@@ -1,4 +1,4 @@
-package recipebox;
+package org.wrowclif.recipebox;
 
 public interface Ingredient {
 

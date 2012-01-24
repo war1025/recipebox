@@ -1,4 +1,4 @@
-package recipebox;
+package org.wrowclif.recipebox;
 
 import java.util.Set;
 
