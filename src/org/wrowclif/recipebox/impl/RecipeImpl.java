@@ -12,10 +12,10 @@ import java.util.List;
 
 public class RecipeImpl implements Recipe {
 
-	protected static final RecipeFactoryImpl factory;
+	protected static final RecipeFactory factory;
 
 	static {
-		factory = new RecipeFactoryImpl();
+		factory = new RecipeFactory();
 	}
 
 	private long id;
@@ -145,39 +145,90 @@ public class RecipeImpl implements Recipe {
 		CategoryImpl.factory.removeRecipeFromCategory(id, c);
 	}
 
-	public List<Recipe> getSuggestedWith() {
+	public List<Suggestion> getSuggestedWith() {
+		return SuggestionImpl.factory.getSuggestedWith(this);
+	}
+
+	public Suggestion addSuggestion(Recipe r) {
+		return SuggestionImpl.factory.addSuggestion(this, r);
+	}
+
+	public void removeSuggestion(Recipe r) {
+		SuggestionImpl.factory.removeSuggestion(this, r);
+	}
+
+	public List<Recipe> getVariants() {
 		List<Recipe> l1 = null;
 		String stmt =
-			"SELECT r.id, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
-			"FROM Recipe r, SuggestedWith sw " +
-			"WHERE sw.rid1 = %s " +
-				"and sw.rid2 = %s ";
+			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+			"FROM Recipe r " +
+			"WHERE r.vid = %s " +
+				"and r.rid != %s; ";
 		SQLiteDatabase db = factory.helper.getWriteableDatabase();
 		db.beginTransaction();
-			Cursor c1 = db.rawQuery(String.format(stmt, "r.id", id + ""), null);
-			Cursor c2 = db.rawQuery(String.format(stmt, id + "", "r.id"), null);
+			Cursor c1 = db.rawQuery(String.format(stmt, vid + "", id + ""), null);
 			l1 = factory.createListFromCursor(c1);
-			l1.addAll(factory.createListFromCursor(c2));
 			c1.close();
-			c2.close();
 		db.endTransaction();
 		return l1;
 	}
 
-	public void addSuggestion(Recipe r) {
-// Database update here
-	}
+	public Recipe branch(String name) {
+		String stmt =
+			"INSERT INTO SuggestedWith(rid1, rid2, comments) " +
+				"SELECT sw.rid1, ? as rid2, sw.comments " +
+				"FROM SuggestedWith sw " +
+				"WHERE sw.rid2 = $; " +
 
-	public void removeSuggestion(Recipe r) {
-// Database update here
-	}
+			"INSERT INTO SuggestedWith(rid1, rid2, comments) " +
+				"SELECT ? as rid1, sw.rid2, sw.comments " +
+				"FROM SuggestedWith sw " +
+				"WHERE sw.rid1 = $; " +
 
-	public List<Recipe> getVariants() {
-// Database query here
-		return null;
+			"INSERT INTO RecipeCategory(cid, rid) " +
+				"SELECT ? as rid, rc.cid " +
+				"FROM RecipeCategory rc " +
+				"WHERE rc.rid = $; " +
+
+			"INSERT INTO RecipeIngredients(rid, iid, uid, amount, num) " +
+				"SELECT ? as rid, ri.iid, ri.uid, ri.amount, ri.num " +
+				"FROM RecipeIngredients ri " +
+				"WHERE ri.rid = $; " +
+
+			"INSERT INTO Instruction(rid, text, num) " +
+				"SELECT ? as rid, i.text, i.num " +
+				"FROM Instruction i " +
+				"WHERE i.rid = $; " +
+
+			"INSERT INTO InstructionIngredients(instrid, ingrid, num) " +
+				"SELECT in1.iid, ii.ingrid, ii.num " +
+				"FROM Instruction in1, Instruction in2, InstructionIngredients ii " +
+				"WHERE in1.rid = ? " +
+					"and in2.rid = $ " +
+					"and in1.num = in2.num " +
+					"and ii.instrid = in2.iid; ";
+
+		ContentValues values = new ContentValues();
+		values.put("name", name);
+		values.put("description", description);
+		values.put("cost", cost);
+		values.put("cooktime", cookTime);
+		values.put("preptime", prepTime);
+		values.put("vid", vid);
+		SQLiteDatabase db = factory.helper.getWriteableDatabase();
+		db.beginTransaction();
+			long newId = db.insert("Recipe", null, values);
+			db.execSQL(stmt.replaceAll("?", newId, "$", id));
+		db.endTransaction();
+		values.put("rid", newId);
+		return factory.createRecipeFromData(values);
 	}
 
 	public void delete() {
+// Delete instructions
+// Delete recipe ingredients
+// Delete from categories
+// Delete recipe
 // Database update here
 	}
 
@@ -190,11 +241,7 @@ public class RecipeImpl implements Recipe {
 		}
 	}
 
-	public RecipeFactory getFactory() {
-		return RecipeFactoryImpl.factory;
-	}
-
-	protected static class RecipeFactoryImpl implements RecipeFactory {
+	protected static class RecipeFactory {
 
 		protected RecipeBoxOpenHelper helper;
 

@@ -54,9 +54,9 @@ public interface Recipe {
 
 	public void removeCategory(Category c);
 
-	public List<Recipe> getSuggestedWith();
+	public List<Suggestion> getSuggestedWith();
 
-	public void addSuggestion(Recipe r);
+	public Suggestion addSuggestion(Recipe r);
 
 	public void removeSuggestion(Recipe r);
 
