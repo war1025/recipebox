@@ -17,10 +17,10 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 		"CREATE TABLE Recipe(" +
 			"rid INTEGER PRIMARY KEY AUTOINCREMENT," +
 			"name TEXT NOT NULL," +
-			"description TEXT," +
-			"cost INTEGER," +
-			"preptime INTEGER," +
-			"cooktime INTEGER," +
+			"description TEXT NOT NULL," +
+			"cost INTEGER NOT NULL DEFAULT 0," +
+			"preptime INTEGER NOT NULL DEFAULT 0," +
+			"cooktime INTEGER NOT NULL DEFAULT 0," +
 			"maxinstruction INTEGER DEFAULT 0," +
 			"maxingredient INTEGER DEFAULT 0," +
 			"vid INTEGER REFERENCES VariantGroup(vid));" +
@@ -44,7 +44,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			"revid INTGER PRIMARY KEY AUTOINCREMENT," +
 			"date INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL," +
 			"rating INTEGER(0,10) NOT NULL," +
-			"comments TEXT," +
+			"comments TEXT NOT NULL," +
 			"rid INTEGER REFERENCES Recipe(rid) NOT NULL);" +
 
 		"CREATE TABLE RecipeCategory(" +
@@ -55,7 +55,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 		"CREATE TABLE SuggestedWith(" +
 			"rid1 INTEGER REFERENCES Recipe(rid)," +
 			"rid2 INTEGER REFERENCES Recipe(rid)," +
-			"comments TEXT," +
+			"comments TEXT NOT NULL," +
 			"PRIMARY KEY(rid1, rid2)," +
 			"CHECK(rid1 < rid2));" +
 
@@ -66,8 +66,8 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 		"CREATE TABLE RecipeIngredients(" +
 			"rid INTEGER REFERENCES Recipe(rid)," +
 			"iid INTEGER REFERENCES Ingredient(iid)," +
-			"amount REAL," +
-			"uid INTEGER REFERENCES Unit(uid)," +
+			"amount REAL NOT NULL DEFAULT 0," +
+			"uid INTEGER REFERENCES Unit(uid) NOT NULL," +
 			"num INTEGER NOT NULL," +
 			"PRIMARY KEY(rid,iid));" +
 

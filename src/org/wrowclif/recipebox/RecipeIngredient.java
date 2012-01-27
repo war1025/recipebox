@@ -10,6 +10,8 @@ public interface RecipeIngredient {
 
 	public String getUnitName();
 
+	public Recipe getRecipe();
+
 	public Ingredient getIngredient();
 
 	public Unit getUnits();

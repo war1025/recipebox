@@ -10,10 +10,6 @@ public interface Instruction {
 
 	public List<Ingredient> getIngredientsUsed();
 
-	public void addIngredient(Ingredient toAdd);
-
-	public void removeIngredient(Ingredient toRemove);
-
-	public void reorderIngredients(List<Ingredient> order);
+	public void setIngredientsUsed(List<Ingredient> ingredients);
 
 }

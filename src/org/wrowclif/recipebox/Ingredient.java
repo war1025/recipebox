@@ -1,5 +1,7 @@
 package org.wrowclif.recipebox;
 
+import java.util.List;
+
 public interface Ingredient {
 
 	public long getId();

@@ -1,5 +1,9 @@
 package org.wrowclif.recipebox;
 
+import android.content.Context;
+
+import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
+
 public class AppData {
 
 	private RecipeBoxOpenHelper helper;
@@ -19,7 +23,7 @@ public class AppData {
 	}
 
 	public static AppData initialSingleton(Context context) {
-		this.appContext = context;
+		AppData.appContext = context;
 		return Inner.singleton;
 	}
 

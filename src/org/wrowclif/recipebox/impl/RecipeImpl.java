@@ -1,12 +1,20 @@
 package org.wrowclif.recipebox.impl;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.content.ContentValues;
+
+import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
+import org.wrowclif.recipebox.RecipeIngredient;
 import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Review;
+import org.wrowclif.recipebox.Unit;
+import org.wrowclif.recipebox.Suggestion;
+import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
-import java.util.Collections;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +36,12 @@ public class RecipeImpl implements Recipe {
 
 	private RecipeImpl(long id) {
 		this.id = id;
+		this.name = "";
+		this.description = "";
+		this.cost = 0;
+		this.prepTime = 0;
+		this.cookTime = 0;
+		this.vid = id;
 	}
 
 	public String getName() {
@@ -90,11 +104,11 @@ public class RecipeImpl implements Recipe {
 	}
 
 	public List<RecipeIngredient> getIngredients() {
-		return RecipeIngredientImpl.factory.getRecipeIngredients(id);
+		return RecipeIngredientImpl.factory.getRecipeIngredients(this);
 	}
 
-	public RecipeIngredient addIngredient(Ingredient i) {
-		return RecipeIngredientImpl.factory.addRecipeIngredient(id);
+	public RecipeIngredient addIngredient(Ingredient i, Unit u) {
+		return RecipeIngredientImpl.factory.addRecipeIngredient(this, i, u);
 	}
 
 	public void removeIngredient(RecipeIngredient toRemove) {
@@ -164,7 +178,7 @@ public class RecipeImpl implements Recipe {
 			"FROM Recipe r " +
 			"WHERE r.vid = %s " +
 				"and r.rid != %s; ";
-		SQLiteDatabase db = factory.helper.getWriteableDatabase();
+		SQLiteDatabase db = factory.helper.getWritableDatabase();
 		db.beginTransaction();
 			Cursor c1 = db.rawQuery(String.format(stmt, vid + "", id + ""), null);
 			l1 = factory.createListFromCursor(c1);
@@ -215,10 +229,10 @@ public class RecipeImpl implements Recipe {
 		values.put("cooktime", cookTime);
 		values.put("preptime", prepTime);
 		values.put("vid", vid);
-		SQLiteDatabase db = factory.helper.getWriteableDatabase();
+		SQLiteDatabase db = factory.helper.getWritableDatabase();
 		db.beginTransaction();
 			long newId = db.insert("Recipe", null, values);
-			db.execSQL(stmt.replaceAll("?", newId).replaceAll("$", id));
+			db.execSQL(stmt.replaceAll("?", newId + "").replaceAll("$", id + ""));
 		db.endTransaction();
 		values.put("rid", newId);
 		return factory.createRecipeFromData(values);
@@ -258,14 +272,14 @@ public class RecipeImpl implements Recipe {
 			"DELETE FROM Recipe r " +
 				"WHERE r.rid = ?;";
 
-		SQLiteDatabase db = factory.helper.getWriteableDatabase();
+		SQLiteDatabase db = factory.helper.getWritableDatabase();
 		db.beginTransaction();
-			db.execSQL(stmt.replaceAll("?", id));
+			db.execSQL(stmt.replaceAll("?", id + ""));
 		db.endTransaction();
 	}
 
 	private void itemUpdate(ContentValues values, String operation) {
-		SQLiteDatabase db = factory.helper.getWriteableDatabase();
+		SQLiteDatabase db = factory.helper.getWritableDatabase();
 		int ret = db.update("Recipe", values, "rid=?", new String[] {id + ""});
 		if(ret != 1) {
 			throw new IllegalStateException("Recipe " + operation + " should have affected only row " + id +
@@ -278,13 +292,13 @@ public class RecipeImpl implements Recipe {
 		protected RecipeBoxOpenHelper helper;
 
 		private RecipeFactory() {
-			helper = AppData.singleton().getOpenHelper();
+			helper = AppData.getSingleton().getOpenHelper();
 		}
 
 		protected Recipe createNew(String name) {
 			ContentValues values = new ContentValues();
 			values.put("name", name);
-			SQLiteDatabase db = helper.getWriteableDatabase();
+			SQLiteDatabase db = helper.getWritableDatabase();
 			db.beginTransaction();
 				long id = db.insert("Recipe", null, values);
 				values.remove("name");
@@ -293,8 +307,9 @@ public class RecipeImpl implements Recipe {
 				db.update("Recipe", values, "rid=?", new String[] {id + ""});
 			db.endTransaction();
 
-			Recipe created = new Recipe(id);
+			RecipeImpl created = new RecipeImpl(id);
 			created.name = name;
+
 			return created;
 		}
 
@@ -302,20 +317,26 @@ public class RecipeImpl implements Recipe {
 			//  r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid
 			List<Recipe> list = new ArrayList<Recipe>(c.getCount());
 			while(c.moveToNext()) {
-				list.add(new Recipe(c.getLong(1), c.getString(2), c.getString(3),
-									c.getInt(4), c.getInt(5), c.getInt(6), c.getLong(7)));
+				RecipeImpl r = new RecipeImpl(c.getLong(1));
+				r.name = c.getString(2);
+				r.description = c.getString(3);
+				r.prepTime = c.getInt(4);
+				r.cookTime = c.getInt(5);
+				r.cost = c.getInt(6);
+				r.vid = c.getLong(7);
+				list.add(r);
 			}
 			return list;
 		}
 
 		protected Recipe createRecipeFromData(ContentValues values) {
-			Recipe r = new Recipe(values.getAsLong("rid"));
+			RecipeImpl r = new RecipeImpl(values.getAsLong("rid"));
 			r.name = values.getAsString("name");
 			r.vid = values.getAsLong("vid");
 			r.description = values.getAsString("description");
-			r.prepTime = values.getAsInt("preptime");
-			r.cookTime = values.getAsInt("cooktime");
-			r.cost = values.getAsInt("cost");
+			r.prepTime = values.getAsInteger("preptime");
+			r.cookTime = values.getAsInteger("cooktime");
+			r.cost = values.getAsInteger("cost");
 
 			return r;
 		}
