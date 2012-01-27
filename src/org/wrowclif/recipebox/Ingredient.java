@@ -6,14 +6,6 @@ public interface Ingredient {
 
 	public String getName();
 
-	public double getAmount();
-
-	public void setAmount(double amount);
-
-	public String getUnits();
-
-	public void setUnits(String units);
-
 	public List<Ingredient> getSimilarIngredients();
 
 	public void addSimilarIngredient(Ingredient other);

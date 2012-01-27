@@ -18,15 +18,15 @@ public class RecipeImpl implements Recipe {
 		factory = new RecipeFactory();
 	}
 
-	private long id;
-	private String name;
-	private String description;
-	private int cost;
-	private int prepTime;
-	private int cookTime;
-	private long vid;
+	protected long id;
+	protected String name;
+	protected String description;
+	protected int cost;
+	protected int prepTime;
+	protected int cookTime;
+	protected long vid;
 
-	private RecipleImpl(long id) {
+	private RecipeImpl(long id) {
 		this.id = id;
 	}
 
@@ -118,7 +118,7 @@ public class RecipeImpl implements Recipe {
 	}
 
 	public void reorderSteps(List<Instruction> order) {
-		InstructionImpl.factory.reorderInstructions(order);
+		InstructionImpl.factory.reorderInstructions(id, order);
 	}
 
 	public List<Review> getReviews() {
@@ -218,18 +218,50 @@ public class RecipeImpl implements Recipe {
 		SQLiteDatabase db = factory.helper.getWriteableDatabase();
 		db.beginTransaction();
 			long newId = db.insert("Recipe", null, values);
-			db.execSQL(stmt.replaceAll("?", newId, "$", id));
+			db.execSQL(stmt.replaceAll("?", newId).replaceAll("$", id));
 		db.endTransaction();
 		values.put("rid", newId);
 		return factory.createRecipeFromData(values);
 	}
 
 	public void delete() {
-// Delete instructions
-// Delete recipe ingredients
-// Delete from categories
-// Delete recipe
-// Database update here
+		String stmt =
+			"DELETE FROM SuggestedWith sw" +
+				"WHERE sw.rid1 = ?; " +
+
+			"DELETE FROM SuggestedWith sw" +
+				"WHERE sw.rid2 = ?; " +
+
+			"DELETE FROM RecipeCategory rc" +
+				"WHERE rc.rid = ?; " +
+
+			"DELETE FROM RecipeIngredients ri " +
+				"WHERE ri.rid = ?; " +
+
+			"DELETE FROM InstructionIngredients ii " +
+				"WHERE ii.instrid IN (" +
+					"SELECT i.iid " +
+					"FROM Instruction i " +
+					"WHERE i.rid = ?); " +
+
+			"DELETE FROM Instruction i " +
+				"WHERE i.rid = ?; " +
+
+			"DELETE FROM VariantGroup vg " +
+				"WHERE NOT EXISTS (" +
+					"SELECT r2.vid " +
+					"FROM Recipe r1, Recipe r2 " +
+					"WHERE r1.rid = ? " +
+						"and r1.vid = r2.vid " +
+						"and r1.rid != r2.rid);" +
+
+			"DELETE FROM Recipe r " +
+				"WHERE r.rid = ?;";
+
+		SQLiteDatabase db = factory.helper.getWriteableDatabase();
+		db.beginTransaction();
+			db.execSQL(stmt.replaceAll("?", id));
+		db.endTransaction();
 	}
 
 	private void itemUpdate(ContentValues values, String operation) {
@@ -245,18 +277,47 @@ public class RecipeImpl implements Recipe {
 
 		protected RecipeBoxOpenHelper helper;
 
-		private RecipeFactoryImpl() {
+		private RecipeFactory() {
 			helper = AppData.singleton().getOpenHelper();
 		}
 
-		public Recipe create(String name) {
-// Database insert here
-			return null;
+		protected Recipe createNew(String name) {
+			ContentValues values = new ContentValues();
+			values.put("name", name);
+			SQLiteDatabase db = helper.getWriteableDatabase();
+			db.beginTransaction();
+				long id = db.insert("Recipe", null, values);
+				values.remove("name");
+				values.put("vid", id);
+				db.insert("VariantGroup", null, values);
+				db.update("Recipe", values, "rid=?", new String[] {id + ""});
+			db.endTransaction();
+
+			Recipe created = new Recipe(id);
+			created.name = name;
+			return created;
 		}
 
-		public Recipe branch(String name, Recipe toBranch) {
-// Database update here
-			return null;
+		protected List<Recipe> createListFromCursor(Cursor c) {
+			//  r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid
+			List<Recipe> list = new ArrayList<Recipe>(c.getCount());
+			while(c.moveToNext()) {
+				list.add(new Recipe(c.getLong(1), c.getString(2), c.getString(3),
+									c.getInt(4), c.getInt(5), c.getInt(6), c.getLong(7)));
+			}
+			return list;
+		}
+
+		protected Recipe createRecipeFromData(ContentValues values) {
+			Recipe r = new Recipe(values.getAsLong("rid"));
+			r.name = values.getAsString("name");
+			r.vid = values.getAsLong("vid");
+			r.description = values.getAsString("description");
+			r.prepTime = values.getAsInt("preptime");
+			r.cookTime = values.getAsInt("cooktime");
+			r.cost = values.getAsInt("cost");
+
+			return r;
 		}
 
 	}

@@ -21,6 +21,8 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			"cost INTEGER," +
 			"preptime INTEGER," +
 			"cooktime INTEGER," +
+			"maxinstruction INTEGER DEFAULT 0," +
+			"maxingredient INTEGER DEFAULT 0," +
 			"vid INTEGER REFERENCES VariantGroup(vid));" +
 
 		"CREATE TABLE Category(" +
@@ -42,7 +44,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			"revid INTGER PRIMARY KEY AUTOINCREMENT," +
 			"date INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL," +
 			"rating INTEGER(0,10) NOT NULL," +
-			"comments TEXT",
+			"comments TEXT," +
 			"rid INTEGER REFERENCES Recipe(rid) NOT NULL);" +
 
 		"CREATE TABLE RecipeCategory(" +
