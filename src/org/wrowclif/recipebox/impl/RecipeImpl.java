@@ -107,8 +107,8 @@ public class RecipeImpl implements Recipe {
 		return RecipeIngredientImpl.factory.getRecipeIngredients(this);
 	}
 
-	public RecipeIngredient addIngredient(Ingredient i, Unit u) {
-		return RecipeIngredientImpl.factory.addRecipeIngredient(this, i, u);
+	public RecipeIngredient addIngredient(Ingredient i) {
+		return RecipeIngredientImpl.factory.addRecipeIngredient(this, i);
 	}
 
 	public void removeIngredient(RecipeIngredient toRemove) {

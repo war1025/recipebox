@@ -28,7 +28,7 @@ public interface Recipe {
 
 	public List<RecipeIngredient> getIngredients();
 
-	public RecipeIngredient addIngredient(Ingredient toAdd, Unit u);
+	public RecipeIngredient addIngredient(Ingredient toAdd);
 
 	public void removeIngredient(RecipeIngredient toRemove);
 

@@ -28,7 +28,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 		"CREATE TABLE Category(" +
 			"cid INTEGER PRIMARY KEY AUTOINCREMENT," +
 			"name TEXT NOT NULL," +
-			"description TEXT);" +
+			"description TEXT NOT NULL);" +
 
 		"CREATE TABLE Ingredient(" +
 			"iid INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -55,7 +55,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 		"CREATE TABLE SuggestedWith(" +
 			"rid1 INTEGER REFERENCES Recipe(rid)," +
 			"rid2 INTEGER REFERENCES Recipe(rid)," +
-			"comments TEXT NOT NULL," +
+			"comments TEXT NOT NULL DEFAULT ''," +
 			"PRIMARY KEY(rid1, rid2)," +
 			"CHECK(rid1 < rid2));" +
 

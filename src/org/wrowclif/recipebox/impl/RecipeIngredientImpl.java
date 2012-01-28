@@ -131,7 +131,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 
 		}
 
-		protected RecipeIngredient addRecipeIngredient(Recipe r, Ingredient i, Unit u) {
+		protected RecipeIngredient addRecipeIngredient(Recipe r, Ingredient i) {
 			String selectStmt =
 				"SELECT r.maxingredient " +
 				"FROM Recipe r " +
@@ -142,6 +142,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				"WHERE r.rid = ?; ";
 
 			RecipeIngredientImpl result = null;
+			Unit u = UnitImpl.factory.getNullUnit();
 			ContentValues values = new ContentValues();
 			values.put("rid", r.getId());
 			values.put("iid", i.getId());
@@ -151,6 +152,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				Cursor c = db.rawQuery(selectStmt.replaceAll("?", r.getId() + ""), null);
 				c.moveToNext();
 				int max = c.getInt(1);
+				c.close();
 				max = max + 1;
 				db.execSQL(updateStmt, new Object[] {max, r.getId()});
 				values.put("num", max);

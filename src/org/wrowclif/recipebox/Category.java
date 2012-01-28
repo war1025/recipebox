@@ -20,14 +20,6 @@ public interface Category {
 
 	public void removeRecipe(Recipe toRemove);
 
-	public CategoryFactory getFactory();
-
-	public interface CategoryFactory {
-
-		public Category create(String name);
-
-		public void delete(String name);
-
-	}
+	public void delete();
 
 }

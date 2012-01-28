@@ -137,6 +137,7 @@ public class InstructionImpl implements Instruction {
 				Cursor c = db.rawQuery(selectStmt.replaceAll("?", recipeId + ""), null);
 				c.moveToNext();
 				int max = c.getInt(1);
+				c.close();
 				max = max + 1;
 				db.execSQL(updateStmt, new Object[] {max, recipeId});
 				values.put("num", max);
