@@ -220,7 +220,14 @@ public class RecipeImpl implements Recipe {
 				"WHERE in1.rid = ? " +
 					"and in2.rid = $ " +
 					"and in1.num = in2.num " +
-					"and ii.instrid = in2.iid; ";
+					"and ii.instrid = in2.iid; " +
+
+			"UPDATE Ingredient i " +
+				"SET (i.usecount = i.usecount + 1) " +
+				"WHERE i.iid IN ( " +
+					"SELECT ri.iid " +
+					"FROM RecipeIngredients ri " +
+					"WHERE ri.rid = ?); ";
 
 		ContentValues values = new ContentValues();
 		values.put("name", name);
@@ -240,6 +247,13 @@ public class RecipeImpl implements Recipe {
 
 	public void delete() {
 		String stmt =
+			"UPDATE Ingredient i " +
+				"SET (i.usecount = i.usecount - 1) " +
+				"WHERE i.iid IN ( " +
+					"SELECT ri.iid " +
+					"FROM RecipeIngredients ri " +
+					"WHERE ri.rid = ?); " +
+
 			"DELETE FROM SuggestedWith sw" +
 				"WHERE sw.rid1 = ?; " +
 

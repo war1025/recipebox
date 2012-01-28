@@ -138,8 +138,12 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				"WHERE r.rid = ?; ";
 			String updateStmt =
 				"UPDATE Recipe r " +
-				"SET (r.maxingredient = ?) " +
-				"WHERE r.rid = ?; ";
+				"SET (r.maxingredient = r.maxingredient + 1) " +
+				"WHERE r.rid = ?; " +
+
+				"UPDATE Ingredient i " +
+				"SET (i.usecount = i.usecount + 1) " +
+				"WHERE i.iid = ?; ";
 
 			RecipeIngredientImpl result = null;
 			Unit u = UnitImpl.factory.getNullUnit();
@@ -154,7 +158,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				int max = c.getInt(1);
 				c.close();
 				max = max + 1;
-				db.execSQL(updateStmt, new Object[] {max, r.getId()});
+				db.execSQL(updateStmt, new Object[] {r.getId(), i.getId()});
 				values.put("num", max);
 				db.insert("RecipeIngredients", null, values);
 
@@ -171,10 +175,16 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 			String stmt =
 				"DELETE FROM RecipeIngredient ri " +
 				"WHERE ri.iid = ? " +
-					"and ri.rid = ?; ";
+					"and ri.rid = ?; " +
+
+				"UPDATE Ingredient i " +
+				"SET (i.usecount = i.usecount - 1) " +
+				"WHERE i.iid = ?; ";
 
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.execSQL(stmt, new Object[] {toRemove.getIngredient().getId(), toRemove.getRecipe().getId()});
+			long iid = toRemove.getIngredient().getId();
+			long rid = toRemove.getRecipe().getId();
+			db.execSQL(stmt, new Object[] {iid, rid, iid});
 		}
 
 		protected void reorderRecipeIngredients(List<RecipeIngredient> order) {

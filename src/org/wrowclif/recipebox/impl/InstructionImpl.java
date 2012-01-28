@@ -125,7 +125,7 @@ public class InstructionImpl implements Instruction {
 				"WHERE r.rid = ?; ";
 			String updateStmt =
 				"UPDATE Recipe r " +
-				"SET (r.maxinstruction = ?) " +
+				"SET (r.maxinstruction = r.maxinstruction + 1) " +
 				"WHERE r.rid = ?; ";
 
 			Instruction result = null;
@@ -139,7 +139,7 @@ public class InstructionImpl implements Instruction {
 				int max = c.getInt(1);
 				c.close();
 				max = max + 1;
-				db.execSQL(updateStmt, new Object[] {max, recipeId});
+				db.execSQL(updateStmt, new Object[] {recipeId});
 				values.put("num", max);
 				long iid = db.insert("Instruction", null, values);
 				result = new InstructionImpl(iid);

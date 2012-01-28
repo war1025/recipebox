@@ -74,24 +74,20 @@ public class SuggestionImpl implements Suggestion {
 		}
 
 		protected List<Suggestion> createListFromCursor(Recipe r, Cursor c) {
-			// sw.rid1, sw.rid2, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid
+			// r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid
 			List<Suggestion> list = new ArrayList<Suggestion>(c.getCount());
 			ContentValues values = new ContentValues();
 			while(c.moveToNext()) {
 				values.clear();
-				if(r.getId() == c.getLong(1)) {
-					values.put("rid", c.getLong(2));
-				} else {
-					values.put("rid", c.getLong(1));
-				}
-				values.put("name", c.getString(4));
-				values.put("description", c.getString(5));
-				values.put("preptime", c.getInt(6));
-				values.put("cooktime", c.getInt(7));
-				values.put("vid", c.getLong(8));
+				values.put("rid", c.getLong(1));
+				values.put("name", c.getString(3));
+				values.put("description", c.getString(4));
+				values.put("preptime", c.getInt(5));
+				values.put("cooktime", c.getInt(6));
+				values.put("vid", c.getLong(7));
 				Recipe r2 = RecipeImpl.factory.createRecipeFromData(values);
 				SuggestionImpl si = new SuggestionImpl(r, r2);
-				si.comments = c.getString(3);
+				si.comments = c.getString(2);
 
 				list.add(si);
 			}
@@ -101,19 +97,21 @@ public class SuggestionImpl implements Suggestion {
 
 		protected List<Suggestion> getSuggestedWith(Recipe r) {
 			String stmt =
-				"SELECT sw.rid1, sw.rid2, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+				"SELECT r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
 				"FROM Recipe r, SuggestedWith sw " +
 				"WHERE sw.rid1 = ? " +
+					"and sw.rid2 = r.rid " +
+				"UNION " +
+				"SELECT r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+				"FROM Recipe r, SuggestedWith sw " +
+				"WHERE sw.rid1 = r.rid " +
 					"and sw.rid2 = ?; ";
 
 			List<Suggestion> list = null;
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
-				Cursor c1 = db.rawQuery(stmt, new String[] {r.getId() + "", "r.rid"});
+				Cursor c1 = db.rawQuery(stmt.replaceAll("?",r.getId() + ""), null);
 				list = createListFromCursor(r, c1);
-				c1.close();
-				c1 = db.rawQuery(stmt, new String[] {"r.rid", r.getId() + ""});
-				list.addAll(createListFromCursor(r, c1));
 				c1.close();
 			db.endTransaction();
 			return list;

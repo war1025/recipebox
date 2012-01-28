@@ -32,7 +32,8 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 
 		"CREATE TABLE Ingredient(" +
 			"iid INTEGER PRIMARY KEY AUTOINCREMENT," +
-			"name TEXT NOT NULL UNIQUE);" +
+			"name TEXT NOT NULL UNIQUE," +
+			"usecount INTEGER NOT NULL DEFAULT 0);" +
 
 		"CREATE TABLE Instruction(" +
 			"iid INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -61,7 +62,10 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 
 		"CREATE TABLE Unit(" +
 			"uid INTEGER PRIMARY KEY AUTOINCREMENT," +
-			"name TEXT NOT NULL UNIQUE);" +
+			"name TEXT NOT NULL UNIQUE, " +
+			"type INTEGER(0,2) NOT NULL DEFAULT 0, " +
+			"factor REAL NOT NULL CHECK(factor > 0), " +
+			"minfraction INTEGER NOT NULL);" +
 
 		"CREATE TABLE RecipeIngredients(" +
 			"rid INTEGER REFERENCES Recipe(rid)," +
@@ -81,13 +85,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			"iid1 INTEGER REFERENCES Ingredient(iid)," +
 			"iid2 INTEGER REFERENCES Ingredient(iid)," +
 			"PRIMARY KEY(iid1, iid2)," +
-			"CHECK(iid1 < iid2));" +
-
-		"CREATE TABLE UnitConversion(" +
-			"uid1 INTEGER REFERENCES Unit(uid)," +
-			"uid2 INTEGER REFERENCES Unit(uid)," +
-			"factor REAL NOT NULL CHECK(factor > 0)," +
-			"PRIMARY KEY(uid1, uid2));";
+			"CHECK(iid1 < iid2));";
 
 	public RecipeBoxOpenHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
