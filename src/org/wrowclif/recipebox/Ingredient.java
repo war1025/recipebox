@@ -14,15 +14,4 @@ public interface Ingredient {
 
 	public void removeSimilarIngredient(Ingredient other);
 
-	public IngredientFactory getFactory();
-
-	public interface IngredientFactory {
-
-		public Ingredient createNew(String name);
-
-		public Ingredient getExisting(String name);
-
-		public void delete(String name);
-
-	}
 }

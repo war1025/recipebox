@@ -4,26 +4,31 @@ import org.wrowclif.recipebox.Ingredient;
 
 public class IngredientImpl implements Ingredient {
 
+	private long id;
 	private String name;
-	private double amount;
-	private String units;
 
-	public IngredientImpl(String name, double amount, String units) {
-		this.name = name;
-		this.amount = amount;
-		this.units = units;
+	private IngredientImpl(long id) {
+		this.id = id;
+	}
+
+	public long getId() {
+		return id;
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
-	public double getAmount() {
-		return this.amount;
+	public List<Ingredient> getSimilarIngredients() {
+		return null;
 	}
 
-	public String getUnits() {
-		return this.units;
+	public void addSimilarIngredient(Ingredient other) {
+
+	}
+
+	public void removeSimilarIngredient(Ingredient other) {
+
 	}
 }
 

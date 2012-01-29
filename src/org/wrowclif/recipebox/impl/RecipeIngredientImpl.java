@@ -96,14 +96,27 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 		}
 
 		protected List<RecipeIngredient> createListFromCursor(Recipe r, Cursor c) {
-			// i.iid, i.name, u.uid, u.name, ri.amount
+			// i.iid, i.name, u.uid, u.name, u.type, u.factor, u.minfraction, ri.amount
 			List<RecipeIngredient> list = new ArrayList<RecipeIngredient>(c.getCount());
+			ContentValues values = new ContentValues();
 			while(c.moveToNext()) {
 				RecipeIngredientImpl ri = new RecipeIngredientImpl();
 				ri.recipe = r;
-				ri.ingredient = IngredientImpl.factory.createFromData(c.getLong(1), c.getString(2));
-				ri.unit = UnitImpl.factory.createFromData(c.getLong(3), c.getString(4));
-				ri.amount = c.getInt(5);
+
+				values.clear();
+				values.put("iid", c.getLong(1));
+				values.put("name", c.getString(2));
+				ri.ingredient = IngredientImpl.factory.createFromData(values);
+
+				values.clear();
+				values.put("uid", c.getLong(3));
+				values.put("name", c.getString(4));
+				values.put("type", c.getInt(5));
+				values.put("factor", c.getDouble(6));
+				values.put("minfraction", c.getInt(7));
+				ri.unit = UnitImpl.factory.createFromData(values);
+
+				ri.amount = c.getInt(8);
 
 				list.add(ri);
 			}
@@ -113,7 +126,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 
 		protected List<RecipeIngredient> getRecipeIngredients(Recipe r) {
 			String stmt =
-				"SELECT i.iid, i.name, u.uid, u.name, ri.amount " +
+				"SELECT i.iid, i.name, u.uid, u.name, u.type, u.factor, u.minfraction, ri.amount " +
 				"FROM Ingredient i, Unit u, RecipeIngredients ri " +
 				"WHERE ri.rid = ? " +
 					"and ri.iid = i.iid " +

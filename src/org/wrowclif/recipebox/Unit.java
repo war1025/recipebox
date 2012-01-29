@@ -4,25 +4,21 @@ import java.util.List;
 
 public interface Unit {
 
+	public enum Type {
+		ARBITRARY,
+		VOLUME,
+		MASS
+	}
+
 	public long getId();
 
 	public String getName();
 
-	public List<Unit> getConvertibleUnits();
+	public Type getType();
 
-	public double convertToGivenUnit(double amount, Unit given);
+	public double getConversionFactorTo(Unit u);
 
-	public UnitFactory getFactory();
+	public List<Unit> getCompatibleUnits();
 
-	public interface UnitFactory {
-
-		public Unit createNew(String name);
-
-		public Unit getExisting(String name);
-
-		public void setConversionFactor(Unit a, Unit b, double factor);
-
-		public void removeConversionFactor(Unit a, Unit b);
-
-	}
+	public String getStringForAmount(double amount);
 }
