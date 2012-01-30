@@ -19,11 +19,24 @@ public class RecipeBox extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        AppData.initialSingleton(this).getOpenHelper().getWritableDatabase();
+        AppData.initialSingleton(this);
 
 		List<Ingredient> ilist = new ArrayList<Ingredient>();
 
+		String[] inNames = {"spice", "ice", "icecream", "sliced pizza", "mice"};
+
+
         Utility util = UtilityImpl.singleton;
+
+		for(String i : inNames) {
+			util.createOrRetrieveIngredient(i);
+		}
+
+		List<Ingredient> inList = util.searchIngredients("ice", 6);
+
+		for(Ingredient i : inList) {
+			Log.d("Recipebox", "Ingredient: " + i.getName());
+		}
 
         List<Recipe> list = util.searchRecipes("Amy", 10);
 
@@ -37,6 +50,7 @@ public class RecipeBox extends Activity
 
 		for(int k = 0; k < 3; k++) {
 			r = r.branch("Amy's new Recipe: " + k);
+			r.addIngredient(util.createOrRetrieveIngredient(inNames[k]));
 			Log.d("Recipebox", "Created Recipe: " + r.getId() + " " + r.getName());
 
 			Instruction instruction = r.addStep();

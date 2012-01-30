@@ -1,6 +1,8 @@
 package org.wrowclif.recipebox;
 
 import android.content.Context;
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 
 import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
@@ -37,5 +39,34 @@ public class AppData {
 
 	public void close() {
 		helper.close();
+	}
+
+	public <E> E sqlTransaction(Transaction<E> t) {
+		E ret = null;
+		SQLiteDatabase db = helper.getWritableDatabase();
+		db.beginTransaction();
+		try {
+			ret = t.exec(db);
+			db.setTransactionSuccessful();
+		} finally {
+			db.endTransaction();
+		}
+
+		return ret;
+	}
+
+	public void itemUpdate(ContentValues cv, String table, String where, String[] values, String op) {
+		SQLiteDatabase db = helper.getWritableDatabase();
+		int ret = db.update(table, cv, where, values);
+		if(ret != 1) {
+			throw new IllegalStateException(table + " " + op + " setComments should have affected only one row" +
+												" but affected " + ret + " rows");
+		}
+	}
+
+	public interface Transaction<T> {
+
+		public T exec(SQLiteDatabase db);
+
 	}
 }

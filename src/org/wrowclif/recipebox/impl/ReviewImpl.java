@@ -5,9 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
 
 import org.wrowclif.recipebox.AppData;
+import org.wrowclif.recipebox.AppData.Transaction;
 import org.wrowclif.recipebox.Review;
 import org.wrowclif.recipebox.Recipe;
-import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -73,20 +73,15 @@ public class ReviewImpl implements Review {
 	}
 
 	private void itemUpdate(ContentValues values, String operation) {
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		int ret = db.update("Review", values, "revid=?", new String[] {id + ""});
-		if(ret != 1) {
-			throw new IllegalStateException("Review " + operation + " should have affected only row " + id +
-												" but affected " + ret + " rows");
-		}
+		factory.data.itemUpdate(values, "Review", "revid=?", new String[] {id + ""}, operation);
 	}
 
 	protected static class ReviewFactory {
 
-		protected RecipeBoxOpenHelper helper;
+		protected AppData data;
 
 		private ReviewFactory() {
-			helper = AppData.getSingleton().getOpenHelper();
+			data = AppData.getSingleton();
 		}
 
 		protected List<Review> createListFromCursor(Cursor c) {
@@ -104,50 +99,52 @@ public class ReviewImpl implements Review {
 			return list;
 		}
 
-		protected List<Review> getReviews(long recipeId) {
-			String stmt =
+		protected List<Review> getReviews(final long recipeId) {
+			final String stmt =
 				"SELECT r.revid, r.date, r.rating, r.comments " +
 				"FROM Review r " +
 				"WHERE r.rid = ? " +
 				"ORDER BY r.date ASC; ";
 
-			List<Review> list = null;
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.beginTransaction();
-				Cursor c = db.rawQuery(stmt, new String[] {recipeId + ""});
-				list = createListFromCursor(c);
-				c.close();
-			db.setTransactionSuccessful();
-			db.endTransaction();
-			return list;
+			return data.sqlTransaction(new Transaction<List<Review>>() {
+				public List<Review> exec(SQLiteDatabase db) {
+					Cursor c = db.rawQuery(stmt, new String[] {recipeId + ""});
+					List<Review> list = createListFromCursor(c);
+					c.close();
+					return list;
+				}
+			});
 		}
 
-		protected Review addReview(long recipeId) {
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			ContentValues values = new ContentValues();
-			values.put("comments", "");
-			values.put("rating", 10);
-			long id = db.insert("Review", null, values);
+		protected Review addReview(final long recipeId) {
+			return data.sqlTransaction(new Transaction<Review>() {
+				public Review exec(SQLiteDatabase db) {
+					ContentValues values = new ContentValues();
+					values.put("comments", "");
+					values.put("rating", 10);
+					long id = db.insert("Review", null, values);
 
-			ReviewImpl ri = new ReviewImpl();
-			ri.id = id;
-			ri.comments = "";
-			ri.rating = 10;
+					ReviewImpl ri = new ReviewImpl();
+					ri.id = id;
+					ri.comments = "";
+					ri.rating = 10;
 
-			return ri;
+					return ri;
+				}
+			});
 		}
 
-		protected void removeReview(Review r) {
-			String stmt =
+		protected void removeReview(final Review r) {
+			final String stmt =
 				"DELETE FROM Review " +
 					"WHERE revid = ?; ";
 
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.beginTransaction();
-				db.execSQL(stmt, new Object[] {r.getId()});
-			db.setTransactionSuccessful();
-			db.endTransaction();
+			data.sqlTransaction(new Transaction<Void>() {
+				public Void exec(SQLiteDatabase db) {
+					db.execSQL(stmt, new Object[] {r.getId()});
+					return null;
+				}
+			});
 		}
 	}
-
 }

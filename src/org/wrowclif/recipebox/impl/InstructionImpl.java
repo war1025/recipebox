@@ -5,10 +5,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
 
 import org.wrowclif.recipebox.AppData;
+import org.wrowclif.recipebox.AppData.Transaction;
 import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.Recipe;
-import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -43,55 +43,52 @@ public class InstructionImpl implements Instruction {
 
 		ContentValues values = new ContentValues();
 		values.put("text", text);
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		int ret = db.update("Instruction", values, "iid=?", new String[] {id + ""});
-		if(ret != 1) {
-			throw new IllegalStateException("Instruction setText should have affected only row " + id +
-												" but affected " + ret + " rows");
-		}
+		factory.data.itemUpdate(values, "Instruction", "iid=?", new String[] {id + ""}, "setText");
 	}
 
 	public List<Ingredient> getIngredientsUsed() {
-		List<Ingredient> list = null;
-		String stmt =
+		final String stmt =
 			"SELECT i.iid, i.name " +
 			"FROM InstructionIngredients ii, Ingredient i " +
 			"WHERE ii.ingrid = i.iid " +
 				"and ii.instid = ? " +
 			"ORDER BY ii.num ASC; ";
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		db.beginTransaction();
-			Cursor c = db.rawQuery(stmt.replaceAll("\\?", id + ""), null);
-			list = IngredientImpl.factory.createListFromCursor(c);
-			c.close();
-		db.setTransactionSuccessful();
-		db.endTransaction();
-		return list;
+
+		return factory.data.sqlTransaction(new Transaction<List<Ingredient>>() {
+			public List<Ingredient> exec(SQLiteDatabase db) {
+				Cursor c = db.rawQuery(stmt.replaceAll("\\?", id + ""), null);
+				List<Ingredient> list = IngredientImpl.factory.createListFromCursor(c);
+				c.close();
+				return list;
+			}
+		});
 	}
 
-	public void setIngredientsUsed(List<Ingredient> order) {
-		String removeAllStmt =
+	public void setIngredientsUsed(final List<Ingredient> order) {
+		final String removeAllStmt =
 			"DELETE FROM InstructionIngredients " +
 			"WHERE instid = ?;";
-		String insertStmt =
+		final String insertStmt =
 			"INSERT OR REPLACE INTO InstructionIngredients(instid, ingrid, num) " +
 			"VALUES(?, ?, ?);";
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		db.beginTransaction();
-			db.execSQL(removeAllStmt, new String[] {id + ""});
-			for(int i = 0; i < order.size(); i++) {
-				db.execSQL(insertStmt, new String[] {id + "", order.get(i).getId() + "", i + ""});
+
+		factory.data.sqlTransaction(new Transaction<Void>() {
+			public Void exec(SQLiteDatabase db) {
+				db.execSQL(removeAllStmt, new String[] {id + ""});
+				for(int i = 0; i < order.size(); i++) {
+					db.execSQL(insertStmt, new String[] {id + "", order.get(i).getId() + "", i + ""});
+				}
+				return null;
 			}
-		db.setTransactionSuccessful();
-		db.endTransaction();
+		});
 	}
 
 	protected static class InstructionFactory {
 
-		protected RecipeBoxOpenHelper helper;
+		protected AppData data;
 
 		private InstructionFactory() {
-			helper = AppData.getSingleton().getOpenHelper();
+			data = AppData.getSingleton();
 		}
 
 		protected List<Instruction> createListFromCursor(Cursor c) {
@@ -104,112 +101,118 @@ public class InstructionImpl implements Instruction {
 			return list;
 		}
 
-		protected List<Instruction> getRecipeSteps(long recipeId) {
-			List<Instruction> list = null;
-			String stmt =
+		protected List<Instruction> getRecipeSteps(final long recipeId) {
+			final String stmt =
 				"SELECT i.iid, i.text " +
 				"FROM Instruction i " +
 				"WHERE i.rid = ? " +
 				"ORDER BY i.num ASC;";
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.beginTransaction();
-				Cursor c1 = db.rawQuery(stmt.replaceAll("\\?", recipeId + ""), null);
-				list = createListFromCursor(c1);
-				c1.close();
-			db.setTransactionSuccessful();
-			db.endTransaction();
-			return list;
+
+			return data.sqlTransaction(new Transaction<List<Instruction>>() {
+				public List<Instruction> exec(SQLiteDatabase db) {
+					Cursor c1 = db.rawQuery(stmt.replaceAll("\\?", recipeId + ""), null);
+					List<Instruction> list = createListFromCursor(c1);
+					c1.close();
+					return list;
+				}
+			});
 		}
 
-		protected Instruction addInstruction(long recipeId) {
-			String selectStmt =
+		protected Instruction addInstruction(final long recipeId) {
+			final String selectStmt =
 				"SELECT r.maxinstruction " +
 				"FROM Recipe r " +
 				"WHERE r.rid = ?; ";
-			String updateStmt =
+
+			final String updateStmt =
 				"UPDATE Recipe " +
 				"SET maxinstruction = maxinstruction + 1 " +
 				"WHERE rid = ?; ";
 
-			Instruction result = null;
-			ContentValues values = new ContentValues();
+			final ContentValues values = new ContentValues();
 			values.put("text", "");
 			values.put("rid", recipeId);
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.beginTransaction();
-				Cursor c = db.rawQuery(selectStmt.replaceAll("\\?", recipeId + ""), null);
-				c.moveToNext();
-				int max = c.getInt(0);
-				c.close();
-				max = max + 1;
-				db.execSQL(updateStmt, new Object[] {recipeId});
-				values.put("num", max);
-				long iid = db.insert("Instruction", null, values);
-				result = new InstructionImpl(iid);
-			db.setTransactionSuccessful();
-			db.endTransaction();
-			return result;
+
+			return data.sqlTransaction(new Transaction<Instruction>() {
+				public Instruction exec(SQLiteDatabase db) {
+					Cursor c = db.rawQuery(selectStmt.replaceAll("\\?", recipeId + ""), null);
+					c.moveToNext();
+					int max = c.getInt(0);
+					c.close();
+					max = max + 1;
+					db.execSQL(updateStmt, new Object[] {recipeId});
+					values.put("num", max);
+					long iid = db.insert("Instruction", null, values);
+					return new InstructionImpl(iid);
+				}
+			});
 		}
 
-		protected void removeInstruction(Instruction i) {
-			String stmt =
+		protected void removeInstruction(final Instruction i) {
+			final String stmt =
 				"DELETE FROM Instruction " +
 				"WHERE iid = ?; ";
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.execSQL(stmt, new Object[] {i.getId()});
+
+			data.sqlTransaction(new Transaction<Void>() {
+				public Void exec(SQLiteDatabase db) {
+					db.execSQL(stmt, new Object[] {i.getId()});
+					return null;
+				}
+			});
 		}
 
-		protected void reorderInstructions(long recipeId, List<Instruction> order) {
-			String getInstructionIdsStmt =
+		protected void reorderInstructions(final long recipeId, final List<Instruction> order) {
+			final String getInstructionIdsStmt =
 				"SELECT i.iid " +
 				"FROM Instruction i " +
 				"WHERE i.rid = ?; ";
-			String instructionStmt =
+			final String instructionStmt =
 				"UPDATE Instruction " +
 					"SET num = ? " +
 					"WHERE iid = ? " +
 						"and rid = ?; ";
-			String recipeStmt =
+			final String recipeStmt =
 				"UPDATE Recipe " +
 					"SET maxinstruction = ? " +
 					"WHERE rid = ?; ";
 
 			// Check that all values in 'order' are the same as those in the database currently.
 			// Error otherwise.
-			long[] orderIds = new long[order.size()];
+			final long[] orderIds = new long[order.size()];
 			for(int i = 0; i < order.size(); i++) {
 				orderIds[i] = order.get(i).getId();
 			}
 			Arrays.sort(orderIds);
-			boolean valid = false;
 
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.beginTransaction();
-				Cursor c1 = db.rawQuery(getInstructionIdsStmt.replaceAll("\\?", recipeId + ""), null);
-				if(orderIds.length == c1.getCount()) {
-					long[] actualIds = new long[c1.getCount()];
-					for(int i = 0; i < actualIds.length; i++) {
-						c1.moveToNext();
-						actualIds[i] = c1.getLong(0);
-					}
-					Arrays.sort(actualIds);
-					valid = true;
-					for(int i = 0; i < actualIds.length; i++) {
-						if(actualIds[i] != orderIds[i]) {
-							valid = false;
-							break;
+			boolean valid = data.sqlTransaction(new Transaction<Boolean>() {
+				public Boolean exec(SQLiteDatabase db) {
+					boolean valid = false;
+					Cursor c1 = db.rawQuery(getInstructionIdsStmt.replaceAll("\\?", recipeId + ""), null);
+					if(orderIds.length == c1.getCount()) {
+						long[] actualIds = new long[c1.getCount()];
+						for(int i = 0; i < actualIds.length; i++) {
+							c1.moveToNext();
+							actualIds[i] = c1.getLong(0);
+						}
+						Arrays.sort(actualIds);
+						valid = true;
+						for(int i = 0; i < actualIds.length; i++) {
+							if(actualIds[i] != orderIds[i]) {
+								valid = false;
+								break;
+							}
 						}
 					}
-				}
-				c1.close();
-				if(valid) {
-					for(int i = 0; i < order.size(); i++) {
-						db.execSQL(instructionStmt, new Object[] {i, order.get(i).getId(), recipeId});
+					c1.close();
+					if(valid) {
+						for(int i = 0; i < order.size(); i++) {
+							db.execSQL(instructionStmt, new Object[] {i, order.get(i).getId(), recipeId});
+						}
+						db.execSQL(recipeStmt, new Object[] {order.size() - 1, recipeId});
 					}
-					db.execSQL(recipeStmt, new Object[] {order.size() - 1, recipeId});
+					return valid;
 				}
-			db.setTransactionSuccessful();
-			db.endTransaction();
+			});
 			if(!valid) {
 				throw new IllegalArgumentException("Ingredients were not valid");
 			}

@@ -5,9 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
 
 import org.wrowclif.recipebox.AppData;
+import org.wrowclif.recipebox.AppData.Transaction;
 import org.wrowclif.recipebox.Unit;
 import org.wrowclif.recipebox.Unit.Type;
-import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -67,21 +67,20 @@ public class UnitImpl implements Unit {
 			return new ArrayList<Unit>();
 		}
 
-		String stmt =
+		final String stmt =
 			"SELECT u.uid, u.name, u.type, u.factor, u.minfraction " +
 			"FROM Unit u " +
 			"WHERE u.type == ? " +
 				"and u.uid != ?; ";
 
-		List<Unit> list = null;
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		db.beginTransaction();
-			Cursor c = db.rawQuery(stmt, new String[] {type.ordinal() + "", id + ""});
-			list = factory.createListFromCursor(c);
-			c.close();
-		db.setTransactionSuccessful();
-		db.endTransaction();
-		return list;
+		return factory.data.sqlTransaction(new Transaction<List<Unit>>() {
+			public List<Unit> exec(SQLiteDatabase db) {
+				Cursor c = db.rawQuery(stmt, new String[] {type.ordinal() + "", id + ""});
+				List<Unit> list = factory.createListFromCursor(c);
+				c.close();
+				return list;
+			}
+		});
 	}
 
 	public String getStringForAmount(double amount) {
@@ -99,13 +98,13 @@ public class UnitImpl implements Unit {
 
 	protected static class UnitFactory {
 
-		protected RecipeBoxOpenHelper helper;
+		protected AppData data;
 
 		private Object nullLock;
 		private Unit nullUnit;
 
 		private UnitFactory() {
-			helper = AppData.getSingleton().getOpenHelper();
+			data = AppData.getSingleton();
 			nullLock = new Object();
 			nullUnit = null;
 		}
@@ -126,29 +125,30 @@ public class UnitImpl implements Unit {
 		}
 
 		protected Unit getNullUnit() {
-			String stmt =
+			final String stmt =
 				"SELECT u.uid, u.name, u.type, u.factor, u.minfraction " +
 				"FROM Unit u " +
 				"WHERE u.name = ?; ";
 
 			synchronized(nullLock) {
 				if(nullUnit == null) {
-					SQLiteDatabase db = factory.helper.getWritableDatabase();
-					db.beginTransaction();
-						Cursor c = db.rawQuery(stmt, new String[] {"nullunit"});
-						if(c.moveToNext()) {
-							nullUnit = new UnitImpl(c.getLong(0), c.getString(1), c.getInt(2), c.getDouble(3), c.getInt(4));
-						} else {
-							ContentValues values = new ContentValues();
-							values.put("name", "nullunit");
-							values.put("type", 0);
-							values.put("factor", 1);
-							values.put("minfraction", 0);
-							long id = db.insert("Unit", null, values);
-							nullUnit = new UnitImpl(id, "nullunit", 0, 1, 0);
+					data.sqlTransaction(new Transaction<Void>() {
+						public Void exec(SQLiteDatabase db) {
+							Cursor c = db.rawQuery(stmt, new String[] {"nullunit"});
+							if(c.moveToNext()) {
+								nullUnit = new UnitImpl(c.getLong(0), c.getString(1), c.getInt(2), c.getDouble(3), c.getInt(4));
+							} else {
+								ContentValues values = new ContentValues();
+								values.put("name", "nullunit");
+								values.put("type", 0);
+								values.put("factor", 1);
+								values.put("minfraction", 0);
+								long id = db.insert("Unit", null, values);
+								nullUnit = new UnitImpl(id, "nullunit", 0, 1, 0);
+							}
+							return null;
 						}
-					db.setTransactionSuccessful();
-					db.endTransaction();
+					});
 				}
 				return nullUnit;
 			}

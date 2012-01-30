@@ -5,9 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
 
 import org.wrowclif.recipebox.AppData;
+import org.wrowclif.recipebox.AppData.Transaction;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Suggestion;
-import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -54,23 +54,18 @@ public class SuggestionImpl implements Suggestion {
 	public void setComments(String text) {
 		this.comments = text;
 
-		ContentValues values = new ContentValues();
-		values.put("comments", text);
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		int ret = db.update("SuggestedWith", values, "rid1 = ? and rid2 = ?",
-						new String[] {lowId + "", hiId + ""});
-		if(ret != 1) {
-			throw new IllegalStateException("SuggestedWith setComments should have affected only one row" +
-												" but affected " + ret + " rows");
-		}
+		ContentValues cv = new ContentValues();
+		cv.put("comments", text);
+		factory.data.itemUpdate(cv, "SuggestedWith", "rid1 = ? and rid2 = ?",
+							new String[] {lowId + "", hiId + ""}, "setComments");
 	}
 
 	protected static class SuggestionFactory {
 
-		protected RecipeBoxOpenHelper helper;
+		protected AppData data;
 
 		private SuggestionFactory() {
-			helper = AppData.getSingleton().getOpenHelper();
+			data = AppData.getSingleton();
 		}
 
 		protected List<Suggestion> createListFromCursor(Recipe r, Cursor c) {
@@ -95,8 +90,8 @@ public class SuggestionImpl implements Suggestion {
 			return list;
 		}
 
-		protected List<Suggestion> getSuggestedWith(Recipe r) {
-			String stmt =
+		protected List<Suggestion> getSuggestedWith(final Recipe r) {
+			final String stmt =
 				"SELECT r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
 				"FROM Recipe r, SuggestedWith sw " +
 				"WHERE sw.rid1 = ? " +
@@ -107,15 +102,14 @@ public class SuggestionImpl implements Suggestion {
 				"WHERE sw.rid1 = r.rid " +
 					"and sw.rid2 = ?; ";
 
-			List<Suggestion> list = null;
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.beginTransaction();
-				Cursor c1 = db.rawQuery(stmt.replaceAll("\\?",r.getId() + ""), null);
-				list = createListFromCursor(r, c1);
-				c1.close();
-			db.setTransactionSuccessful();
-			db.endTransaction();
-			return list;
+			return data.sqlTransaction(new Transaction<List<Suggestion>>() {
+				public List<Suggestion> exec(SQLiteDatabase db) {
+					Cursor c1 = db.rawQuery(stmt.replaceAll("\\?",r.getId() + ""), null);
+					List<Suggestion> list = createListFromCursor(r, c1);
+					c1.close();
+					return list;
+				}
+			});
 		}
 
 		protected Suggestion addSuggestion(Recipe r1, Recipe r2) {
@@ -123,29 +117,31 @@ public class SuggestionImpl implements Suggestion {
 				throw new IllegalArgumentException("Cannot suggest a recipe with itself");
 			}
 
-			String stmt =
+			final String stmt =
 				"INSERT OR REPLACE INTO SuggestedWith(rid1, rid2) " +
 					"VALUES (?, ?); ";
-			SuggestionImpl si = new SuggestionImpl(r1, r2);
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.beginTransaction();
-				db.execSQL(stmt, new Object[] {si.lowId, si.hiId});
-			db.setTransactionSuccessful();
-			db.endTransaction();
+			final SuggestionImpl si = new SuggestionImpl(r1, r2);
+			data.sqlTransaction(new Transaction<Void>() {
+				public Void exec(SQLiteDatabase db) {
+					db.execSQL(stmt, new Object[] {si.lowId, si.hiId});
+					return null;
+				}
+			});
 			return si;
 		}
 
 		protected void removeSuggestion(Recipe r1, Recipe r2) {
-			String stmt =
+			final String stmt =
 				"DELETE FROM SuggestedWith " +
 					"WHERE rid1 = ? " +
 						"and rid2 = ?; ";
-			SuggestionImpl si = new SuggestionImpl(r1, r2);
-			SQLiteDatabase db = factory.helper.getWritableDatabase();
-			db.beginTransaction();
-				db.execSQL(stmt, new Object[] {si.lowId, si.hiId});
-			db.setTransactionSuccessful();
-			db.endTransaction();
+			final SuggestionImpl si = new SuggestionImpl(r1, r2);
+			data.sqlTransaction(new Transaction<Void>() {
+				public Void exec(SQLiteDatabase db) {
+					db.execSQL(stmt, new Object[] {si.lowId, si.hiId});
+					return null;
+				}
+			});
 		}
 	}
 }

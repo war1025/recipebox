@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.util.Log;
 
 import org.wrowclif.recipebox.AppData;
+import org.wrowclif.recipebox.AppData.Transaction;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.RecipeIngredient;
 import org.wrowclif.recipebox.Ingredient;
@@ -14,7 +15,6 @@ import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Review;
 import org.wrowclif.recipebox.Unit;
 import org.wrowclif.recipebox.Suggestion;
-import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,24 +173,24 @@ public class RecipeImpl implements Recipe {
 	}
 
 	public List<Recipe> getVariants() {
-		List<Recipe> l1 = null;
-		String stmt =
+		final String stmt =
 			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
 			"FROM Recipe r " +
 			"WHERE r.vid = %s " +
 				"and r.rid != %s; ";
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		db.beginTransaction();
-			Cursor c1 = db.rawQuery(String.format(stmt, vid + "", id + ""), null);
-			l1 = factory.createListFromCursor(c1);
-			c1.close();
-		db.setTransactionSuccessful();
-		db.endTransaction();
-		return l1;
+
+		return factory.data.sqlTransaction(new Transaction<List<Recipe>>() {
+			public List<Recipe> exec(SQLiteDatabase db) {
+				Cursor c1 = db.rawQuery(String.format(stmt, vid + "", id + ""), null);
+				List<Recipe> l1 = factory.createListFromCursor(c1);
+				c1.close();
+				return l1;
+			}
+		});
 	}
 
-	public Recipe branch(String name) {
-		String stmt =
+	public Recipe branch(final String name) {
+		final String stmt =
 			"INSERT INTO SuggestedWith(rid1, rid2, comments) " +
 				"SELECT sw.rid1, ? as rid2, sw.comments " +
 				"FROM SuggestedWith sw " +
@@ -245,28 +245,29 @@ public class RecipeImpl implements Recipe {
 					"WHERE r.rid = $)" +
 				"WHERE rid = ?;";
 
-		ContentValues values = new ContentValues();
+		final ContentValues values = new ContentValues();
 		values.put("name", name);
 		values.put("description", description);
 		values.put("cost", cost);
 		values.put("cooktime", cookTime);
 		values.put("preptime", prepTime);
 		values.put("vid", vid);
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		db.beginTransaction();
-			long newId = db.insert("Recipe", null, values);
-			String[] stmts = stmt.replaceAll("\\?", newId + "").replaceAll("\\$", id + "").split(";");
-			for(String s : stmts) {
-				db.execSQL(s);
+
+		return factory.data.sqlTransaction(new Transaction<Recipe>() {
+			public Recipe exec(SQLiteDatabase db) {
+				long newId = db.insert("Recipe", null, values);
+				String[] stmts = stmt.replaceAll("\\?", newId + "").replaceAll("\\$", id + "").split(";");
+				for(String s : stmts) {
+					db.execSQL(s);
+				}
+				values.put("rid", newId);
+				return factory.createRecipeFromData(values);
 			}
-		db.setTransactionSuccessful();
-		db.endTransaction();
-		values.put("rid", newId);
-		return factory.createRecipeFromData(values);
+		});
 	}
 
 	public void delete() {
-		String stmt =
+		final String stmt =
 			"UPDATE Ingredient " +
 				"SET usecount = usecount - 1 " +
 				"WHERE iid IN ( " +
@@ -306,49 +307,45 @@ public class RecipeImpl implements Recipe {
 			"DELETE FROM Recipe " +
 				"WHERE rid = ?;";
 
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		db.beginTransaction();
-			String[] stmts = stmt.replaceAll("\\?", id + "").split(";");
-			for(String s : stmts) {
-				db.execSQL(s);
+		factory.data.sqlTransaction(new Transaction<Void>() {
+			public Void exec(SQLiteDatabase db) {
+				String[] stmts = stmt.replaceAll("\\?", id + "").split(";");
+				for(String s : stmts) {
+					db.execSQL(s);
+				}
+				return null;
 			}
-		db.setTransactionSuccessful();
-		db.endTransaction();
+		});
 	}
 
 	private void itemUpdate(ContentValues values, String operation) {
-		SQLiteDatabase db = factory.helper.getWritableDatabase();
-		int ret = db.update("Recipe", values, "rid=?", new String[] {id + ""});
-		if(ret != 1) {
-			throw new IllegalStateException("Recipe " + operation + " should have affected only row " + id +
-												" but affected " + ret + " rows");
-		}
+		factory.data.itemUpdate(values, "Recipe", "rid=?", new String[] {id + ""}, operation);
 	}
 
 	protected static class RecipeFactory {
 
-		protected RecipeBoxOpenHelper helper;
+		protected AppData data;
 
 		private RecipeFactory() {
-			helper = AppData.getSingleton().getOpenHelper();
+			data = AppData.getSingleton();
 		}
 
-		protected Recipe createNew(String name) {
-			ContentValues values = new ContentValues();
+		protected Recipe createNew(final String name) {
+			final ContentValues values = new ContentValues();
 			values.put("name", name);
-			SQLiteDatabase db = helper.getWritableDatabase();
-			db.beginTransaction();
-				long id = db.insert("Recipe", null, values);
-				values.remove("name");
-				values.put("vid", id);
-				db.insert("VariantGroup", null, values);
-				db.update("Recipe", values, "rid=?", new String[] {id + ""});
-			db.setTransactionSuccessful();
-			db.endTransaction();
-			RecipeImpl created = new RecipeImpl(id);
-			created.name = name;
 
-			return created;
+			return data.sqlTransaction(new Transaction<Recipe>() {
+				public Recipe exec(SQLiteDatabase db) {
+					long id = db.insert("Recipe", null, values);
+					values.remove("name");
+					values.put("vid", id);
+					db.insert("VariantGroup", null, values);
+					db.update("Recipe", values, "rid=?", new String[] {id + ""});
+					RecipeImpl created = new RecipeImpl(id);
+					created.name = name;
+					return created;
+				}
+			});
 		}
 
 		protected List<Recipe> createListFromCursor(Cursor c) {
