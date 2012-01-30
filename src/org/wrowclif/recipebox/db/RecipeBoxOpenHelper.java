@@ -64,6 +64,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 		"CREATE TABLE Unit(" +
 			"uid INTEGER PRIMARY KEY AUTOINCREMENT," +
 			"name TEXT NOT NULL UNIQUE, " +
+			"abbreviation TEXT NOT NULL, " +
 			"type INTEGER(0,2) NOT NULL DEFAULT 0, " +
 			"factor REAL NOT NULL CHECK(factor > 0), " +
 			"minfraction INTEGER NOT NULL);" +

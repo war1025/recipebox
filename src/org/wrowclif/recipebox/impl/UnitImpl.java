@@ -22,13 +22,15 @@ public class UnitImpl implements Unit {
 
 	private long id;
 	private String name;
+	private String abbreviation;
 	private Type type;
 	private double factor;
 	private int minFraction;
 
-	private UnitImpl(long id, String name, int type, double factor, int minFraction) {
+	private UnitImpl(long id, String name, String abbreviation, int type, double factor, int minFraction) {
 		this.id = id;
 		this.name = name;
+		this.abbreviation = abbreviation;
 		switch(type) {
 			case 1 : this.type = Type.VOLUME; break;
 			case 2 : this.type = Type.MASS; break;
@@ -44,6 +46,10 @@ public class UnitImpl implements Unit {
 
 	public String getName() {
 		return name;
+	}
+
+	public String getAbbreviation() {
+		return abbreviation;
 	}
 
 	public Type getType() {
@@ -68,7 +74,7 @@ public class UnitImpl implements Unit {
 		}
 
 		final String stmt =
-			"SELECT u.uid, u.name, u.type, u.factor, u.minfraction " +
+			"SELECT u.uid, u.name, u.abbreviation, u.type, u.factor, u.minfraction " +
 			"FROM Unit u " +
 			"WHERE u.type == ? " +
 				"and u.uid != ?; ";
@@ -145,26 +151,28 @@ public class UnitImpl implements Unit {
 			data = AppData.getSingleton();
 			nullLock = new Object();
 			nullUnit = null;
+			ensureUnits();
 		}
 
 		protected List<Unit> createListFromCursor(Cursor c) {
 			List<Unit> list = new ArrayList<Unit>(c.getCount());
 			while(c.moveToNext()) {
-				// u.uid, u.name, u.type, u.factor, u.minfraction
-				UnitImpl ui = new UnitImpl(c.getLong(0), c.getString(1), c.getInt(2), c.getDouble(3), c.getInt(4));
+				// u.uid, u.name, u.abbreviation, u.type, u.factor, u.minfraction
+				UnitImpl ui = new UnitImpl(c.getLong(0), c.getString(1), c.getString(2),
+												c.getInt(3), c.getDouble(4), c.getInt(5));
 				list.add(ui);
 			}
 			return list;
 		}
 
 		protected Unit createFromData(ContentValues v) {
-			return new UnitImpl(v.getAsLong("uid"), v.getAsString("name"), v.getAsInteger("type"),
-								v.getAsDouble("factor"), v.getAsInteger("minfraction"));
+			return new UnitImpl(v.getAsLong("uid"), v.getAsString("name"), v.getAsString("abbreviation"),
+								v.getAsInteger("type"), v.getAsDouble("factor"), v.getAsInteger("minfraction"));
 		}
 
 		protected Unit getNullUnit() {
 			final String stmt =
-				"SELECT u.uid, u.name, u.type, u.factor, u.minfraction " +
+				"SELECT u.uid, u.name, u.abbreviation, u.type, u.factor, u.minfraction " +
 				"FROM Unit u " +
 				"WHERE u.name = ?; ";
 
@@ -174,15 +182,17 @@ public class UnitImpl implements Unit {
 						public Void exec(SQLiteDatabase db) {
 							Cursor c = db.rawQuery(stmt, new String[] {"nullunit"});
 							if(c.moveToNext()) {
-								nullUnit = new UnitImpl(c.getLong(0), c.getString(1), c.getInt(2), c.getDouble(3), c.getInt(4));
+								nullUnit = new UnitImpl(c.getLong(0), c.getString(1), c.getString(2),
+															c.getInt(3), c.getDouble(4), c.getInt(5));
 							} else {
 								ContentValues values = new ContentValues();
 								values.put("name", "nullunit");
+								values.put("abbreviation", "");
 								values.put("type", 0);
 								values.put("factor", 1);
 								values.put("minfraction", 0);
 								long id = db.insert("Unit", null, values);
-								nullUnit = new UnitImpl(id, "nullunit", 0, 1, 0);
+								nullUnit = createFromData(values);
 							}
 							return null;
 						}
@@ -190,6 +200,68 @@ public class UnitImpl implements Unit {
 				}
 				return nullUnit;
 			}
+		}
+
+		protected void ensureUnits() {
+			final String stmt =
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('Cup', 'C', 1, 236.58824, 4); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('Tablespoon', 'T', 1, 14.786765, 3); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('teaspoon', 'tsp', 1, 4.9289216, 8); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('Pint', 'p', 1, 473.17647, 4); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('Quart', 'qt', 1, 946.35295, 4); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('Gallon', 'gal', 1, 3785.4118, 4); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('Fluid Ounce', 'floz', 1, 29.57353, 4); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('milliliter', 'mL', 1, 1, 0); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('Liter', 'L', 1, 1000, -2); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('Pound', 'lb', 2, 453.59237, 4); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('Ounce', 'oz', 2, 28.349523, 4); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('gram', 'g', 2, 1, 0); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('kilogram', 'kg', 2, 1000, -2); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('to taste', 'to taste', 0, 1, 0); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('pinch', 'pinch', 0, 1, 0); " +
+
+				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('nullunit', '', 0, 1, 0);";
+
+			data.sqlTransaction(new Transaction<Void>() {
+				public Void exec(SQLiteDatabase db) {
+					String[] stmts = stmt.split(";");
+
+					for(String s : stmts) {
+						db.execSQL(s);
+					}
+					return null;
+				}
+			});
 		}
 	}
 }

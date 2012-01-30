@@ -14,6 +14,8 @@ public interface Unit {
 
 	public String getName();
 
+	public String getAbbreviation();
+
 	public Type getType();
 
 	public double getConversionFactorTo(Unit u);
