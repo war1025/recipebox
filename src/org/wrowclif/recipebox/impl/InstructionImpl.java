@@ -61,17 +61,18 @@ public class InstructionImpl implements Instruction {
 			"ORDER BY ii.num ASC; ";
 		SQLiteDatabase db = factory.helper.getWritableDatabase();
 		db.beginTransaction();
-			Cursor c = db.rawQuery(stmt.replaceAll("?", id + ""), null);
+			Cursor c = db.rawQuery(stmt.replaceAll("\\?", id + ""), null);
 			list = IngredientImpl.factory.createListFromCursor(c);
 			c.close();
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		return list;
 	}
 
 	public void setIngredientsUsed(List<Ingredient> order) {
 		String removeAllStmt =
-			"DELETE FROM InstructionIngredients ii " +
-			"WHERE ii.instid = ?;";
+			"DELETE FROM InstructionIngredients " +
+			"WHERE instid = ?;";
 		String insertStmt =
 			"INSERT OR REPLACE INTO InstructionIngredients(instid, ingrid, num) " +
 			"VALUES(?, ?, ?);";
@@ -81,6 +82,7 @@ public class InstructionImpl implements Instruction {
 			for(int i = 0; i < order.size(); i++) {
 				db.execSQL(insertStmt, new String[] {id + "", order.get(i).getId() + "", i + ""});
 			}
+		db.setTransactionSuccessful();
 		db.endTransaction();
 	}
 
@@ -95,8 +97,8 @@ public class InstructionImpl implements Instruction {
 		protected List<Instruction> createListFromCursor(Cursor c) {
 			List<Instruction> list = new ArrayList<Instruction>(c.getCount());
 			while(c.moveToNext()) {
-				InstructionImpl i = new InstructionImpl(c.getLong(1));
-				i.text = c.getString(2);
+				InstructionImpl i = new InstructionImpl(c.getLong(0));
+				i.text = c.getString(1);
 				list.add(i);
 			}
 			return list;
@@ -111,9 +113,10 @@ public class InstructionImpl implements Instruction {
 				"ORDER BY i.num ASC;";
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
-				Cursor c1 = db.rawQuery(stmt.replaceAll("?", recipeId + ""), null);
+				Cursor c1 = db.rawQuery(stmt.replaceAll("\\?", recipeId + ""), null);
 				list = createListFromCursor(c1);
 				c1.close();
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			return list;
 		}
@@ -124,9 +127,9 @@ public class InstructionImpl implements Instruction {
 				"FROM Recipe r " +
 				"WHERE r.rid = ?; ";
 			String updateStmt =
-				"UPDATE Recipe r " +
-				"SET (r.maxinstruction = r.maxinstruction + 1) " +
-				"WHERE r.rid = ?; ";
+				"UPDATE Recipe " +
+				"SET maxinstruction = maxinstruction + 1 " +
+				"WHERE rid = ?; ";
 
 			Instruction result = null;
 			ContentValues values = new ContentValues();
@@ -134,23 +137,24 @@ public class InstructionImpl implements Instruction {
 			values.put("rid", recipeId);
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
-				Cursor c = db.rawQuery(selectStmt.replaceAll("?", recipeId + ""), null);
+				Cursor c = db.rawQuery(selectStmt.replaceAll("\\?", recipeId + ""), null);
 				c.moveToNext();
-				int max = c.getInt(1);
+				int max = c.getInt(0);
 				c.close();
 				max = max + 1;
 				db.execSQL(updateStmt, new Object[] {recipeId});
 				values.put("num", max);
 				long iid = db.insert("Instruction", null, values);
 				result = new InstructionImpl(iid);
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			return result;
 		}
 
 		protected void removeInstruction(Instruction i) {
 			String stmt =
-				"DELETE FROM Instruction i " +
-				"WHERE i.iid = ?; ";
+				"DELETE FROM Instruction " +
+				"WHERE iid = ?; ";
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.execSQL(stmt, new Object[] {i.getId()});
 		}
@@ -161,14 +165,14 @@ public class InstructionImpl implements Instruction {
 				"FROM Instruction i " +
 				"WHERE i.rid = ?; ";
 			String instructionStmt =
-				"UPDATE Instruction i " +
-					"SET (i.num = ?) " +
-					"WHERE i.iid = ? " +
-						"and i.rid = ?; ";
+				"UPDATE Instruction " +
+					"SET num = ? " +
+					"WHERE iid = ? " +
+						"and rid = ?; ";
 			String recipeStmt =
-				"UPDATE Recipe r " +
-					"SET (r.maxinstruction = ?) " +
-					"WHERE r.rid = ?; ";
+				"UPDATE Recipe " +
+					"SET maxinstruction = ? " +
+					"WHERE rid = ?; ";
 
 			// Check that all values in 'order' are the same as those in the database currently.
 			// Error otherwise.
@@ -181,12 +185,12 @@ public class InstructionImpl implements Instruction {
 
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
-				Cursor c1 = db.rawQuery(getInstructionIdsStmt.replaceAll("?", recipeId + ""), null);
+				Cursor c1 = db.rawQuery(getInstructionIdsStmt.replaceAll("\\?", recipeId + ""), null);
 				if(orderIds.length == c1.getCount()) {
 					long[] actualIds = new long[c1.getCount()];
 					for(int i = 0; i < actualIds.length; i++) {
 						c1.moveToNext();
-						actualIds[i] = c1.getLong(1);
+						actualIds[i] = c1.getLong(0);
 					}
 					Arrays.sort(actualIds);
 					valid = true;
@@ -204,6 +208,7 @@ public class InstructionImpl implements Instruction {
 					}
 					db.execSQL(recipeStmt, new Object[] {order.size() - 1, recipeId});
 				}
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			if(!valid) {
 				throw new IllegalArgumentException("Ingredients were not valid");

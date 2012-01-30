@@ -79,15 +79,15 @@ public class SuggestionImpl implements Suggestion {
 			ContentValues values = new ContentValues();
 			while(c.moveToNext()) {
 				values.clear();
-				values.put("rid", c.getLong(1));
-				values.put("name", c.getString(3));
-				values.put("description", c.getString(4));
-				values.put("preptime", c.getInt(5));
-				values.put("cooktime", c.getInt(6));
-				values.put("vid", c.getLong(7));
+				values.put("rid", c.getLong(0));
+				values.put("name", c.getString(2));
+				values.put("description", c.getString(3));
+				values.put("preptime", c.getInt(4));
+				values.put("cooktime", c.getInt(5));
+				values.put("vid", c.getLong(6));
 				Recipe r2 = RecipeImpl.factory.createRecipeFromData(values);
 				SuggestionImpl si = new SuggestionImpl(r, r2);
-				si.comments = c.getString(2);
+				si.comments = c.getString(1);
 
 				list.add(si);
 			}
@@ -110,9 +110,10 @@ public class SuggestionImpl implements Suggestion {
 			List<Suggestion> list = null;
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
-				Cursor c1 = db.rawQuery(stmt.replaceAll("?",r.getId() + ""), null);
+				Cursor c1 = db.rawQuery(stmt.replaceAll("\\?",r.getId() + ""), null);
 				list = createListFromCursor(r, c1);
 				c1.close();
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			return list;
 		}
@@ -129,19 +130,21 @@ public class SuggestionImpl implements Suggestion {
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
 				db.execSQL(stmt, new Object[] {si.lowId, si.hiId});
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			return si;
 		}
 
 		protected void removeSuggestion(Recipe r1, Recipe r2) {
 			String stmt =
-				"DELETE FROM SuggestedWith sw " +
-					"WHERE sw.rid1 = ? " +
-						"and sw.rid2 = ?; ";
+				"DELETE FROM SuggestedWith " +
+					"WHERE rid1 = ? " +
+						"and rid2 = ?; ";
 			SuggestionImpl si = new SuggestionImpl(r1, r2);
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
 				db.execSQL(stmt, new Object[] {si.lowId, si.hiId});
+			db.setTransactionSuccessful();
 			db.endTransaction();
 		}
 	}

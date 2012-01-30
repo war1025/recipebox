@@ -3,6 +3,7 @@ package org.wrowclif.recipebox.impl;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
+import android.util.Log;
 
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.RecipeIngredient;
@@ -104,19 +105,19 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				ri.recipe = r;
 
 				values.clear();
-				values.put("iid", c.getLong(1));
-				values.put("name", c.getString(2));
+				values.put("iid", c.getLong(0));
+				values.put("name", c.getString(1));
 				ri.ingredient = IngredientImpl.factory.createFromData(values);
 
 				values.clear();
-				values.put("uid", c.getLong(3));
-				values.put("name", c.getString(4));
-				values.put("type", c.getInt(5));
-				values.put("factor", c.getDouble(6));
-				values.put("minfraction", c.getInt(7));
+				values.put("uid", c.getLong(2));
+				values.put("name", c.getString(3));
+				values.put("type", c.getInt(4));
+				values.put("factor", c.getDouble(5));
+				values.put("minfraction", c.getInt(6));
 				ri.unit = UnitImpl.factory.createFromData(values);
 
-				ri.amount = c.getInt(8);
+				ri.amount = c.getInt(7);
 
 				list.add(ri);
 			}
@@ -136,9 +137,10 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 			List<RecipeIngredient> list = null;
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
-				Cursor c = db.rawQuery(stmt.replaceAll("?", r.getId() + ""), null);
+				Cursor c = db.rawQuery(stmt.replaceAll("\\?", r.getId() + ""), null);
 				list = createListFromCursor(r, c);
 				c.close();
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			return list;
 
@@ -150,13 +152,13 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				"FROM Recipe r " +
 				"WHERE r.rid = ?; ";
 			String updateStmt =
-				"UPDATE Recipe r " +
-				"SET (r.maxingredient = r.maxingredient + 1) " +
-				"WHERE r.rid = ?; " +
-
-				"UPDATE Ingredient i " +
-				"SET (i.usecount = i.usecount + 1) " +
-				"WHERE i.iid = ?; ";
+				"UPDATE Recipe " +
+				"SET maxingredient = maxingredient + 1 " +
+				"WHERE rid = ?; ";
+			String useCountStmt =
+				"UPDATE Ingredient " +
+				"SET usecount = usecount + 1 " +
+				"WHERE iid = ?; ";
 
 			RecipeIngredientImpl result = null;
 			Unit u = UnitImpl.factory.getNullUnit();
@@ -166,12 +168,13 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 			values.put("uid", u.getId());
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
-				Cursor c = db.rawQuery(selectStmt.replaceAll("?", r.getId() + ""), null);
+				Cursor c = db.rawQuery(selectStmt.replaceAll("\\?", r.getId() + ""), null);
 				c.moveToNext();
-				int max = c.getInt(1);
+				int max = c.getInt(0);
 				c.close();
 				max = max + 1;
-				db.execSQL(updateStmt, new Object[] {r.getId(), i.getId()});
+				db.execSQL(updateStmt, new Object[] {r.getId()});
+				db.execSQL(useCountStmt, new Object[] {i.getId()});
 				values.put("num", max);
 				db.insert("RecipeIngredients", null, values);
 
@@ -180,24 +183,29 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				result.ingredient = i;
 				result.unit = u;
 				result.amount = 0;
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			return result;
 		}
 
 		protected void removeRecipeIngredient(RecipeIngredient toRemove) {
 			String stmt =
-				"DELETE FROM RecipeIngredient ri " +
-				"WHERE ri.iid = ? " +
-					"and ri.rid = ?; " +
-
-				"UPDATE Ingredient i " +
-				"SET (i.usecount = i.usecount - 1) " +
-				"WHERE i.iid = ?; ";
+				"DELETE FROM RecipeIngredient " +
+				"WHERE iid = ? " +
+					"and rid = ?; ";
+			String useCountStmt =
+				"UPDATE Ingredient " +
+				"SET usecount = usecount - 1 " +
+				"WHERE iid = ?; ";
 
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			long iid = toRemove.getIngredient().getId();
 			long rid = toRemove.getRecipe().getId();
-			db.execSQL(stmt, new Object[] {iid, rid, iid});
+			db.beginTransaction();
+				db.execSQL(stmt, new Object[] {iid, rid});
+				db.execSQL(useCountStmt, new Object[] {iid});
+			db.setTransactionSuccessful();
+			db.endTransaction();
 		}
 
 		protected void reorderRecipeIngredients(List<RecipeIngredient> order) {
@@ -206,14 +214,14 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				"FROM RecipeIngredients ri " +
 				"WHERE ri.rid = ?; ";
 			String ingredientStmt =
-				"UPDATE RecipeIngredients ri " +
-					"SET (ri.num = ?) " +
-					"WHERE ri.iid = ? " +
-						"and ri.rid = ?; ";
+				"UPDATE RecipeIngredients " +
+					"SET num = ? " +
+					"WHERE iid = ? " +
+						"and rid = ?; ";
 			String recipeStmt =
-				"UPDATE Recipe r " +
-					"SET (r.maxingredient = ?) " +
-					"WHERE r.rid = ?; ";
+				"UPDATE Recipe " +
+					"SET maxingredient = ? " +
+					"WHERE rid = ?; ";
 
 			// Check that all values in 'order' are the same as those in the database currently.
 			// Error otherwise.
@@ -234,12 +242,12 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
-				Cursor c1 = db.rawQuery(getIngredientIdsStmt.replaceAll("?", recipeId + ""), null);
+				Cursor c1 = db.rawQuery(getIngredientIdsStmt.replaceAll("\\?", recipeId + ""), null);
 				if(orderIds.length == c1.getCount()) {
 					long[] actualIds = new long[c1.getCount()];
 					for(int i = 0; i < actualIds.length; i++) {
 						c1.moveToNext();
-						actualIds[i] = c1.getLong(1);
+						actualIds[i] = c1.getLong(0);
 					}
 					Arrays.sort(actualIds);
 					valid = true;
@@ -257,6 +265,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 					}
 					db.execSQL(recipeStmt, new Object[] {order.size() - 1, recipeId});
 				}
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			if(!valid) {
 				throw new IllegalArgumentException("Ingredients were not valid");

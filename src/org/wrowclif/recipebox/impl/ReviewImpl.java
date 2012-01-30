@@ -94,10 +94,10 @@ public class ReviewImpl implements Review {
 			List<Review> list = new ArrayList<Review>(c.getCount());
 			while(c.moveToNext()) {
 				ReviewImpl ri = new ReviewImpl();
-				ri.id = c.getLong(1);
-				ri.date = c.getLong(2);
-				ri.rating = c.getInt(3);
-				ri.comments = c.getString(4);
+				ri.id = c.getLong(0);
+				ri.date = c.getLong(1);
+				ri.rating = c.getInt(2);
+				ri.comments = c.getString(3);
 
 				list.add(ri);
 			}
@@ -117,6 +117,7 @@ public class ReviewImpl implements Review {
 				Cursor c = db.rawQuery(stmt, new String[] {recipeId + ""});
 				list = createListFromCursor(c);
 				c.close();
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			return list;
 		}
@@ -138,12 +139,13 @@ public class ReviewImpl implements Review {
 
 		protected void removeReview(Review r) {
 			String stmt =
-				"DELETE FROM Review r " +
-					"WHERE r.revid = ?; ";
+				"DELETE FROM Review " +
+					"WHERE revid = ?; ";
 
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
 				db.execSQL(stmt, new Object[] {r.getId()});
+			db.setTransactionSuccessful();
 			db.endTransaction();
 		}
 	}

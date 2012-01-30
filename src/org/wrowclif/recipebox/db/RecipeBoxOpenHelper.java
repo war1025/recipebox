@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.database.SQLException;
 import android.content.Context;
+import android.util.Log;
 
 public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 
@@ -17,7 +18,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 		"CREATE TABLE Recipe(" +
 			"rid INTEGER PRIMARY KEY AUTOINCREMENT," +
 			"name TEXT NOT NULL," +
-			"description TEXT NOT NULL," +
+			"description TEXT NOT NULL DEFAULT ''," +
 			"cost INTEGER NOT NULL DEFAULT 0," +
 			"preptime INTEGER NOT NULL DEFAULT 0," +
 			"cooktime INTEGER NOT NULL DEFAULT 0," +
@@ -42,7 +43,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			"rid INTEGER REFERENCES Recipe(rid) NOT NULL);" +
 
 		"CREATE TABLE Review(" +
-			"revid INTGER PRIMARY KEY AUTOINCREMENT," +
+			"revid INTEGER PRIMARY KEY AUTOINCREMENT," +
 			"date INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL," +
 			"rating INTEGER(0,10) NOT NULL," +
 			"comments TEXT NOT NULL," +
@@ -92,7 +93,10 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 	}
 
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(CREATE_STATEMENT);
+		String[] statements = CREATE_STATEMENT.split(";");
+		for(String stmt : statements) {
+			db.execSQL(stmt);
+		}
 	}
 
 	public void onUpgrade(SQLiteDatabase db, int oldv, int newv) {

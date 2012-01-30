@@ -8,6 +8,8 @@ public interface Instruction {
 
 	public String getText();
 
+	public void setText(String text);
+
 	public List<Ingredient> getIngredientsUsed();
 
 	public void setIngredientsUsed(List<Ingredient> ingredients);

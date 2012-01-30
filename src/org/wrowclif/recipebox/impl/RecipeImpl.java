@@ -3,6 +3,7 @@ package org.wrowclif.recipebox.impl;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
+import android.util.Log;
 
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
@@ -148,7 +149,7 @@ public class RecipeImpl implements Recipe {
 	}
 
 	public List<Category> getCategories() {
-		CategoryImpl.factory.getRecipeCategories(id);
+		return CategoryImpl.factory.getRecipeCategories(id);
 	}
 
 	public void addCategory(Category c) {
@@ -183,6 +184,7 @@ public class RecipeImpl implements Recipe {
 			Cursor c1 = db.rawQuery(String.format(stmt, vid + "", id + ""), null);
 			l1 = factory.createListFromCursor(c1);
 			c1.close();
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		return l1;
 	}
@@ -214,20 +216,34 @@ public class RecipeImpl implements Recipe {
 				"FROM Instruction i " +
 				"WHERE i.rid = $; " +
 
-			"INSERT INTO InstructionIngredients(instrid, ingrid, num) " +
+			"INSERT INTO InstructionIngredients(instid, ingrid, num) " +
 				"SELECT in1.iid, ii.ingrid, ii.num " +
 				"FROM Instruction in1, Instruction in2, InstructionIngredients ii " +
 				"WHERE in1.rid = ? " +
 					"and in2.rid = $ " +
 					"and in1.num = in2.num " +
-					"and ii.instrid = in2.iid; " +
+					"and ii.instid = in2.iid; " +
 
-			"UPDATE Ingredient i " +
-				"SET (i.usecount = i.usecount + 1) " +
-				"WHERE i.iid IN ( " +
+			"UPDATE Ingredient " +
+				"SET usecount = usecount + 1 " +
+				"WHERE iid IN ( " +
 					"SELECT ri.iid " +
 					"FROM RecipeIngredients ri " +
-					"WHERE ri.rid = ?); ";
+					"WHERE ri.rid = ?); " +
+
+			"UPDATE Recipe " +
+				"SET maxingredient = ( " +
+					"SELECT r.maxingredient " +
+					"FROM Recipe r " +
+					"WHERE r.rid = $)" +
+				"WHERE rid = ?; " +
+
+			"UPDATE Recipe " +
+				"SET maxinstruction = ( " +
+					"SELECT r.maxinstruction " +
+					"FROM Recipe r " +
+					"WHERE r.rid = $)" +
+				"WHERE rid = ?;";
 
 		ContentValues values = new ContentValues();
 		values.put("name", name);
@@ -239,7 +255,11 @@ public class RecipeImpl implements Recipe {
 		SQLiteDatabase db = factory.helper.getWritableDatabase();
 		db.beginTransaction();
 			long newId = db.insert("Recipe", null, values);
-			db.execSQL(stmt.replaceAll("?", newId + "").replaceAll("$", id + ""));
+			String[] stmts = stmt.replaceAll("\\?", newId + "").replaceAll("\\$", id + "").split(";");
+			for(String s : stmts) {
+				db.execSQL(s);
+			}
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		values.put("rid", newId);
 		return factory.createRecipeFromData(values);
@@ -247,35 +267,35 @@ public class RecipeImpl implements Recipe {
 
 	public void delete() {
 		String stmt =
-			"UPDATE Ingredient i " +
-				"SET (i.usecount = i.usecount - 1) " +
-				"WHERE i.iid IN ( " +
+			"UPDATE Ingredient " +
+				"SET usecount = usecount - 1 " +
+				"WHERE iid IN ( " +
 					"SELECT ri.iid " +
 					"FROM RecipeIngredients ri " +
 					"WHERE ri.rid = ?); " +
 
-			"DELETE FROM SuggestedWith sw" +
-				"WHERE sw.rid1 = ?; " +
+			"DELETE FROM SuggestedWith " +
+				"WHERE rid1 = ?; " +
 
-			"DELETE FROM SuggestedWith sw" +
-				"WHERE sw.rid2 = ?; " +
+			"DELETE FROM SuggestedWith " +
+				"WHERE rid2 = ?; " +
 
-			"DELETE FROM RecipeCategory rc" +
-				"WHERE rc.rid = ?; " +
+			"DELETE FROM RecipeCategory " +
+				"WHERE rid = ?; " +
 
-			"DELETE FROM RecipeIngredients ri " +
-				"WHERE ri.rid = ?; " +
+			"DELETE FROM RecipeIngredients " +
+				"WHERE rid = ?; " +
 
-			"DELETE FROM InstructionIngredients ii " +
-				"WHERE ii.instrid IN (" +
+			"DELETE FROM InstructionIngredients " +
+				"WHERE instid IN (" +
 					"SELECT i.iid " +
 					"FROM Instruction i " +
 					"WHERE i.rid = ?); " +
 
-			"DELETE FROM Instruction i " +
-				"WHERE i.rid = ?; " +
+			"DELETE FROM Instruction " +
+				"WHERE rid = ?; " +
 
-			"DELETE FROM VariantGroup vg " +
+			"DELETE FROM VariantGroup " +
 				"WHERE NOT EXISTS (" +
 					"SELECT r2.vid " +
 					"FROM Recipe r1, Recipe r2 " +
@@ -283,12 +303,16 @@ public class RecipeImpl implements Recipe {
 						"and r1.vid = r2.vid " +
 						"and r1.rid != r2.rid);" +
 
-			"DELETE FROM Recipe r " +
-				"WHERE r.rid = ?;";
+			"DELETE FROM Recipe " +
+				"WHERE rid = ?;";
 
 		SQLiteDatabase db = factory.helper.getWritableDatabase();
 		db.beginTransaction();
-			db.execSQL(stmt.replaceAll("?", id + ""));
+			String[] stmts = stmt.replaceAll("\\?", id + "").split(";");
+			for(String s : stmts) {
+				db.execSQL(s);
+			}
+		db.setTransactionSuccessful();
 		db.endTransaction();
 	}
 
@@ -319,8 +343,8 @@ public class RecipeImpl implements Recipe {
 				values.put("vid", id);
 				db.insert("VariantGroup", null, values);
 				db.update("Recipe", values, "rid=?", new String[] {id + ""});
+			db.setTransactionSuccessful();
 			db.endTransaction();
-
 			RecipeImpl created = new RecipeImpl(id);
 			created.name = name;
 
@@ -331,13 +355,13 @@ public class RecipeImpl implements Recipe {
 			//  r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid
 			List<Recipe> list = new ArrayList<Recipe>(c.getCount());
 			while(c.moveToNext()) {
-				RecipeImpl r = new RecipeImpl(c.getLong(1));
-				r.name = c.getString(2);
-				r.description = c.getString(3);
-				r.prepTime = c.getInt(4);
-				r.cookTime = c.getInt(5);
-				r.cost = c.getInt(6);
-				r.vid = c.getLong(7);
+				RecipeImpl r = new RecipeImpl(c.getLong(0));
+				r.name = c.getString(1);
+				r.description = c.getString(2);
+				r.prepTime = c.getInt(3);
+				r.cookTime = c.getInt(4);
+				r.cost = c.getInt(5);
+				r.vid = c.getLong(6);
 				list.add(r);
 			}
 			return list;

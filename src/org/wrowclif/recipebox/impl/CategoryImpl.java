@@ -66,9 +66,10 @@ public class CategoryImpl implements Category {
 		List<Recipe> list = null;
 		SQLiteDatabase db = factory.helper.getWritableDatabase();
 		db.beginTransaction();
-			Cursor c = db.rawQuery(stmt.replaceAll("?", id + ""), null);
+			Cursor c = db.rawQuery(stmt.replaceAll("\\?", id + ""), null);
 			list = RecipeImpl.factory.createListFromCursor(c);
 			c.close();
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		return list;
 	}
@@ -82,16 +83,19 @@ public class CategoryImpl implements Category {
 	}
 
 	public void delete() {
-		String stmt =
-			"DELETE FROM RecipeCategory rc " +
-				"WHERE rc.cid = ?; " +
-
-			"DELETE FROM Category c " +
-				"WHERE c.cid = ?; ";
+		String stmt1 =
+			"DELETE FROM RecipeCategory " +
+				"WHERE cid = ?; ";
+		String stmt2 =
+			"DELETE FROM Category " +
+				"WHERE cid = ?; ";
 
 		SQLiteDatabase db = factory.helper.getWritableDatabase();
 		db.beginTransaction();
-			db.execSQL(stmt.replaceAll("?", id + ""), null);
+			Object[] params = {id};
+			db.execSQL(stmt1, params);
+			db.execSQL(stmt2, params);
+		db.setTransactionSuccessful();
 		db.endTransaction();
 	}
 
@@ -115,9 +119,9 @@ public class CategoryImpl implements Category {
 		protected List<Category> createListFromCursor(Cursor c) {
 			List<Category> list = new ArrayList<Category>(c.getCount());
 			while(c.moveToNext()) {
-				CategoryImpl ci = new CategoryImpl(c.getLong(1));
-				ci.name = c.getString(2);
-				ci.description = c.getString(3);
+				CategoryImpl ci = new CategoryImpl(c.getLong(0));
+				ci.name = c.getString(1);
+				ci.description = c.getString(2);
 
 				list.add(ci);
 			}
@@ -134,9 +138,10 @@ public class CategoryImpl implements Category {
 			List<Category> list = null;
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
-				Cursor c1 = db.rawQuery(stmt.replaceAll("?", recipeId + ""), null);
+				Cursor c1 = db.rawQuery(stmt.replaceAll("\\?", recipeId + ""), null);
 				list = createListFromCursor(c1);
 				c1.close();
+			db.setTransactionSuccessful();
 			db.endTransaction();
 			return list;
 		}
@@ -148,18 +153,50 @@ public class CategoryImpl implements Category {
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
 				db.execSQL(stmt, new String[] {recipeId + "", c.getId() + ""});
+			db.setTransactionSuccessful();
 			db.endTransaction();
 		}
 
 		protected void removeRecipeFromCategory(long recipeId, Category c) {
 			String stmt =
-				"DELETE FROM RecipeCategory rc " +
-				"WHERE rc.rid = ? " +
-					"and rc.cid = ?; ";
+				"DELETE FROM RecipeCategory " +
+				"WHERE rid = ? " +
+					"and cid = ?; ";
 			SQLiteDatabase db = factory.helper.getWritableDatabase();
 			db.beginTransaction();
 				db.execSQL(stmt, new String[] {recipeId + "", c.getId() + ""});
+			db.setTransactionSuccessful();
 			db.endTransaction();
+		}
+
+		protected Category createOrRetrieveCategory(String category) {
+			String retrieveStmt =
+				"SELECT c.cid, c.name, c.description " +
+				"FROM Category c " +
+				"WHERE name = ?; ";
+
+			CategoryImpl ci = null;
+			SQLiteDatabase db = factory.helper.getWritableDatabase();
+			db.beginTransaction();
+				Cursor c = db.rawQuery(retrieveStmt, new String[] {category});
+				if(c.moveToNext()) {
+					ci = new CategoryImpl(c.getLong(0));
+					ci.name = c.getString(1);
+					ci.description = c.getString(2);
+				} else {
+					ContentValues values = new ContentValues();
+					values.put("name", category);
+					values.put("description", "");
+
+					long id = db.insert("Category", null, values);
+
+					ci = new CategoryImpl(id);
+					ci.name = category;
+				}
+				c.close();
+			db.setTransactionSuccessful();
+			db.endTransaction();
+			return ci;
 		}
 	}
 }

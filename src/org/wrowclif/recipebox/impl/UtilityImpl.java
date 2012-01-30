@@ -19,7 +19,7 @@ import java.util.List;
 
 public class UtilityImpl implements Utility {
 
-	protected static final UtilityImpl singleton;
+	public static final UtilityImpl singleton;
 
 	static {
 		singleton = new UtilityImpl();
@@ -46,9 +46,10 @@ public class UtilityImpl implements Utility {
 		List<Recipe> list = null;
 		SQLiteDatabase db = helper.getWritableDatabase();
 		db.beginTransaction();
-			Cursor c = db.rawQuery(stmt, new String[] {String.format("%%s%", search), maxResults + ""});
+			Cursor c = db.rawQuery(stmt, new String[] {"%" + search + "%", maxResults + ""});
 			list = RecipeImpl.factory.createListFromCursor(c);
 			c.close();
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		return list;
 	}
@@ -68,9 +69,10 @@ public class UtilityImpl implements Utility {
 		List<Ingredient> list = null;
 		SQLiteDatabase db = helper.getWritableDatabase();
 		db.beginTransaction();
-			Cursor c = db.rawQuery(stmt, new String[] {String.format("%%s%", search), maxResults + ""});
+			Cursor c = db.rawQuery(stmt, new String[] {"%" + search + "%", maxResults + ""});
 			list = IngredientImpl.factory.createListFromCursor(c);
 			c.close();
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		return list;
 	}
@@ -86,9 +88,10 @@ public class UtilityImpl implements Utility {
 		List<Unit> list = null;
 		SQLiteDatabase db = helper.getWritableDatabase();
 		db.beginTransaction();
-			Cursor c = db.rawQuery(stmt, new String[] {String.format("%%s%", search), maxResults + ""});
+			Cursor c = db.rawQuery(stmt, new String[] {"%" + search + "%", maxResults + ""});
 			list = UnitImpl.factory.createListFromCursor(c);
 			c.close();
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		return list;
 	}
@@ -104,15 +107,16 @@ public class UtilityImpl implements Utility {
 		List<Category> list = null;
 		SQLiteDatabase db = helper.getWritableDatabase();
 		db.beginTransaction();
-			Cursor c = db.rawQuery(stmt, new String[] {String.format("%%s%", search), maxResults + ""});
+			Cursor c = db.rawQuery(stmt, new String[] {"%" + search + "%", maxResults + ""});
 			list = CategoryImpl.factory.createListFromCursor(c);
 			c.close();
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		return list;
 	}
 
 	public Category createOrRetrieveCategory(String category) {
-		return CategoryImpl.createOrRetrieveCategory(category);
+		return CategoryImpl.factory.createOrRetrieveCategory(category);
 	}
 
 }

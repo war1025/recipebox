@@ -79,6 +79,7 @@ public class UnitImpl implements Unit {
 			Cursor c = db.rawQuery(stmt, new String[] {type.ordinal() + "", id + ""});
 			list = factory.createListFromCursor(c);
 			c.close();
+		db.setTransactionSuccessful();
 		db.endTransaction();
 		return list;
 	}
@@ -100,23 +101,57 @@ public class UnitImpl implements Unit {
 
 		protected RecipeBoxOpenHelper helper;
 
+		private Object nullLock;
+		private Unit nullUnit;
+
 		private UnitFactory() {
 			helper = AppData.getSingleton().getOpenHelper();
+			nullLock = new Object();
+			nullUnit = null;
 		}
 
 		protected List<Unit> createListFromCursor(Cursor c) {
 			List<Unit> list = new ArrayList<Unit>(c.getCount());
 			while(c.moveToNext()) {
 				// u.uid, u.name, u.type, u.factor, u.minfraction
-				UnitImpl ui = new UnitImpl(c.getLong(1), c.getString(2), c.getInt(3), c.getDouble(4), c.getInt(5));
+				UnitImpl ui = new UnitImpl(c.getLong(0), c.getString(1), c.getInt(2), c.getDouble(3), c.getInt(4));
 				list.add(ui);
 			}
 			return list;
 		}
 
 		protected Unit createFromData(ContentValues v) {
-			return new UnitImpl(v.getAsLong("id"), v.getAsString("name"), v.getAsInteger("type"),
+			return new UnitImpl(v.getAsLong("uid"), v.getAsString("name"), v.getAsInteger("type"),
 								v.getAsDouble("factor"), v.getAsInteger("minfraction"));
+		}
+
+		protected Unit getNullUnit() {
+			String stmt =
+				"SELECT u.uid, u.name, u.type, u.factor, u.minfraction " +
+				"FROM Unit u " +
+				"WHERE u.name = ?; ";
+
+			synchronized(nullLock) {
+				if(nullUnit == null) {
+					SQLiteDatabase db = factory.helper.getWritableDatabase();
+					db.beginTransaction();
+						Cursor c = db.rawQuery(stmt, new String[] {"nullunit"});
+						if(c.moveToNext()) {
+							nullUnit = new UnitImpl(c.getLong(0), c.getString(1), c.getInt(2), c.getDouble(3), c.getInt(4));
+						} else {
+							ContentValues values = new ContentValues();
+							values.put("name", "nullunit");
+							values.put("type", 0);
+							values.put("factor", 1);
+							values.put("minfraction", 0);
+							long id = db.insert("Unit", null, values);
+							nullUnit = new UnitImpl(id, "nullunit", 0, 1, 0);
+						}
+					db.setTransactionSuccessful();
+					db.endTransaction();
+				}
+				return nullUnit;
+			}
 		}
 	}
 }

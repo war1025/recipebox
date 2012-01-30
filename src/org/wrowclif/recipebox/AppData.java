@@ -34,4 +34,8 @@ public class AppData {
 	public RecipeBoxOpenHelper getOpenHelper() {
 		return helper;
 	}
+
+	public void close() {
+		helper.close();
+	}
 }
