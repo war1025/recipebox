@@ -120,19 +120,19 @@ public class RecipeImpl implements Recipe {
 		RecipeIngredientImpl.factory.reorderRecipeIngredients(order);
 	}
 
-	public List<Instruction> getSteps() {
+	public List<Instruction> getInstructions() {
 		return InstructionImpl.factory.getRecipeSteps(id);
 	}
 
-	public Instruction addStep() {
+	public Instruction addInstruction() {
 		return InstructionImpl.factory.addInstruction(id);
 	}
 
-	public void removeStep(Instruction i) {
+	public void removeInstruction(Instruction i) {
 		InstructionImpl.factory.removeInstruction(i);
 	}
 
-	public void reorderSteps(List<Instruction> order) {
+	public void reorderInstructions(List<Instruction> order) {
 		InstructionImpl.factory.reorderInstructions(id, order);
 	}
 

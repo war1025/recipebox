@@ -85,14 +85,52 @@ public class UnitImpl implements Unit {
 
 	public String getStringForAmount(double amount) {
 		int intAmount = (int) amount;
-		if(minFraction == 0) {
-			return intAmount + "";
-		} if(minFraction < 0) {
-			String fmt = String.format("%.%df", -minFraction);
+		if(minFraction <= 0) {
+			String fmt = "%." + -minFraction + "f";
 			return String.format(fmt, amount);
 		} else {
-			// Some sort of binary search thing.
-			return "";
+			double partialAmount = amount - intAmount;
+
+			String frac = null;
+
+			int numerator = (int) Math.round(partialAmount * minFraction);
+			int denominator = minFraction;
+
+			double roundedFrac = (numerator * 1.0)/minFraction;
+
+			if(minFraction > 2) {
+				if(Math.abs(partialAmount - 1/3.0) < Math.abs(partialAmount - roundedFrac)) {
+					frac = "1/3";
+				} else if(Math.abs(partialAmount - 2/3.0) < Math.abs(partialAmount - roundedFrac)) {
+					frac = "2/3";
+				}
+			}
+			if(numerator == 0) {
+				frac = "";
+			} else if(frac == null) {
+				int a = numerator;
+				int b = denominator;
+
+				while(b > 0) {
+					if(a > b) {
+						a = a - b;
+					} else {
+						b = b - a;
+					}
+				}
+				numerator = numerator / a;
+				denominator = denominator / a;
+
+				frac = numerator + "/" + denominator;
+
+				if(denominator == 1 && numerator == 1) {
+					if(numerator == 1) {
+						intAmount++;
+						frac = "";
+					}
+				}
+			}
+			return ((intAmount == 0) ? "" : intAmount + " ") + frac;
 		}
 	}
 

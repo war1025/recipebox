@@ -34,13 +34,13 @@ public interface Recipe {
 
 	public void reorderIngredients(List<RecipeIngredient> order);
 
-	public List<Instruction> getSteps();
+	public List<Instruction> getInstructions();
 
-	public Instruction addStep();
+	public Instruction addInstruction();
 
-	public void removeStep(Instruction i);
+	public void removeInstruction(Instruction i);
 
-	public void reorderSteps(List<Instruction> order);
+	public void reorderInstructions(List<Instruction> order);
 
 	public List<Review> getReviews();
 

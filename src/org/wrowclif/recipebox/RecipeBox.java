@@ -53,7 +53,7 @@ public class RecipeBox extends Activity
 			r.addIngredient(util.createOrRetrieveIngredient(inNames[k]));
 			Log.d("Recipebox", "Created Recipe: " + r.getId() + " " + r.getName());
 
-			Instruction instruction = r.addStep();
+			Instruction instruction = r.addInstruction();
 
 			instruction.setText(r.getId() + "Most Finally, Love amy lots.");
 
@@ -61,21 +61,23 @@ public class RecipeBox extends Activity
 		}
 
 		AppData.getSingleton().close();
+
     }
 
 	public static void info(Recipe r) {
 		Log.d("Recipebox", "Recipe: " + r.getId() + " " + r.getName());
         for(RecipeIngredient ii : r.getIngredients()) {
-			Log.d("Recipebox", "Ingredient: " + ii.getIngredient().getId() + " " + ii.getName());
+			Log.d("Recipebox", "Ingredient: " + ii.getName());
 		}
 
-        for(Instruction ii : r.getSteps()) {
-			Log.d("Recipebox", "Instruction: " + ii.getId() + " " + ii.getText());
+		List<Instruction> i = r.getInstructions();
+        for(int j = 0; j < i.size(); j++) {
+			Instruction ii = i.get(j);
+			Log.d("Recipebox", String.format("%2d: " + ii.getText(), j));
 			Log.d("Recipebox", "This step uses: ");
 			for(Ingredient ingredient : ii.getIngredientsUsed()) {
-				Log.d("Recipebox", ingredient.getName() + " " + ingredient.getId());
+				Log.d("Recipebox", ingredient.getName());
 			}
 		}
 	}
-
 }
