@@ -58,7 +58,7 @@ public class IngredientImpl implements Ingredient {
 
 	public void addSimilarIngredient(final Ingredient other) {
 		final String stmt =
-			"INSERT OR REPLACE INTO SimilarIngredients(iid1, iid2) " +
+			"INSERT OR IGNORE INTO SimilarIngredients(iid1, iid2) " +
 			"VALUES(?, ?); ";
 
 		final long lowId;

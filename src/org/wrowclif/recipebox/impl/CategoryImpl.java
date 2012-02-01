@@ -143,7 +143,7 @@ public class CategoryImpl implements Category {
 
 		protected void addRecipeToCategory(final long recipeId, final Category c) {
 			final String stmt =
-				"INSERT OR REPLACE INTO RecipeCategory(rid, cid) " +
+				"INSERT OR IGNORE INTO RecipeCategory(rid, cid) " +
 				"VALUES (?, ?); ";
 
 			data.sqlTransaction(new Transaction<Void>() {

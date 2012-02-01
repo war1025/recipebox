@@ -51,6 +51,10 @@ public class UtilityImpl implements Utility {
 		});
 	}
 
+	public Recipe getRecipeById(long id) {
+		return RecipeImpl.factory.getRecipeById(id);
+	}
+
 	public Ingredient createOrRetrieveIngredient(String name) {
 		return IngredientImpl.factory.createOrRetrieveIngredient(name);
 	}
@@ -75,7 +79,7 @@ public class UtilityImpl implements Utility {
 
 	public List<Unit> searchUnits(final String search, final int maxResults) {
 		final String stmt =
-			"SELECT u.uid, u.name, u.type, u.factor, u.minfraction " +
+			"SELECT u.uid, u.name, u.abbreviation, u.type, u.factor, u.minfraction " +
 			"FROM Unit u " +
 			"WHERE u.name LIKE ? " +
 			"ORDER BY u.name ASC " +

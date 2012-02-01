@@ -376,6 +376,25 @@ public class RecipeImpl implements Recipe {
 			return r;
 		}
 
+		protected Recipe getRecipeById(final long id) {
+			final String stmt =
+				"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+				"FROM Recipe r " +
+				"WHERE r.rid = ?;";
+
+			return data.sqlTransaction(new Transaction<Recipe>() {
+				public Recipe exec(SQLiteDatabase db) {
+					Cursor c = db.rawQuery(stmt, new String[] {id + ""});
+					List<Recipe> list = createListFromCursor(c);
+					c.close();
+					if(list.size() > 0) {
+						return list.get(0);
+					} else {
+						return null;
+					}
+				}
+			});
+		}
 	}
 }
 

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <TextView
+		android:id="@+id/name_label"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Name" />
+	<TextView
+		android:id="@+id/name_edit"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:layout_below="@id/name_label"
+		android:layout_alignLeft="@id/name_label" />
+
+    <TextView
+		android:id="@+id/description_label"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Description"
+		android:layout_below="@id/name_edit" />
+	<TextView
+		android:id="@+id/description_edit"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:layout_below="@id/description_label"
+		android:layout_alignLeft="@id/description_label" />
+
+    <TextView
+		android:id="@+id/prep_label"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Prep Time"
+		android:layout_below="@id/description_edit" />
+
+	<TextView
+		android:id="@+id/prep_edit"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:layout_below="@id/prep_label"
+		android:layout_alignLeft="@id/prep_label" />
+
+    <TextView
+		android:id="@+id/cook_label"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Cook Time"
+		android:layout_below="@id/prep_edit" />
+	<TextView
+		android:id="@+id/cook_edit"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10dp"
+		android:layout_below="@id/cook_label"
+		android:layout_alignLeft="@id/cook_label" />
+
+
+
+</RelativeLayout>

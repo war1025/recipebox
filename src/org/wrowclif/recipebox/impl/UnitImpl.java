@@ -204,52 +204,52 @@ public class UnitImpl implements Unit {
 
 		protected void ensureUnits() {
 			final String stmt =
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('Cup', 'C', 1, 236.58824, 4); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('Tablespoon', 'T', 1, 14.786765, 3); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('teaspoon', 'tsp', 1, 4.9289216, 8); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('Pint', 'p', 1, 473.17647, 4); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('Quart', 'qt', 1, 946.35295, 4); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('Gallon', 'gal', 1, 3785.4118, 4); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('Fluid Ounce', 'floz', 1, 29.57353, 4); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('milliliter', 'mL', 1, 1, 0); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('Liter', 'L', 1, 1000, -2); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('Pound', 'lb', 2, 453.59237, 4); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('Ounce', 'oz', 2, 28.349523, 4); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('gram', 'g', 2, 1, 0); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('kilogram', 'kg', 2, 1000, -2); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('to taste', 'to taste', 0, 1, 0); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('pinch', 'pinch', 0, 1, 0); " +
 
-				"INSERT OR REPLACE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('nullunit', '', 0, 1, 0);";
 
 			data.sqlTransaction(new Transaction<Void>() {

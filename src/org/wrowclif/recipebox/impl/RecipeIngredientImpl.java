@@ -114,7 +114,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				values.put("minfraction", c.getInt(7));
 				ri.unit = UnitImpl.factory.createFromData(values);
 
-				ri.amount = c.getInt(7);
+				ri.amount = c.getDouble(8);
 
 				list.add(ri);
 			}
@@ -143,6 +143,11 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 		}
 
 		protected RecipeIngredient addRecipeIngredient(final Recipe r, final Ingredient i) {
+			final String existsStmt =
+				"SELECT ri.rid, ri.iid " +
+				"FROM RecipeIngredients ri " +
+				"WHERE ri.rid = ? " +
+					"and ri.iid = ?;";
 			final String selectStmt =
 				"SELECT r.maxingredient " +
 				"FROM Recipe r " +
@@ -163,7 +168,11 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 			values.put("uid", u.getId());
 			return data.sqlTransaction(new Transaction<RecipeIngredient>() {
 				public RecipeIngredient exec(SQLiteDatabase db) {
-					Cursor c = db.rawQuery(selectStmt.replaceAll("\\?", r.getId() + ""), null);
+					Cursor c = db.rawQuery(existsStmt, new String[] {r.getId() + "", i.getId() + ""});
+					if(c.getCount() > 0) {
+						return null;
+					}
+					c = db.rawQuery(selectStmt.replaceAll("\\?", r.getId() + ""), null);
 					c.moveToNext();
 					int max = c.getInt(0);
 					c.close();

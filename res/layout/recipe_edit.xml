@@ -4,19 +4,17 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-	<AutoCompleteTextView
-		android:id="@+id/recipesearch"
+    <TextView
+		android:id="@+id/name_label"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentTop="true"
-		android:completionThreshold="2"
-		/>
-	<Button
-		android:id="@+id/addrecipe"
+		android:text="Name" />
+	<EditText
+		android:id="@+id/name_edit"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:text="Add Recipe" />
+		android:paddingLeft="10dp"
+		android:layout_below="@id/name_label"
+		android:layout_alignLeft="@id/name_label" />
 
 </RelativeLayout>
-

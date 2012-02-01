@@ -117,12 +117,21 @@ public class SuggestionImpl implements Suggestion {
 				throw new IllegalArgumentException("Cannot suggest a recipe with itself");
 			}
 
+			final String selectStmt =
+				"SELECT sw.comments " +
+				"FROM SuggestedWith sw " +
+				"WHERE sw.rid1 = ? " +
+					"and sw.rid2 = ?;";
 			final String stmt =
-				"INSERT OR REPLACE INTO SuggestedWith(rid1, rid2) " +
+				"INSERT OR IGNORE INTO SuggestedWith(rid1, rid2) " +
 					"VALUES (?, ?); ";
 			final SuggestionImpl si = new SuggestionImpl(r1, r2);
 			data.sqlTransaction(new Transaction<Void>() {
 				public Void exec(SQLiteDatabase db) {
+					Cursor c = db.rawQuery(selectStmt, new String[] {si.lowId + "", si.hiId + ""});
+					if(c.getCount() > 0) {
+						si.comments = c.getString(0);
+					}
 					db.execSQL(stmt, new Object[] {si.lowId, si.hiId});
 					return null;
 				}
