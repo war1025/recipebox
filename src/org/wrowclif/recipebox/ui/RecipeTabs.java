@@ -19,9 +19,11 @@ public class RecipeTabs extends TabActivity {
 		TabSpec spec = null;
 		Intent intent = getIntent();
 		long id = intent.getLongExtra("id", -1);
+		boolean edit = intent.getBooleanExtra("edit", false);
 
 		intent = new Intent(this, RecipeDisplay.class);
 		intent.putExtra("id", id);
+		intent.putExtra("edit", edit);
 
 		spec = host.newTabSpec("info").setIndicator("Info").setContent(intent);
 
