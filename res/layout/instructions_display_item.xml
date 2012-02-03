@@ -1,32 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:layout_margin="10dip"
-    >
-<TextView
-	android:id="@+id/instruction_number"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Child"
-    android:textSize="18sp"
-    android:paddingTop="10dip"
-    android:paddingBottom="10dip"
-    android:paddingRight="3dip"
-    android:paddingLeft="10dip"
-    />
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_margin="10dip" >
+	<TextView
+			android:id="@+id/instruction_number"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Child"
+			android:textSize="18sp"
+			android:paddingTop="10dip"
+			android:paddingBottom="10dip"
+			android:paddingRight="3dip"
+			android:paddingLeft="10dip" />
 
-<TextView
-	android:id="@+id/instruction_text"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:singleLine="false"
-    android:text="Child"
-    android:textSize="18sp"
-    android:paddingTop="10dip"
-    android:paddingBottom="10dip"
-    android:paddingRight="10dip"
-    android:paddingLeft="0dip"
-    />
+	<TextView
+			android:id="@+id/instruction_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:singleLine="false"
+			android:text="Child"
+			android:textSize="18sp"
+			android:paddingTop="10dip"
+			android:paddingBottom="10dip"
+			android:paddingRight="10dip"
+			android:paddingLeft="0dip" />
+
+	<Button
+			android:id="@+id/edit_button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Ed" />
+
+	<Button
+			android:id="@+id/delete_button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="X" />
+
 </LinearLayout>

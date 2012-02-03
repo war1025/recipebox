@@ -62,8 +62,8 @@ public class RecipeDisplay extends Activity {
 		Intent intent = getIntent();
 		util = UtilityImpl.singleton;
 
-		r = util.getRecipeById(intent.getLongExtra("id", -1));
-		edit = intent.getBooleanExtra("edit", false);
+		r = ((RecipeTabs) getParent()).curRecipe;
+		edit = ((RecipeTabs) getParent()).editing;
 
 		if(r != null) {
 			setTitle(r.getName());
@@ -119,6 +119,14 @@ public class RecipeDisplay extends Activity {
 		}
     }
 
+    public void onResume() {
+		super.onResume();
+		boolean editing = ((RecipeTabs) getParent()).editing;
+		if(edit != editing) {
+			setEditing(editing);
+		}
+	}
+
     protected void setEditing(boolean editing) {
 		TextView[] labels = {(TextView) findViewById(R.id.name_label), (TextView) findViewById(R.id.description_label),
 								(TextView) findViewById(R.id.prep_label), (TextView) findViewById(R.id.cook_label),
@@ -143,6 +151,9 @@ public class RecipeDisplay extends Activity {
 				label.setVisibility(View.VISIBLE);
 			}
 		}
+		edit = editing;
+
+		((RecipeTabs) getParent()).editing = editing;
 	}
 
     protected class EditClickListener implements OnClickListener {
@@ -190,7 +201,7 @@ public class RecipeDisplay extends Activity {
 									break;
 								case 1 :
 									Recipe r2 = r.branch(r.getName() + " (branch)");
-									Intent intent = getIntent();
+									Intent intent = new Intent(RecipeDisplay.this, RecipeTabs.class);
 									intent.putExtra("id", r2.getId());
 									intent.putExtra("edit", true);
 

@@ -27,18 +27,21 @@ import android.text.Editable;
 
 import java.util.ArrayList;
 
-public class IngredientsDisplay extends Activity
-{
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
+public class IngredientsDisplay extends Activity {
+
+	private Recipe r;
+	private boolean edit;
+
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
         setContentView(R.layout.ingredients_display);
 
 		Intent intent = getIntent();
 
-		Recipe r = UtilityImpl.singleton.getRecipeById(intent.getLongExtra("id", -1));
+		r = ((RecipeTabs) getParent()).curRecipe;
+		edit = ((RecipeTabs) getParent()).editing;
 
 		if(r != null) {
 			setTitle(r.getName());

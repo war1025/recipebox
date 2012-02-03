@@ -1,6 +1,8 @@
 package org.wrowclif.recipebox.ui;
 
 import org.wrowclif.recipebox.R;
+import org.wrowclif.recipebox.Recipe;
+import org.wrowclif.recipebox.impl.UtilityImpl;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +13,9 @@ import android.widget.TabHost.TabSpec;
 
 public class RecipeTabs extends TabActivity {
 
+	protected Recipe curRecipe;
+	protected boolean editing;
+
 	public void onCreate(Bundle savedInstance) {
 		super.onCreate(savedInstance);
 		setContentView(R.layout.recipe_tabs);
@@ -20,31 +25,31 @@ public class RecipeTabs extends TabActivity {
 		Intent intent = getIntent();
 		long id = intent.getLongExtra("id", -1);
 		boolean edit = intent.getBooleanExtra("edit", false);
+		int tab = intent.getIntExtra("tab", 0);
+
+		this.curRecipe = UtilityImpl.singleton.getRecipeById(id);
+		this.editing = edit;
 
 		intent = new Intent(this, RecipeDisplay.class);
-		intent.putExtra("id", id);
-		intent.putExtra("edit", edit);
 
 		spec = host.newTabSpec("info").setIndicator("Info").setContent(intent);
 
 		host.addTab(spec);
 
 		intent = new Intent(this, IngredientsDisplay.class);
-		intent.putExtra("id", id);
 
 		spec = host.newTabSpec("ingredients").setIndicator("Ingredients").setContent(intent);
 
 		host.addTab(spec);
 
 		intent = new Intent(this, InstructionsDisplay.class);
-		intent.putExtra("id", id);
 
 		spec = host.newTabSpec("instructions").setIndicator("Instructions").setContent(intent);
 
 		host.addTab(spec);
 
 
-		host.setCurrentTab(0);
+		host.setCurrentTab(tab);
 
 	}
 }
