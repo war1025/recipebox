@@ -273,9 +273,13 @@ public class RecipeDisplay extends Activity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		String title = null;
 		String initialText = null;
+		boolean singleLine = false;
+		DigitsKeyListener dklistener = null;
 
-		final EditText input = new EditText(this);
-		builder.setView(input);
+		LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View v = li.inflate(R.layout.enter_text_dialog, null);
+		EditText input = (EditText) v.findViewById(R.id.text_edit);
+		builder.setView(v);
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 
@@ -291,6 +295,7 @@ public class RecipeDisplay extends Activity {
 
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
+						EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
 						String value = input.getText().toString();
 						r.setName(value);
 						TextView tv = (TextView) findViewById(R.id.name_edit);
@@ -308,6 +313,7 @@ public class RecipeDisplay extends Activity {
 
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
+						EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
 						String value = input.getText().toString();
 						r.setDescription(value);
 						TextView tv = (TextView) findViewById(R.id.description_edit);
@@ -322,11 +328,13 @@ public class RecipeDisplay extends Activity {
 				title = "Edit Cost";
 
 				initialText = r.getCost() + "";
+
 				input.setSingleLine(true);
 				input.setKeyListener(new DigitsKeyListener(false, false));
 
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
+						EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
 						int value = Integer.parseInt(input.getText().toString());
 						r.setCost(value);
 						TextView tv = (TextView) findViewById(R.id.cost_edit);
@@ -341,8 +349,9 @@ public class RecipeDisplay extends Activity {
 		}
 		builder.setCancelable(true);
 		builder.setTitle(title);
-		input.setText(initialText);
 		dialog = builder.create();
+
+		input.setText(initialText);
 
 		return dialog;
 	}

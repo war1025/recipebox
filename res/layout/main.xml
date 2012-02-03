@@ -4,15 +4,20 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
+    <TextView
+		android:id="@+id/recipe_label"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:text="Search Recipes" />
 	<AutoCompleteTextView
 		android:id="@+id/recipesearch"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:singleLine="true"
 		android:imeOptions="actionGo"
-		android:layout_alignParentTop="true"
 		android:completionThreshold="2"
-		/>
+		android:layout_below="@id/recipe_label" />
 	<Button
 		android:id="@+id/addrecipe"
 		android:layout_width="fill_parent"

@@ -176,7 +176,7 @@ public class InstructionsDisplay extends Activity {
 			case EDIT_INSTRUCTION_DIALOG : {
 				AlertDialog dialog = (AlertDialog) d;
 				final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
-				final EditText input = (EditText) dialog.findViewById(1234);
+				final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
 				input.setText(instruction.getText());
 
 				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Done", new DialogInterface.OnClickListener() {
@@ -214,10 +214,11 @@ public class InstructionsDisplay extends Activity {
 
 				Log.d("Recipebox", "Edit dialog position: " + bundle.getInt("position", -1) + " instruction: " + instruction.getId());
 
-				final EditText input = new EditText(this);
-				builder.setView(input);
+				LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				View v = li.inflate(R.layout.enter_text_dialog, null);
+				final EditText input = (EditText) v.findViewById(R.id.text_edit);
+				builder.setView(v);
 				input.setText(instruction.getText());
-				input.setId(1234);
 
 				builder.setTitle("Edit Instruction");
 				builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {

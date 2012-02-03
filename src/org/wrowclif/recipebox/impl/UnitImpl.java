@@ -208,7 +208,7 @@ public class UnitImpl implements Unit {
 					"VALUES('Cup', 'C', 1, 236.58824, 4); " +
 
 				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
-					"VALUES('Tablespoon', 'T', 1, 14.786765, 3); " +
+					"VALUES('Tablespoon', 'Tbs', 1, 14.786765, 3); " +
 
 				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('teaspoon', 'tsp', 1, 4.9289216, 8); " +
@@ -248,6 +248,12 @@ public class UnitImpl implements Unit {
 
 				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('pinch', 'pinch', 0, 1, 0); " +
+
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('package', 'pkg', 0, 1, 0); " +
+
+				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
+					"VALUES('stick', 'stick', 0, 1, 0); " +
 
 				"INSERT OR IGNORE INTO Unit(name, abbreviation, type, factor, minfraction) " +
 					"VALUES('nullunit', '', 0, 1, 0);";

@@ -14,6 +14,7 @@
         <activity android:name=".ui.RecipeDisplay"/>
         <activity android:name=".ui.IngredientsDisplay"/>
         <activity android:name=".ui.InstructionsDisplay"/>
-        <activity android:name=".ui.RecipeTabs"/>
+        <activity android:name=".ui.RecipeTabs"
+					android:windowSoftInputMode="adjustPan" />
     </application>
 </manifest>
