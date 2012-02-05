@@ -61,19 +61,10 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			"PRIMARY KEY(rid1, rid2)," +
 			"CHECK(rid1 < rid2));" +
 
-		"CREATE TABLE Unit(" +
-			"uid INTEGER PRIMARY KEY AUTOINCREMENT," +
-			"name TEXT NOT NULL UNIQUE, " +
-			"abbreviation TEXT NOT NULL, " +
-			"type INTEGER(0,2) NOT NULL DEFAULT 0, " +
-			"factor REAL NOT NULL CHECK(factor > 0), " +
-			"minfraction INTEGER NOT NULL);" +
-
 		"CREATE TABLE RecipeIngredients(" +
 			"rid INTEGER REFERENCES Recipe(rid)," +
 			"iid INTEGER REFERENCES Ingredient(iid)," +
-			"amount REAL NOT NULL DEFAULT 0," +
-			"uid INTEGER REFERENCES Unit(uid) NOT NULL," +
+			"amount TEXT NOT NULL DEFAULT ''," +
 			"num INTEGER NOT NULL," +
 			"PRIMARY KEY(rid,iid));" +
 

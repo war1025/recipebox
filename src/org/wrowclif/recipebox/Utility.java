@@ -10,11 +10,11 @@ public interface Utility {
 
 	public Recipe getRecipeById(long id);
 
+	public Ingredient getIngredientByName(String name);
+
 	public Ingredient createOrRetrieveIngredient(String name);
 
 	public List<Ingredient> searchIngredients(String search, int maxResults);
-
-	public List<Unit> searchUnits(String search, int maxResults);
 
 	public List<Category> searchCategories(String search, int maxResults);
 

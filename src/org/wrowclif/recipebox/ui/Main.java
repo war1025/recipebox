@@ -105,8 +105,6 @@ public class Main extends Activity {
 					String text = v.getText().toString();
 					List<Recipe> recipes = util.searchRecipes(text, 1);
 					if(recipes.size() > 0) {
-						Log.d("Recipebox", "Starting new Intent from editoractionlistener");
-						Log.d("Recipebox", "KeyEvent: " + event);
 						Intent intent = new Intent(Main.this, RecipeTabs.class);
 						intent.putExtra("id", recipes.get(0).getId());
 						startActivity(intent);

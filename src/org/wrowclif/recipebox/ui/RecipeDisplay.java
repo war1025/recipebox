@@ -117,9 +117,9 @@ public class RecipeDisplay extends Activity {
 				doneButton.setVisibility(View.GONE);
 			}
 		}
-    }
+	}
 
-    public void onResume() {
+	public void onResume() {
 		super.onResume();
 		boolean editing = ((RecipeTabs) getParent()).editing;
 		if(edit != editing) {
@@ -127,7 +127,7 @@ public class RecipeDisplay extends Activity {
 		}
 	}
 
-    protected void setEditing(boolean editing) {
+	protected void setEditing(boolean editing) {
 		TextView[] labels = {(TextView) findViewById(R.id.name_label), (TextView) findViewById(R.id.description_label),
 								(TextView) findViewById(R.id.prep_label), (TextView) findViewById(R.id.cook_label),
 								(TextView) findViewById(R.id.cost_label)};
@@ -156,7 +156,7 @@ public class RecipeDisplay extends Activity {
 		((RecipeTabs) getParent()).editing = editing;
 	}
 
-    protected class EditClickListener implements OnClickListener {
+	protected class EditClickListener implements OnClickListener {
 
 		private int dialog;
 
@@ -169,7 +169,7 @@ public class RecipeDisplay extends Activity {
 		}
 	}
 
-    protected Dialog onCreateDialog(int id) {
+	protected Dialog onCreateDialog(int id) {
 		switch(id) {
 			case CREATE_DIALOG : case EDIT_DIALOG : case DELETE_DIALOG :
 				return showMenuDialog(id);
@@ -385,14 +385,14 @@ public class RecipeDisplay extends Activity {
 		}
 	}
 
-    private String timeFormat(int minutes) {
+	private String timeFormat(int minutes) {
 		int hours = minutes / 60;
 		int min = minutes % 60;
 
 		return String.format("%02d:%02d", hours, min);
 	}
 
-    public void onStop() {
+	public void onStop() {
 		super.onStop();
 
 		AppData.getSingleton().close();

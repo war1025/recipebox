@@ -8,7 +8,6 @@ import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.AppData.Transaction;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Ingredient;
-import org.wrowclif.recipebox.Unit;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Utility;
 
@@ -55,6 +54,10 @@ public class UtilityImpl implements Utility {
 		return RecipeImpl.factory.getRecipeById(id);
 	}
 
+	public Ingredient getIngredientByName(String name) {
+		return IngredientImpl.factory.getIngredientByName(name);
+	}
+
 	public Ingredient createOrRetrieveIngredient(String name) {
 		return IngredientImpl.factory.createOrRetrieveIngredient(name);
 	}
@@ -71,24 +74,6 @@ public class UtilityImpl implements Utility {
 			public List<Ingredient> exec(SQLiteDatabase db) {
 				Cursor c = db.rawQuery(stmt, new String[] {"%" + search + "%", maxResults + ""});
 				List<Ingredient> list = IngredientImpl.factory.createListFromCursor(c);
-				c.close();
-				return list;
-			}
-		});
-	}
-
-	public List<Unit> searchUnits(final String search, final int maxResults) {
-		final String stmt =
-			"SELECT u.uid, u.name, u.abbreviation, u.type, u.factor, u.minfraction " +
-			"FROM Unit u " +
-			"WHERE u.name LIKE ? " +
-			"ORDER BY u.name ASC " +
-			"LIMIT ?; ";
-
-		return data.sqlTransaction(new Transaction<List<Unit>>() {
-			public List<Unit> exec(SQLiteDatabase db) {
-				Cursor c = db.rawQuery(stmt, new String[] {"%" + search + "%", maxResults + ""});
-				List<Unit> list = UnitImpl.factory.createListFromCursor(c);
 				c.close();
 				return list;
 			}

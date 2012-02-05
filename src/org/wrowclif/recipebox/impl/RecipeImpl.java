@@ -13,7 +13,6 @@ import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Review;
-import org.wrowclif.recipebox.Unit;
 import org.wrowclif.recipebox.Suggestion;
 
 import java.util.ArrayList;
@@ -206,8 +205,8 @@ public class RecipeImpl implements Recipe {
 				"FROM RecipeCategory rc " +
 				"WHERE rc.rid = $; " +
 
-			"INSERT INTO RecipeIngredients(rid, iid, uid, amount, num) " +
-				"SELECT ? as rid, ri.iid, ri.uid, ri.amount, ri.num " +
+			"INSERT INTO RecipeIngredients(rid, iid, amount, num) " +
+				"SELECT ? as rid, ri.iid, ri.amount, ri.num " +
 				"FROM RecipeIngredients ri " +
 				"WHERE ri.rid = $; " +
 

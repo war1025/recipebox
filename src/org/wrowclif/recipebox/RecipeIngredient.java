@@ -4,17 +4,11 @@ public interface RecipeIngredient {
 
 	public String getName();
 
-	public double getAmount();
+	public String getAmount();
 
-	public void setAmount(double amount);
-
-	public String getUnitName();
+	public void setAmount(String amound);
 
 	public Recipe getRecipe();
 
 	public Ingredient getIngredient();
-
-	public Unit getUnits();
-
-	public void setUnits(Unit unit);
 }

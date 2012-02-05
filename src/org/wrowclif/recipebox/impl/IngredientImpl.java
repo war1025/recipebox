@@ -117,6 +117,10 @@ public class IngredientImpl implements Ingredient {
 			data = AppData.getSingleton();
 		}
 
+		protected String sanitizeIngredientName(String name) {
+			return name.trim().replaceAll("\\s", " ").toLowerCase();
+		}
+
 		protected List<Ingredient> createListFromCursor(Cursor c) {
 			List<Ingredient> list = new ArrayList<Ingredient>(c.getCount());
 
@@ -137,25 +141,49 @@ public class IngredientImpl implements Ingredient {
 			return ii;
 		}
 
-		protected Ingredient createOrRetrieveIngredient(final String name) {
+		protected Ingredient getIngredientByName(String name) {
 			final String retrieveStmt =
 				"SELECT i.iid " +
 				"FROM Ingredient i " +
 				"WHERE i.name = ?; ";
 
+			final String sanitizedName = sanitizeIngredientName(name);
+
 			return data.sqlTransaction(new Transaction<Ingredient>() {
 				public Ingredient exec(SQLiteDatabase db) {
 					IngredientImpl ii = null;
-					Cursor c = db.rawQuery(retrieveStmt, new String[] {name});
+					Cursor c = db.rawQuery(retrieveStmt, new String[] {sanitizedName});
+					if(c.moveToNext()) {
+						ii = new IngredientImpl(c.getLong(0));
+						ii.name = sanitizedName;
+					}
+					c.close();
+					return ii;
+				}
+			});
+		}
+
+		protected Ingredient createOrRetrieveIngredient(String name) {
+			final String retrieveStmt =
+				"SELECT i.iid " +
+				"FROM Ingredient i " +
+				"WHERE i.name = ?; ";
+
+			final String sanitizedName = sanitizeIngredientName(name);
+
+			return data.sqlTransaction(new Transaction<Ingredient>() {
+				public Ingredient exec(SQLiteDatabase db) {
+					IngredientImpl ii = null;
+					Cursor c = db.rawQuery(retrieveStmt, new String[] {sanitizedName});
 					if(c.moveToNext()) {
 						ii = new IngredientImpl(c.getLong(0));
 					} else {
 						ContentValues values = new ContentValues();
-						values.put("name", name);
+						values.put("name", sanitizedName);
 						long id = db.insert("Ingredient", null, values);
 						ii = new IngredientImpl(id);
 					}
-					ii.name = name;
+					ii.name = sanitizedName;
 					c.close();
 					return ii;
 				}

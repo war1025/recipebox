@@ -10,7 +10,6 @@ import org.wrowclif.recipebox.AppData.Transaction;
 import org.wrowclif.recipebox.RecipeIngredient;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Ingredient;
-import org.wrowclif.recipebox.Unit;
 import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
 import java.util.List;
@@ -27,8 +26,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 
 	protected Recipe recipe;
 	protected Ingredient ingredient;
-	protected Unit unit;
-	protected double amount;
+	protected String amount;
 
 	private RecipeIngredientImpl() {
 
@@ -38,11 +36,11 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 		return ingredient.getName();
 	}
 
-	public double getAmount() {
+	public String getAmount() {
 		return amount;
 	}
 
-	public void setAmount(double amount) {
+	public void setAmount(String amount) {
 		this.amount = amount;
 
 		ContentValues values = new ContentValues();
@@ -51,32 +49,12 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 		itemUpdate(values, "setAmount");
 	}
 
-	public String getUnitName() {
-		return unit.getName();
-	}
-
 	public Recipe getRecipe() {
 		return recipe;
 	}
 
 	public Ingredient getIngredient() {
 		return ingredient;
-	}
-
-	public Unit getUnits() {
-		return unit;
-	}
-
-	public void setUnits(Unit unit) {
-		if(unit == null) {
-			throw new IllegalArgumentException("unit cannot be null");
-		}
-		this.unit = unit;
-
-		ContentValues values = new ContentValues();
-		values.put("uid", unit.getId());
-
-		itemUpdate(values, "setUnits");
 	}
 
 	protected void itemUpdate(ContentValues values, String operation) {
@@ -93,7 +71,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 		}
 
 		protected List<RecipeIngredient> createListFromCursor(Recipe r, Cursor c) {
-			// i.iid, i.name, u.uid, u.name, u.abbreviation, u.type, u.factor, u.minfraction, ri.amount
+			// i.iid, i.name, ri.amount
 			List<RecipeIngredient> list = new ArrayList<RecipeIngredient>(c.getCount());
 			ContentValues values = new ContentValues();
 			while(c.moveToNext()) {
@@ -105,16 +83,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				values.put("name", c.getString(1));
 				ri.ingredient = IngredientImpl.factory.createFromData(values);
 
-				values.clear();
-				values.put("uid", c.getLong(2));
-				values.put("name", c.getString(3));
-				values.put("abbreviation", c.getString(4));
-				values.put("type", c.getInt(5));
-				values.put("factor", c.getDouble(6));
-				values.put("minfraction", c.getInt(7));
-				ri.unit = UnitImpl.factory.createFromData(values);
-
-				ri.amount = c.getDouble(8);
+				ri.amount = c.getString(2);
 
 				list.add(ri);
 			}
@@ -124,11 +93,10 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 
 		protected List<RecipeIngredient> getRecipeIngredients(final Recipe r) {
 			final String stmt =
-				"SELECT i.iid, i.name, u.uid, u.name, u.abbreviation, u.type, u.factor, u.minfraction, ri.amount " +
-				"FROM Ingredient i, Unit u, RecipeIngredients ri " +
+				"SELECT i.iid, i.name, ri.amount " +
+				"FROM Ingredient i, RecipeIngredients ri " +
 				"WHERE ri.rid = ? " +
 					"and ri.iid = i.iid " +
-					"and ri.uid = u.uid " +
 				"ORDER BY ri.num ASC; ";
 
 
@@ -161,11 +129,9 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				"SET usecount = usecount + 1 " +
 				"WHERE iid = ?; ";
 
-			final Unit u = UnitImpl.factory.getNullUnit();
 			final ContentValues values = new ContentValues();
 			values.put("rid", r.getId());
 			values.put("iid", i.getId());
-			values.put("uid", u.getId());
 			return data.sqlTransaction(new Transaction<RecipeIngredient>() {
 				public RecipeIngredient exec(SQLiteDatabase db) {
 					Cursor c = db.rawQuery(existsStmt, new String[] {r.getId() + "", i.getId() + ""});
@@ -185,8 +151,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 					RecipeIngredientImpl result = new RecipeIngredientImpl();
 					result.recipe = r;
 					result.ingredient = i;
-					result.unit = u;
-					result.amount = 0;
+					result.amount = "";
 					return result;
 				}
 			});
@@ -194,7 +159,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 
 		protected void removeRecipeIngredient(final RecipeIngredient toRemove) {
 			final String stmt =
-				"DELETE FROM RecipeIngredient " +
+				"DELETE FROM RecipeIngredients " +
 				"WHERE iid = ? " +
 					"and rid = ?; ";
 			final String useCountStmt =
