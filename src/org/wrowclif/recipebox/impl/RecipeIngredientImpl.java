@@ -57,6 +57,57 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 		return ingredient;
 	}
 
+	public boolean setIngredient(final Ingredient other) {
+		final String inUseStmt =
+			"SELECT ri.iid " +
+			"FROM RecipeIngredients ri " +
+			"WHERE ri.rid = ? " +
+				"and ri.iid = ?;";
+
+		final String insertStmt =
+			"INSERT INTO RecipeIngredients(rid, iid, amount, num) " +
+				"SELECT ri.rid, ? as iid, ri.amount, ri.num " +
+				"FROM RecipeIngredients ri " +
+				"WHERE ri.rid = ? " +
+					"and ri.iid = ?;";
+
+		final String deleteStmt =
+			"DELETE FROM RecipeIngredients " +
+			"WHERE rid = ? " +
+				"and iid = ?;";
+
+		final String decreaseIngredientCount =
+			"UPDATE Ingredient " +
+			"SET usecount = usecount - 1 " +
+			"WHERE iid = ?;";
+
+		final String increaseIngredientCount =
+			"UPDATE Ingredient " +
+			"SET usecount = usecount + 1 " +
+			"WHERE iid = ?;";
+
+		if(other.getId() == ingredient.getId()) {
+			return true;
+		}
+
+		return factory.data.sqlTransaction(new Transaction<Boolean>() {
+			public Boolean exec(SQLiteDatabase db) {
+				Cursor c = db.rawQuery(inUseStmt, new String[] {recipe.getId() + "", other.getId() + ""});
+				if(c.getCount() > 0) {
+					c.close();
+					return false;
+				}
+				c.close();
+				db.execSQL(insertStmt, new Object[] {other.getId(), recipe.getId(), ingredient.getId()});
+				db.execSQL(deleteStmt, new Object[] {recipe.getId(), ingredient.getId()});
+				db.execSQL(decreaseIngredientCount, new Object[] {ingredient.getId()});
+				db.execSQL(increaseIngredientCount, new Object[] {other.getId()});
+				ingredient = other;
+				return true;
+			}
+		});
+	}
+
 	protected void itemUpdate(ContentValues values, String operation) {
 		factory.data.itemUpdate(values, "RecipeIngredients", "rid=? and iid=?",
 						new String[] {recipe.getId() + "", ingredient.getId() + ""}, operation);
@@ -174,6 +225,41 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				public Void exec(SQLiteDatabase db) {
 					db.execSQL(stmt, new Object[] {iid, rid});
 					db.execSQL(useCountStmt, new Object[] {iid});
+					return null;
+				}
+			});
+		}
+
+		protected void swapIngredientPositions(final RecipeIngredient a, final RecipeIngredient b) {
+			final String getNumStmt =
+				"SELECT ri.num " +
+				"FROM RecipeIngredients ri " +
+				"WHERE ri.rid = ? " +
+					"and ri.iid = ?;";
+
+			final String setNumStmt =
+				"UPDATE RecipeIngredients " +
+				"SET(num = ?) " +
+				"WHERE rid = ? " +
+					"and iid = ?;";
+
+			if(a.getRecipe().getId() != b.getRecipe().getId()) {
+				throw new IllegalArgumentException("RecipeIngredients belong to different recipes");
+			}
+			if(a.getIngredient().getId() == b.getIngredient().getId()) {
+				return;
+			}
+
+			data.sqlTransaction(new Transaction<Void>() {
+				public Void exec(SQLiteDatabase db) {
+					Cursor c = db.rawQuery(getNumStmt, new String[] {a.getRecipe().getId() + "", a.getIngredient().getId() + ""});
+					int numA = c.getInt(0);
+					c.close();
+					c = db.rawQuery(getNumStmt, new String[] {b.getRecipe().getId() + "", b.getIngredient().getId() + ""});
+					int numB = c.getInt(0);
+					c.close();
+					db.execSQL(setNumStmt, new Object[] {numB, a.getRecipe().getId(), a.getIngredient().getId()});
+					db.execSQL(setNumStmt, new Object[] {numA, b.getRecipe().getId(), b.getIngredient().getId()});
 					return null;
 				}
 			});

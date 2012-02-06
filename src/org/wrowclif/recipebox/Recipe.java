@@ -32,6 +32,8 @@ public interface Recipe {
 
 	public void removeIngredient(RecipeIngredient toRemove);
 
+	public void swapIngredientPositions(RecipeIngredient a, RecipeIngredient b);
+
 	public void reorderIngredients(List<RecipeIngredient> order);
 
 	public List<Instruction> getInstructions();
@@ -39,6 +41,8 @@ public interface Recipe {
 	public Instruction addInstruction();
 
 	public void removeInstruction(Instruction i);
+
+	public void swapInstructionPositions(Instruction a, Instruction b);
 
 	public void reorderInstructions(List<Instruction> order);
 

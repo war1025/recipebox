@@ -282,26 +282,12 @@ public class IngredientDialog extends Dialog {
 			} else if(currentIngredient == null) {
 				showConfirmNew();
 			} else {
-				RecipeIngredient added = recipe.addIngredient(currentIngredient);
+				boolean added = ingredient.setIngredient(currentIngredient);
 
-				if(added == null) {
+				if(!added) {
 					showAlreadyInUse();
 				} else {
-					List<RecipeIngredient> order = new ArrayList<RecipeIngredient>(adapter.getCount());
-					for(int i = 0; i < adapter.getCount(); i++) {
-						if(i == position) {
-							order.add(added);
-						} else {
-							order.add(adapter.getItem(i));
-						}
-					}
-					recipe.removeIngredient(ingredient);
-					recipe.reorderIngredients(order);
-
-					added.setAmount(amountInput.getText().toString());
-
-					adapter.remove(ingredient);
-					adapter.insert(added, position);
+					adapter.notifyDataSetChanged();
 
 					IngredientDialog.this.dismiss();
 				}

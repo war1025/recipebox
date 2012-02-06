@@ -161,6 +161,49 @@ public class InstructionImpl implements Instruction {
 			});
 		}
 
+		protected void swapInstructionPositions(final Instruction a, final Instruction b) {
+			final String sameRecipeStmt =
+				"SELECT i1.rid " +
+				"FROM Instruction i1, Instruction i2 " +
+				"WHERE i1.iid = ? " +
+					"and i2.iid = ? " +
+					"and i1.rid = i2.rid;";
+
+			final String getNumStmt =
+				"SELECT i.num " +
+				"FROM Instruction i " +
+				"WHERE i.iid = ?;";
+
+			final String setNumStmt =
+				"UPDATE Instruction " +
+				"SET num = ? " +
+				"WHERE iid = ?;";
+
+			if(a.getId() == b.getId()) {
+				return;
+			}
+
+			data.sqlTransaction(new Transaction<Void>() {
+				public Void exec(SQLiteDatabase db) {
+					Cursor c = db.rawQuery(sameRecipeStmt, new String[] {a.getId() + "", b.getId() + ""});
+					if(c.getCount() == 0) {
+						c.close();
+						throw new IllegalArgumentException("Instructions belong to different recipes");
+					}
+					c.close();
+					c = db.rawQuery(getNumStmt, new String[] {a.getId() + ""});
+					int numA = c.getInt(0);
+					c.close();
+					c = db.rawQuery(getNumStmt, new String[] {b.getId() + ""});
+					int numB = c.getInt(0);
+					c.close();
+					db.execSQL(setNumStmt, new Object[] {numB, a.getId()});
+					db.execSQL(setNumStmt, new Object[] {numA, b.getId()});
+					return null;
+				}
+			});
+		}
+
 		protected void reorderInstructions(final long recipeId, final List<Instruction> order) {
 			final String getInstructionIdsStmt =
 				"SELECT i.iid " +

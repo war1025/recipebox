@@ -125,6 +125,7 @@ public class InstructionsDisplay extends Activity {
 
 					Bundle bundle = new Bundle();
 					bundle.putInt("position", position);
+					bundle.putBoolean("deleteOnCancel", true);
 
 					showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
 				}
@@ -178,6 +179,7 @@ public class InstructionsDisplay extends Activity {
 				AlertDialog dialog = (AlertDialog) d;
 				final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
 				final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
+				final boolean deleteOnCancel = bundle.getBoolean("deleteOnCancel", false);
 				input.setText(instruction.getText());
 
 				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Done", new DialogInterface.OnClickListener() {
@@ -185,6 +187,15 @@ public class InstructionsDisplay extends Activity {
 						instruction.setText(input.getText().toString());
 
 						adapter.notifyDataSetChanged();
+					}
+				});
+
+				dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						if(deleteOnCancel) {
+							r.removeInstruction(instruction);
+							adapter.remove(instruction);
+						}
 					}
 				});
 				break;
@@ -221,6 +232,7 @@ public class InstructionsDisplay extends Activity {
 				builder.setView(v);
 				input.setText(instruction.getText());
 				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+				input.setSingleLine(false);
 
 				builder.setTitle("Edit Instruction");
 				builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {

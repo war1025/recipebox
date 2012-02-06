@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 import android.text.TextWatcher;
 import android.text.Editable;
 import android.text.method.DigitsKeyListener;
+import android.text.InputType;
 
 import java.util.ArrayList;
 
@@ -307,8 +308,10 @@ public class RecipeDisplay extends Activity {
 			case NAME_DIALOG : {
 				title = "Edit Name";
 
-				input.setSingleLine(true);
 				initialText = r.getName();
+
+				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+				input.setSingleLine(true);
 
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
@@ -327,6 +330,9 @@ public class RecipeDisplay extends Activity {
 				title = "Edit Description";
 
 				initialText = r.getDescription();
+
+				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+				input.setSingleLine(false);
 
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {

@@ -6,9 +6,11 @@ public interface RecipeIngredient {
 
 	public String getAmount();
 
-	public void setAmount(String amound);
+	public void setAmount(String amount);
 
 	public Recipe getRecipe();
 
 	public Ingredient getIngredient();
+
+	public boolean setIngredient(Ingredient in);
 }

@@ -115,6 +115,10 @@ public class RecipeImpl implements Recipe {
 		RecipeIngredientImpl.factory.removeRecipeIngredient(toRemove);
 	}
 
+	public void swapIngredientPositions(RecipeIngredient a, RecipeIngredient b) {
+		RecipeIngredientImpl.factory.swapIngredientPositions(a, b);
+	}
+
 	public void reorderIngredients(List<RecipeIngredient> order) {
 		RecipeIngredientImpl.factory.reorderRecipeIngredients(order);
 	}
@@ -129,6 +133,10 @@ public class RecipeImpl implements Recipe {
 
 	public void removeInstruction(Instruction i) {
 		InstructionImpl.factory.removeInstruction(i);
+	}
+
+	public void swapInstructionPositions(Instruction a, Instruction b) {
+		InstructionImpl.factory.swapInstructionPositions(a, b);
 	}
 
 	public void reorderInstructions(List<Instruction> order) {
