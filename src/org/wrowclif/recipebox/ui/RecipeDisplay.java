@@ -187,6 +187,23 @@ public class RecipeDisplay extends Activity {
 		switch(id) {
 			case CREATE_DIALOG : {
 				builder.setTitle("Create New Recipe");
+				builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						Recipe r2 = UtilityImpl.singleton.newRecipe("New Recipe");
+						Intent intent = new Intent(RecipeDisplay.this, RecipeTabs.class);
+						intent.putExtra("id", r2.getId());
+						intent.putExtra("edit", true);
+						intent.putExtra("tab", 0);
+
+						RecipeDisplay.this.finish();
+						startActivity(intent);
+					}
+				});
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+
+					}
+				});
 				break;
 			}
 
