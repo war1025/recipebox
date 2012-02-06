@@ -16,6 +16,7 @@
 		android:layout_height="wrap_content"
 		android:singleLine="true"
 		android:imeOptions="actionGo"
+		android:inputType="text|textCapWords"
 		android:completionThreshold="2"
 		android:layout_below="@id/recipe_label" />
 	<Button

@@ -31,9 +31,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.text.TextWatcher;
 import android.text.Editable;
+import android.text.InputType;
 
 import java.util.ArrayList;
 
@@ -90,7 +92,6 @@ public class InstructionsDisplay extends Activity {
 							public void onClick(View v) {
 								Bundle bundle = new Bundle();
 								bundle.putInt("position", position);
-								Log.d("Recipebox", "Editing instruction at position: " + position + " with id: " + i.getId());
 
 								showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
 							}
@@ -219,6 +220,7 @@ public class InstructionsDisplay extends Activity {
 				final EditText input = (EditText) v.findViewById(R.id.text_edit);
 				builder.setView(v);
 				input.setText(instruction.getText());
+				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
 
 				builder.setTitle("Edit Instruction");
 				builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
