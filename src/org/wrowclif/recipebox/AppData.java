@@ -25,7 +25,7 @@ public class AppData {
 	}
 
 	public static AppData initialSingleton(Context context) {
-		AppData.appContext = context;
+		AppData.appContext = context.getApplicationContext();
 		return Inner.singleton;
 	}
 

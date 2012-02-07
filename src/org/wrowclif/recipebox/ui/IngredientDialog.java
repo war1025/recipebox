@@ -287,6 +287,7 @@ public class IngredientDialog extends Dialog {
 				if(!added) {
 					showAlreadyInUse();
 				} else {
+					ingredient.setAmount(amountInput.getText().toString());
 					adapter.notifyDataSetChanged();
 
 					IngredientDialog.this.dismiss();

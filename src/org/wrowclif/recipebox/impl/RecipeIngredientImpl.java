@@ -239,7 +239,7 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 
 			final String setNumStmt =
 				"UPDATE RecipeIngredients " +
-				"SET(num = ?) " +
+				"SET num = ? " +
 				"WHERE rid = ? " +
 					"and iid = ?;";
 
@@ -253,9 +253,11 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 			data.sqlTransaction(new Transaction<Void>() {
 				public Void exec(SQLiteDatabase db) {
 					Cursor c = db.rawQuery(getNumStmt, new String[] {a.getRecipe().getId() + "", a.getIngredient().getId() + ""});
+					c.moveToNext();
 					int numA = c.getInt(0);
 					c.close();
 					c = db.rawQuery(getNumStmt, new String[] {b.getRecipe().getId() + "", b.getIngredient().getId() + ""});
+					c.moveToNext();
 					int numB = c.getInt(0);
 					c.close();
 					db.execSQL(setNumStmt, new Object[] {numB, a.getRecipe().getId(), a.getIngredient().getId()});

@@ -37,6 +37,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.text.TextWatcher;
 import android.text.Editable;
@@ -47,6 +48,7 @@ public class IngredientsDisplay extends Activity {
 	private boolean edit;
 	private Recipe r;
 	private ArrayAdapter<RecipeIngredient> adapter;
+	private int moveableItem;
 
 	private static final int NEW_INGREDIENT_DIALOG = 0;
 	private static final int DELETE_INGREDIENT_DIALOG = 1;
@@ -64,6 +66,7 @@ public class IngredientsDisplay extends Activity {
 
 		r = ((RecipeTabs) getParent()).curRecipe;
 		edit = ((RecipeTabs) getParent()).editing;
+		moveableItem = -1;
 
 		if(r != null) {
 			setTitle(r.getName());
@@ -107,9 +110,54 @@ public class IngredientsDisplay extends Activity {
 								showDialog(DELETE_INGREDIENT_DIALOG, bundle);
 							}
 						});
+						convert.setOnLongClickListener(new OnLongClickListener() {
+							public boolean onLongClick(View v) {
+								if(moveableItem != position) {
+									moveableItem = position;
+								} else {
+									moveableItem = -1;
+								}
+								adapter.notifyDataSetChanged();
+								return true;
+							}
+						});
 					} else {
 						be.setVisibility(View.GONE);
 						bd.setVisibility(View.GONE);
+						convert.setOnLongClickListener(null);
+					}
+
+					Button mu = (Button) convert.findViewById(R.id.up_button);
+					Button md = (Button) convert.findViewById(R.id.down_button);
+
+					if(moveableItem == position) {
+						mu.setVisibility(View.VISIBLE);
+						mu.setOnClickListener(new OnClickListener() {
+							public void onClick(View v) {
+								if(position > 0) {
+									r.swapIngredientPositions(adapter.getItem(position), adapter.getItem(position -1));
+									RecipeIngredient i = adapter.getItem(position);
+									moveableItem = position - 1;
+									adapter.remove(i);
+									adapter.insert(i, position -1);
+								}
+							}
+						});
+						md.setVisibility(View.VISIBLE);
+						md.setOnClickListener(new OnClickListener() {
+							public void onClick(View v) {
+								if(position < adapter.getCount() - 1) {
+									r.swapIngredientPositions(adapter.getItem(position), adapter.getItem(position + 1));
+									RecipeIngredient i = adapter.getItem(position + 1);
+									moveableItem = position + 1;
+									adapter.remove(i);
+									adapter.insert(i, position);
+								}
+							}
+						});
+					} else {
+						mu.setVisibility(View.GONE);
+						md.setVisibility(View.GONE);
 					}
 					return convert;
 				}
@@ -161,6 +209,7 @@ public class IngredientsDisplay extends Activity {
 		} else {
 			add.setVisibility(View.GONE);
 			done.setVisibility(View.GONE);
+			moveableItem = -1;
 		}
 		edit = editing;
 		adapter.notifyDataSetChanged();

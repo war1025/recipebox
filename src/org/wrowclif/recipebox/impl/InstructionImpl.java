@@ -192,9 +192,11 @@ public class InstructionImpl implements Instruction {
 					}
 					c.close();
 					c = db.rawQuery(getNumStmt, new String[] {a.getId() + ""});
+					c.moveToNext();
 					int numA = c.getInt(0);
 					c.close();
 					c = db.rawQuery(getNumStmt, new String[] {b.getId() + ""});
+					c.moveToNext();
 					int numB = c.getInt(0);
 					c.close();
 					db.execSQL(setNumStmt, new Object[] {numB, a.getId()});
