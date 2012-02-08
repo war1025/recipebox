@@ -8,6 +8,8 @@ public interface Utility {
 
 	public List<Recipe> searchRecipes(String search, int maxResults);
 
+	public List<Recipe> getRecentlyViewedRecipes(int maxResults);
+
 	public Recipe getRecipeById(long id);
 
 	public Ingredient getIngredientByName(String name);

@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.AdapterView;
+import android.widget.ListView;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.LayoutInflater;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 public class Main extends Activity {
 
 	private Utility util;
+	private ListAutoCompleteAdapter<Recipe> recentAdapter;
 	private static final int CREATE_RECIPE_DIALOG = 1;
 
 	/** Called when the activity is first created. */
@@ -129,9 +131,57 @@ public class Main extends Activity {
 			}
 		});
 
+		ListView lv = (ListView) findViewById(R.id.recent_recipes);
 
+		Specifics<Recipe> sp2 = new Specifics<Recipe>() {
+
+			public View getView(int id, Recipe r, View v, ViewGroup vg) {
+				if(v == null) {
+					v = inflate(R.layout.autoitem);
+				}
+
+				TextView tv = (TextView) v.findViewById(R.id.child_name);
+
+				tv.setText(r.getName());
+
+				return v;
+			}
+
+			public long getItemId(Recipe item) {
+				return item.getId();
+			}
+
+			public List<Recipe> filter(CharSequence seq) {
+				return UtilityImpl.singleton.getRecentlyViewedRecipes(5);
+			}
+
+			public String convertResultToString(Recipe result) {
+				return result.getName();
+			}
+
+			public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
+				Intent intent = new Intent(Main.this, RecipeTabs.class);
+				intent.putExtra("id", id);
+				startActivity(intent);
+			}
+
+			private View inflate(int layoutId) {
+				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				return vi.inflate(layoutId, null);
+			}
+		};
+
+		recentAdapter = new ListAutoCompleteAdapter<Recipe>(sp2);
+
+		lv.setAdapter(recentAdapter);
+		lv.setOnItemClickListener(recentAdapter.onClick);
 
     }
+
+    public void onResume() {
+		super.onResume();
+		recentAdapter.getFilter().filter("");
+	}
 
     protected Dialog onCreateDialog(int id) {
 		Dialog dialog = null;

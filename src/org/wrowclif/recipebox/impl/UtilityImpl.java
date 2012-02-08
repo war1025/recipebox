@@ -37,12 +37,29 @@ public class UtilityImpl implements Utility {
 			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
 			"FROM Recipe r " +
 			"WHERE r.name LIKE ? " +
-			"ORDER BY r.name ASC " +
+			"ORDER BY r.lastviewtime DESC " +
 			"LIMIT ?; ";
 
 		return data.sqlTransaction(new Transaction<List<Recipe>>() {
 			public List<Recipe> exec(SQLiteDatabase db) {
 				Cursor c = db.rawQuery(stmt, new String[] {"%" + search + "%", maxResults + ""});
+				List<Recipe> list = RecipeImpl.factory.createListFromCursor(c);
+				c.close();
+				return list;
+			}
+		});
+	}
+
+	public List<Recipe> getRecentlyViewedRecipes(final int maxResults) {
+		final String stmt =
+			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+			"FROM Recipe r " +
+			"ORDER BY r.lastviewtime DESC " +
+			"LIMIT ?;";
+
+		return data.sqlTransaction(new Transaction<List<Recipe>>() {
+			public List<Recipe> exec(SQLiteDatabase db) {
+				Cursor c = db.rawQuery(stmt, new String[] {maxResults + ""});
 				List<Recipe> list = RecipeImpl.factory.createListFromCursor(c);
 				c.close();
 				return list;
@@ -67,12 +84,14 @@ public class UtilityImpl implements Utility {
 			"SELECT i.iid, i.name " +
 			"FROM Ingredient i " +
 			"WHERE i.name LIKE ? " +
+				"or i.name LIKE ? " +
 			"ORDER BY i.usecount DESC, i.name ASC " +
 			"LIMIT ?; ";
 
 		return data.sqlTransaction(new Transaction<List<Ingredient>>() {
 			public List<Ingredient> exec(SQLiteDatabase db) {
-				Cursor c = db.rawQuery(stmt, new String[] {"%" + search + "%", maxResults + ""});
+				String trimSearch = search.trim();
+				Cursor c = db.rawQuery(stmt, new String[] {trimSearch + "%", "% " + trimSearch + "%", maxResults + ""});
 				List<Ingredient> list = IngredientImpl.factory.createListFromCursor(c);
 				c.close();
 				return list;
