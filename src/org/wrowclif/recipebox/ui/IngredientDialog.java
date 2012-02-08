@@ -103,10 +103,10 @@ public class IngredientDialog extends Dialog {
 	public void showNew() {
 		reshowNew();
 
-		ingredientInput.dismissDropDown();
-
 		amountInput.setText("");
 		ingredientInput.setText("");
+
+		amountInput.requestFocus();
 	}
 
 	public void reshowNew() {
@@ -130,10 +130,10 @@ public class IngredientDialog extends Dialog {
 	public void showEdit() {
 		reshowEdit();
 
-		ingredientInput.dismissDropDown();
-
 		amountInput.setText(ingredient.getAmount());
 		ingredientInput.setText(ingredient.getName());
+
+		amountInput.requestFocus();
 	}
 
 	public void reshowEdit() {
