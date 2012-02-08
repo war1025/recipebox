@@ -196,6 +196,54 @@ public class RecipeImpl implements Recipe {
 		});
 	}
 
+	public long getLastViewTime() {
+		final String stmt =
+			"SELECT r.lastviewtime " +
+			"FROM Recipe r " +
+			"WHERE r.rid = ?;";
+
+		return factory.data.sqlTransaction(new Transaction<Long>() {
+			public Long exec(SQLiteDatabase db) {
+				Cursor c = db.rawQuery(stmt, new String[] {id + ""});
+				c.moveToNext();
+				long time = c.getLong(0);
+				c.close();
+				return time;
+			}
+		});
+	}
+
+	public void updateLastViewTime() {
+		final String stmt =
+			"UPDATE Recipe " +
+			"SET lastviewtime = CURRENT_TIMESTAMP " +
+			"WHERE rid = ?;";
+
+		factory.data.sqlTransaction(new Transaction<Void>() {
+			public Void exec(SQLiteDatabase db) {
+				db.execSQL(stmt, new Object[] {id});
+				return null;
+			}
+		});
+	}
+
+	public long getCreateTime() {
+		final String stmt =
+			"SELECT r.createtime " +
+			"FROM Recipe r " +
+			"WHERE r.ride = ?;";
+
+		return factory.data.sqlTransaction(new Transaction<Long>() {
+			public Long exec(SQLiteDatabase db) {
+				Cursor c = db.rawQuery(stmt, new String[] {id + ""});
+				c.moveToNext();
+				long time = c.getLong(0);
+				c.close();
+				return time;
+			}
+		});
+	}
+
 	public Recipe branch(final String name) {
 		final String stmt =
 			"INSERT INTO SuggestedWith(rid1, rid2, comments) " +
@@ -250,6 +298,10 @@ public class RecipeImpl implements Recipe {
 					"SELECT r.maxinstruction " +
 					"FROM Recipe r " +
 					"WHERE r.rid = $)" +
+				"WHERE rid = ?;" +
+
+			"UPDATE Recipe " +
+				"SET createtime = CURRENT_TIMESTAMP, lastviewtime = CURRENT_TIMESTAMP " +
 				"WHERE rid = ?;";
 
 		final ContentValues values = new ContentValues();
@@ -340,11 +392,15 @@ public class RecipeImpl implements Recipe {
 		protected Recipe createNew(final String name) {
 			final ContentValues values = new ContentValues();
 			values.put("name", name);
+			long now = System.currentTimeMillis();
+
+			values.put("createtime", now);
+			values.put("lastviewtime", now);
 
 			return data.sqlTransaction(new Transaction<Recipe>() {
 				public Recipe exec(SQLiteDatabase db) {
 					long id = db.insert("Recipe", null, values);
-					values.remove("name");
+					values.clear();
 					values.put("vid", id);
 					db.insert("VariantGroup", null, values);
 					db.update("Recipe", values, "rid=?", new String[] {id + ""});

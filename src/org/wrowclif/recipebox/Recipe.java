@@ -66,6 +66,12 @@ public interface Recipe {
 
 	public List<Recipe> getVariants();
 
+	public long getLastViewTime();
+
+	public void updateLastViewTime();
+
+	public long getCreateTime();
+
 	public Recipe branch(String name);
 
 	public void delete();
