@@ -81,11 +81,8 @@ public class IngredientsDisplay extends Activity {
 
 					final RecipeIngredient i = getItem(position);
 
-					TextView tv = (TextView) convert.findViewById(R.id.ingredient_name);
-					tv.setText(i.getName());
-
-					tv = (TextView) convert.findViewById(R.id.ingredient_amount);
-					tv.setText(i.getAmount());
+					TextView tv = (TextView) convert.findViewById(R.id.ingredient_box);
+					tv.setText(i.getAmount() + " " + i.getName());
 
 					Button be = (Button) convert.findViewById(R.id.edit_button);
 					Button bd = (Button) convert.findViewById(R.id.delete_button);
