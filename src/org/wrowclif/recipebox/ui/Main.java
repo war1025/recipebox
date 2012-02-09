@@ -131,6 +131,15 @@ public class Main extends Activity {
 			}
 		});
 
+		Button browseRecipe = (Button) findViewById(R.id.browse);
+
+		browseRecipe.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent(Main.this, Browse.class);
+				startActivity(intent);
+			}
+		});
+
 		ListView lv = (ListView) findViewById(R.id.recent_recipes);
 
 		Specifics<Recipe> sp2 = new Specifics<Recipe>() {
@@ -152,7 +161,7 @@ public class Main extends Activity {
 			}
 
 			public List<Recipe> filter(CharSequence seq) {
-				return UtilityImpl.singleton.getRecentlyViewedRecipes(5);
+				return UtilityImpl.singleton.getRecentlyViewedRecipes(0, 5);
 			}
 
 			public String convertResultToString(Recipe result) {

@@ -50,16 +50,33 @@ public class UtilityImpl implements Utility {
 		});
 	}
 
-	public List<Recipe> getRecentlyViewedRecipes(final int maxResults) {
+	public List<Recipe> getRecentlyViewedRecipes(final int offset, final int maxResults) {
 		final String stmt =
 			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
 			"FROM Recipe r " +
 			"ORDER BY r.lastviewtime DESC " +
-			"LIMIT ?;";
+			"LIMIT ? OFFSET ?;";
 
 		return data.sqlTransaction(new Transaction<List<Recipe>>() {
 			public List<Recipe> exec(SQLiteDatabase db) {
-				Cursor c = db.rawQuery(stmt, new String[] {maxResults + ""});
+				Cursor c = db.rawQuery(stmt, new String[] {maxResults + "", offset + ""});
+				List<Recipe> list = RecipeImpl.factory.createListFromCursor(c);
+				c.close();
+				return list;
+			}
+		});
+	}
+
+	public List<Recipe> getRecipesByName(final int offset, final int maxResults) {
+		final String stmt =
+			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+			"FROM Recipe r " +
+			"ORDER BY r.name ASC " +
+			"LIMIT ? OFFSET ?;";
+
+		return data.sqlTransaction(new Transaction<List<Recipe>>() {
+			public List<Recipe> exec(SQLiteDatabase db) {
+				Cursor c = db.rawQuery(stmt, new String[] {maxResults + "", offset + ""});
 				List<Recipe> list = RecipeImpl.factory.createListFromCursor(c);
 				c.close();
 				return list;
