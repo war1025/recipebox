@@ -81,6 +81,9 @@ public class RecipeDisplay extends Activity {
 			tv = (TextView) findViewById(R.id.cook_edit);
 			tv.setText(timeFormat(r.getCookTime()));
 
+			tv = (TextView) findViewById(R.id.total_edit);
+			tv.setText(timeFormat(r.getCookTime() + r.getPrepTime()));
+
 			tv = (TextView) findViewById(R.id.cost_edit);
 			tv.setText("$" + r.getCost());
 
@@ -131,7 +134,8 @@ public class RecipeDisplay extends Activity {
 	protected void setEditing(boolean editing) {
 		TextView[] labels = {(TextView) findViewById(R.id.name_label), (TextView) findViewById(R.id.description_label),
 								(TextView) findViewById(R.id.prep_label), (TextView) findViewById(R.id.cook_label),
-								(TextView) findViewById(R.id.cost_label)};
+								(TextView) findViewById(R.id.cost_label), (TextView) findViewById(R.id.total_label),
+								(TextView) findViewById(R.id.total_edit)};
 
 		Button[] btns = {(Button) findViewById(R.id.name_button), (Button) findViewById(R.id.description_button),
 							(Button) findViewById(R.id.prep_button), (Button) findViewById(R.id.cook_button),
@@ -266,6 +270,9 @@ public class RecipeDisplay extends Activity {
 							r.setPrepTime(hour * 60 + minute);
 							TextView tv = (TextView) findViewById(R.id.prep_edit);
 							tv.setText(timeFormat(r.getPrepTime()));
+
+							tv = (TextView) findViewById(R.id.total_edit);
+							tv.setText(timeFormat(r.getPrepTime() + r.getCookTime()));
 						}
 					}, time / 60, time % 60, true);
 
@@ -278,6 +285,9 @@ public class RecipeDisplay extends Activity {
 							r.setCookTime(hour * 60 + minute);
 							TextView tv = (TextView) findViewById(R.id.cook_edit);
 							tv.setText(timeFormat(r.getCookTime()));
+
+							tv = (TextView) findViewById(R.id.total_edit);
+							tv.setText(timeFormat(r.getPrepTime() + r.getCookTime()));
 						}
 					}, time / 60, time % 60, true);
 			}
