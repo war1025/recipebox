@@ -38,6 +38,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.text.TextWatcher;
 import android.text.Editable;
 import android.text.InputType;
@@ -48,8 +51,11 @@ public class CategoryList extends Activity {
 
 	private Utility util;
 	private Category category;
-	private DynamicLoadAdapter<Recipe> recentAdapter;
+	private DynamicLoadAdapter<Recipe> adapter;
+	private boolean edit;
+
 	private static final int ADD_RECIPE_DIALOG = 1;
+	private static final int DELETE_RECIPE_DIALOG = 2;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -65,26 +71,51 @@ public class CategoryList extends Activity {
 
 		createDynamicLoadAdapter();
 
-		recentAdapter.setUpList(lv);
+		adapter.setUpList(lv);
 
 		TextView label = (TextView) findViewById(R.id.category_label);
 		label.setText(category.getName());
 
-		TextView button = (TextView) findViewById(R.id.category_add);
+		TextView addButton = (TextView) findViewById(R.id.add_button);
 
-		button.setText("Add Recipe");
+		addButton.setText("Add Recipe");
 
-		button.setOnClickListener(new OnClickListener() {
+		addButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				showDialog(ADD_RECIPE_DIALOG);
 			}
 		});
 
-    }
+		View doneButton = findViewById(R.id.done_button);
+
+		doneButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				setEditing(false);
+			}
+		});
+
+		setEditing(false);
+	}
 
     public void onResume() {
 		super.onResume();
-		recentAdapter.clear();
+	}
+
+	protected void setEditing(boolean editing) {
+		View[] views = {findViewById(R.id.add_button), findViewById(R.id.done_button)};
+
+		if(editing) {
+			for(View v : views) {
+				v.setVisibility(View.VISIBLE);
+			}
+		} else {
+			for(View v : views) {
+				v.setVisibility(View.GONE);
+			}
+		}
+
+		this.edit = editing;
+		adapter.notifyDataSetChanged();
 	}
 
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
@@ -94,6 +125,21 @@ public class CategoryList extends Activity {
 				AlertDialog dialog = (AlertDialog) d;
 				TextView tv = (TextView) dialog.findViewById(R.id.text_edit);
 				tv.setText("");
+				break;
+			}
+
+			case DELETE_RECIPE_DIALOG : {
+				AlertDialog dialog = (AlertDialog) d;
+				final int position = bundle.getInt("position", -1);
+				final Recipe recipe = adapter.getItem(position);
+
+				dialog.setMessage("Are you sure you want to remove " + recipe.getName() + " from this category?");
+				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Remove", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						category.removeRecipe(recipe);
+						adapter.remove(position);
+					}
+				});
 				break;
 			}
 		}
@@ -153,12 +199,12 @@ public class CategoryList extends Activity {
 					}
 				};
 
-				final ListAutoCompleteAdapter<Recipe> adapter = new ListAutoCompleteAdapter<Recipe>(sp);
+				final ListAutoCompleteAdapter<Recipe> acAdapter = new ListAutoCompleteAdapter<Recipe>(sp);
 
 
-				input.setAdapter(adapter);
+				input.setAdapter(acAdapter);
 
-				input.setOnItemClickListener(adapter.onClick);
+				input.setOnItemClickListener(acAdapter.onClick);
 
 				builder.setTitle("Add Recipe To Category");
 				builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
@@ -171,9 +217,29 @@ public class CategoryList extends Activity {
 
 								idHolder[0] = -1;
 
-								recentAdapter.clear();
+								adapter.clear();
 							}
 						}
+					}
+				});
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+
+					}
+				});
+				break;
+			}
+
+			case DELETE_RECIPE_DIALOG : {
+				final int position = bundle.getInt("position", -1);
+				final Recipe recipe = adapter.getItem(position);
+
+				builder.setTitle("Remove Recipe");
+				builder.setMessage("Are you sure you want to remove " + recipe.getName() + " from this category?");
+				builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						category.removeRecipe(recipe);
+						adapter.remove(position);
 					}
 				});
 				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -191,21 +257,59 @@ public class CategoryList extends Activity {
 		return dialog;
 	}
 
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater mi = getMenuInflater();
+
+		mi.inflate(R.menu.category_menu, menu);
+
+		return true;
+	}
+
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+
+		switch(id) {
+			case R.id.edit : {
+				setEditing(!edit);
+				return true;
+			}
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
 
 	private void createDynamicLoadAdapter() {
 
 		DynamicLoadAdapter.Specifics<Recipe> sp = new DynamicLoadAdapter.Specifics<Recipe>() {
-			public View getView(int id, Recipe r, View v, ViewGroup vg) {
+			public View getView(final int position, Recipe r, View v, ViewGroup vg) {
 				if(v == null) {
-					v = inflate(R.layout.autoitem);
+					v = inflate(R.layout.category_item);
 				}
 
-				TextView tv = (TextView) v.findViewById(R.id.child_name);
+				TextView tv = (TextView) v.findViewById(R.id.name_box);
 
 				if(r == null) {
 					tv.setText("Loading...");
 				} else {
 					tv.setText(r.getName());
+				}
+
+				View deleteButton = v.findViewById(R.id.delete_button);
+
+				if(edit) {
+					deleteButton.setOnClickListener(new OnClickListener() {
+						public void onClick(View v) {
+							Bundle b = new Bundle();
+
+							b.putInt("position", position);
+
+							showDialog(DELETE_RECIPE_DIALOG, b);
+						}
+					});
+
+					deleteButton.setVisibility(View.VISIBLE);
+				} else {
+					deleteButton.setVisibility(View.GONE);
 				}
 
 				return v;
@@ -240,6 +344,6 @@ public class CategoryList extends Activity {
 			}
 		};
 
-		recentAdapter = new DynamicLoadAdapter<Recipe>(sp);
+		adapter = new DynamicLoadAdapter<Recipe>(sp);
 	}
 }
