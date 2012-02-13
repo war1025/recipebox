@@ -7,6 +7,9 @@ import org.wrowclif.recipebox.R;
 
 import org.wrowclif.recipebox.ui.components.RecipeMenus;
 import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
+import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
+import org.wrowclif.recipebox.ui.components.ReorderableItemDecorator;
+import org.wrowclif.recipebox.ui.components.ReorderableItemDecorator.ItemSwap;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
@@ -22,6 +25,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -45,15 +49,12 @@ public class InstructionsDisplay extends Activity {
 
 	private boolean edit;
 	private Recipe r;
-	private ArrayAdapter<Instruction> adapter;
-	private int moveableItem;
+	private DynamicLoadAdapter<Instruction> adapter;
+	private ReorderableItemDecorator<Instruction> reorderDecorator;
 	private RecipeMenus menus;
 
 	private static final int EDIT_INSTRUCTION_DIALOG = 1;
 	private static final int DELETE_INSTRUCTION_DIALOG = 2;
-	private static final int EDIT_DIALOG = 3;
-	private static final int CREATE_DIALOG = 4;
-	private static final int DELETE_DIALOG = 5;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -65,138 +66,48 @@ public class InstructionsDisplay extends Activity {
 
 		r = ((RecipeTabs) getParent()).curRecipe;
 		edit = ((RecipeTabs) getParent()).editing;
-		moveableItem = -1;
 
-		if(r != null) {
-			setTitle(r.getName());
+		createDynamicLoadAdapter();
 
-			ListView lv = (ListView) findViewById(R.id.instruction_list);
-			adapter = new ArrayAdapter<Instruction>(this, R.layout.instructions_display_item, r.getInstructions()) {
-				public View getView(final int position, View convert, ViewGroup group) {
-					if(convert == null) {
-						LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-						convert = vi.inflate(R.layout.instructions_display_item, null);
-					}
-
-					final Instruction i = getItem(position);
-
-					TextView tv = (TextView) convert.findViewById(R.id.instruction_number);
-					tv.setText((position + 1) + ".");
-
-					tv = (TextView) convert.findViewById(R.id.instruction_text);
-					tv.setText(i.getText());
-
-					Button be = (Button) convert.findViewById(R.id.edit_button);
-					Button bd = (Button) convert.findViewById(R.id.delete_button);
-
-					if(edit) {
-						be.setVisibility(View.VISIBLE);
-						bd.setVisibility(View.VISIBLE);
-
-						be.setOnClickListener(new OnClickListener() {
-							public void onClick(View v) {
-								Bundle bundle = new Bundle();
-								bundle.putInt("position", position);
-
-								showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
-							}
-						});
-						bd.setOnClickListener(new OnClickListener() {
-							public void onClick(View v) {
-								Bundle bundle = new Bundle();
-								bundle.putInt("position", position);
-
-								showDialog(DELETE_INSTRUCTION_DIALOG, bundle);
-							}
-						});
-
-						convert.setOnLongClickListener(new OnLongClickListener() {
-							public boolean onLongClick(View v) {
-								if(moveableItem != position) {
-									moveableItem = position;
-								} else {
-									moveableItem = -1;
-								}
-								adapter.notifyDataSetChanged();
-								return true;
-							}
-						});
-					} else {
-						be.setVisibility(View.GONE);
-						bd.setVisibility(View.GONE);
-						convert.setOnLongClickListener(null);
-					}
-
-					Button mu = (Button) convert.findViewById(R.id.up_button);
-					Button md = (Button) convert.findViewById(R.id.down_button);
-
-					if(moveableItem == position) {
-						mu.setVisibility(View.VISIBLE);
-						mu.setOnClickListener(new OnClickListener() {
-							public void onClick(View v) {
-								if(position > 0) {
-									r.swapInstructionPositions(adapter.getItem(position), adapter.getItem(position -1));
-									Instruction i = adapter.getItem(position);
-									moveableItem = position - 1;
-									adapter.remove(i);
-									adapter.insert(i, position -1);
-								}
-							}
-						});
-						md.setVisibility(View.VISIBLE);
-						md.setOnClickListener(new OnClickListener() {
-							public void onClick(View v) {
-								if(position < adapter.getCount() - 1) {
-									r.swapInstructionPositions(adapter.getItem(position), adapter.getItem(position + 1));
-									Instruction i = adapter.getItem(position + 1);
-									moveableItem = position + 1;
-									adapter.remove(i);
-									adapter.insert(i, position);
-								}
-							}
-						});
-					} else {
-						mu.setVisibility(View.GONE);
-						md.setVisibility(View.GONE);
-					}
-					return convert;
-				}
-			};
-
-			lv.setAdapter(adapter);
-
-			Button add = (Button) findViewById(R.id.add_button);
-
-			add.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					Instruction in = r.addInstruction();
-					adapter.add(in);
-
-					int position = adapter.getPosition(in);
-
-					Bundle bundle = new Bundle();
-					bundle.putInt("position", position);
-					bundle.putBoolean("deleteOnCancel", true);
-
-					showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
-				}
-			});
-
-			Button done = (Button) findViewById(R.id.done_button);
-
-			done.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					setEditing(false);
-				}
-			});
-
-			if(!edit) {
-				add.setVisibility(View.GONE);
-				done.setVisibility(View.GONE);
+		ItemSwap swapper = new ItemSwap() {
+			public void swapItems(int a, int b) {
+				r.swapInstructionPositions(adapter.getItem(a), adapter.getItem(b));
 			}
-		}
+		};
 
+		reorderDecorator = new ReorderableItemDecorator(adapter, swapper);
 
+		setTitle(r.getName());
+
+		ListView lv = (ListView) findViewById(R.id.instruction_list);
+		lv.setAdapter(adapter);
+
+		Button add = (Button) findViewById(R.id.add_button);
+
+		add.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Instruction in = r.addInstruction();
+
+				int position = adapter.getCount();
+				adapter.add(position, in);
+
+				Bundle bundle = new Bundle();
+				bundle.putInt("position", position);
+				bundle.putBoolean("deleteOnCancel", true);
+
+				showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
+			}
+		});
+
+		Button done = (Button) findViewById(R.id.done_button);
+
+		done.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				setEditing(false);
+			}
+		});
+
+		setEditing(edit);
     }
 
 	public void onResume() {
@@ -216,9 +127,9 @@ public class InstructionsDisplay extends Activity {
 		} else {
 			add.setVisibility(View.GONE);
 			done.setVisibility(View.GONE);
-			moveableItem = -1;
 		}
 		edit = editing;
+		reorderDecorator.setEditing(editing);
 		adapter.notifyDataSetChanged();
 
 		((RecipeTabs) getParent()).editing = editing;
@@ -229,7 +140,8 @@ public class InstructionsDisplay extends Activity {
 		switch(id) {
 			case EDIT_INSTRUCTION_DIALOG : {
 				AlertDialog dialog = (AlertDialog) d;
-				final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
+				final int position = bundle.getInt("position", -1);
+				final Instruction instruction = adapter.getItem(position);
 				final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
 				final boolean deleteOnCancel = bundle.getBoolean("deleteOnCancel", false);
 				input.setText(instruction.getText());
@@ -246,7 +158,7 @@ public class InstructionsDisplay extends Activity {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						if(deleteOnCancel) {
 							r.removeInstruction(instruction);
-							adapter.remove(instruction);
+							adapter.remove(position);
 						}
 					}
 				});
@@ -255,12 +167,13 @@ public class InstructionsDisplay extends Activity {
 
 			case DELETE_INSTRUCTION_DIALOG : {
 				AlertDialog dialog = (AlertDialog) d;
-				final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
+				final int position = bundle.getInt("position", -1);
+				final Instruction instruction = adapter.getItem(position);
 				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						r.removeInstruction(instruction);
 
-						adapter.remove(instruction);
+						adapter.remove(position);
 					}
 				});
 				break;
@@ -309,14 +222,15 @@ public class InstructionsDisplay extends Activity {
 			}
 
 			case DELETE_INSTRUCTION_DIALOG : {
-				final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
+				final int position = bundle.getInt("position", -1);
+				final Instruction instruction = adapter.getItem(position);
 				builder.setTitle("Delete Instruction");
 				builder.setMessage("Are you sure you want to delete this instruction?");
 				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						r.removeInstruction(instruction);
 
-						adapter.remove(instruction);
+						adapter.remove(position);
 					}
 				});
 				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -360,4 +274,86 @@ public class InstructionsDisplay extends Activity {
 		}
 	}
 
+	private void createDynamicLoadAdapter() {
+
+		DynamicLoadAdapter.Specifics<Instruction> sp = new DynamicLoadAdapter.Specifics<Instruction>() {
+			public View getView(final int position, Instruction i, View convert, ViewGroup vg) {
+				if(convert == null) {
+					LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					convert = vi.inflate(R.layout.instructions_display_item, null);
+				}
+
+				TextView tv = (TextView) convert.findViewById(R.id.instruction_number);
+				tv.setText((position + 1) + ".");
+
+				tv = (TextView) convert.findViewById(R.id.instruction_text);
+
+				Button be = (Button) convert.findViewById(R.id.edit_button);
+				Button bd = (Button) convert.findViewById(R.id.delete_button);
+
+				if(i == null) {
+					tv.setText("Loading...");
+					be.setVisibility(View.GONE);
+					bd.setVisibility(View.GONE);
+					return convert;
+				} else {
+					tv.setText(i.getText());
+				}
+
+
+				if(edit) {
+					be.setVisibility(View.VISIBLE);
+					bd.setVisibility(View.VISIBLE);
+
+					be.setOnClickListener(new OnClickListener() {
+						public void onClick(View v) {
+							Bundle bundle = new Bundle();
+							bundle.putInt("position", position);
+
+							showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
+						}
+					});
+					bd.setOnClickListener(new OnClickListener() {
+						public void onClick(View v) {
+							Bundle bundle = new Bundle();
+							bundle.putInt("position", position);
+
+							showDialog(DELETE_INSTRUCTION_DIALOG, bundle);
+						}
+					});
+				} else {
+					be.setVisibility(View.GONE);
+					bd.setVisibility(View.GONE);
+				}
+
+				reorderDecorator.decorateItem(convert, position);
+
+				return convert;
+			}
+
+			public long getItemId(Instruction item) {
+				return item.getId();
+			}
+
+			public List<Instruction> filter(int offset, int max) {
+				List<Instruction> instructions = r.getInstructions();
+				return instructions;
+			}
+
+			public String convertResultToString(Instruction result) {
+				return "Instruction";
+			}
+
+			public void onItemClick(AdapterView av, View v, int position, long id, Instruction item) {
+
+			}
+
+			private View inflate(int layoutId) {
+				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				return vi.inflate(layoutId, null);
+			}
+		};
+
+		adapter = new DynamicLoadAdapter<Instruction>(sp);
+	}
 }
