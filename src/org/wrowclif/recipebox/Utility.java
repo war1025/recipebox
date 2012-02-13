@@ -22,6 +22,10 @@ public interface Utility {
 
 	public List<Category> searchCategories(String search, int maxResults);
 
+	public List<Category> getCategoriesByName(int offset, int maxResults);
+
 	public Category createOrRetrieveCategory(String category);
+
+	public Category getCategoryById(long id);
 
 }

@@ -371,9 +371,4 @@ public class IngredientsDisplay extends Activity {
 		}
 	}
 
-    public void onStop() {
-		super.onStop();
-
-		AppData.getSingleton().close();
-	}
 }

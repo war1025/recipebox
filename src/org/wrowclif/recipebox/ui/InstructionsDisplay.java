@@ -418,10 +418,4 @@ public class InstructionsDisplay extends Activity {
 		}
 	}
 
-    public void onStop() {
-		super.onStop();
-
-		AppData.getSingleton().close();
-	}
-
 }

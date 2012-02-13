@@ -78,6 +78,10 @@ public class Main extends Activity {
 				return UtilityImpl.singleton.searchRecipes(seq.toString(), 5);
 			}
 
+			public List<Recipe> publishFilter(CharSequence seq, List<Recipe> oldData, List<Recipe> newData) {
+				return newData;
+			}
+
 			public String convertResultToString(Recipe result) {
 				return result.getName();
 			}
@@ -140,6 +144,15 @@ public class Main extends Activity {
 			}
 		});
 
+		Button browseCategories = (Button) findViewById(R.id.categories);
+
+		browseCategories.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent(Main.this, BrowseCategories.class);
+				startActivity(intent);
+			}
+		});
+
 		ListView lv = (ListView) findViewById(R.id.recent_recipes);
 
 		Specifics<Recipe> sp2 = new Specifics<Recipe>() {
@@ -162,6 +175,10 @@ public class Main extends Activity {
 
 			public List<Recipe> filter(CharSequence seq) {
 				return UtilityImpl.singleton.getRecentlyViewedRecipes(0, 5);
+			}
+
+			public List<Recipe> publishFilter(CharSequence seq, List<Recipe> oldData, List<Recipe> newData) {
+				return newData;
 			}
 
 			public String convertResultToString(Recipe result) {
@@ -227,12 +244,6 @@ public class Main extends Activity {
 		dialog = builder.create();
 
 		return dialog;
-	}
-
-    public void onStop() {
-		super.onStop();
-
-		AppData.getSingleton().close();
 	}
 
 }

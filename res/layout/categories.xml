@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent" >
+	<Button
+			android:id="@+id/category_add"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="Add Category"
+			android:textSize="18sp"
+			android:layout_alignParentBottom="true" />
+	<TextView
+			android:id="@+id/category_label"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:text="Categories"
+			android:textSize="18sp" />
+	<ListView
+			android:id="@+id/category_list"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@id/category_label"
+			android:layout_above="@id/category_add"
+			android:layout_weight="1" />
+</RelativeLayout>
+

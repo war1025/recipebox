@@ -17,5 +17,7 @@
         <activity android:name=".ui.RecipeTabs"
 					android:windowSoftInputMode="adjustPan" />
 		<activity android:name=".ui.Browse" />
+		<activity android:name=".ui.BrowseCategories" />
+		<activity android:name=".ui.CategoryList" />
     </application>
 </manifest>

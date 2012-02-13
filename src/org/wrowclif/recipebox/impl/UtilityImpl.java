@@ -134,7 +134,29 @@ public class UtilityImpl implements Utility {
 		});
 	}
 
+	public List<Category> getCategoriesByName(final int offset, final int maxResults) {
+		final String stmt =
+			"SELECT c.cid, c.name, c.description " +
+			"FROM Category c " +
+			"ORDER BY c.name ASC " +
+			"LIMIT ? " +
+			"OFFSET ?;";
+
+		return data.sqlTransaction(new Transaction<List<Category>>() {
+			public List<Category> exec(SQLiteDatabase db) {
+				Cursor c = db.rawQuery(stmt, new String[] {maxResults + "", offset + ""});
+				List<Category> list = CategoryImpl.factory.createListFromCursor(c);
+				c.close();
+				return list;
+			}
+		});
+	}
+
 	public Category createOrRetrieveCategory(String category) {
 		return CategoryImpl.factory.createOrRetrieveCategory(category);
+	}
+
+	public Category getCategoryById(long id) {
+		return CategoryImpl.factory.getCategoryById(id);
 	}
 }

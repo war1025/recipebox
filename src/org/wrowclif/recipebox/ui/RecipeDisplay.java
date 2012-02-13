@@ -1,6 +1,7 @@
 package org.wrowclif.recipebox.ui;
 
 import org.wrowclif.recipebox.AppData;
+import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox.R;
@@ -22,8 +23,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.AutoCompleteTextView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.view.LayoutInflater;
@@ -87,10 +90,6 @@ public class RecipeDisplay extends Activity {
 			tv = (TextView) findViewById(R.id.cost_edit);
 			tv.setText("$" + r.getCost());
 
-			TextView[] labels = {(TextView) findViewById(R.id.name_label), (TextView) findViewById(R.id.description_label),
-								(TextView) findViewById(R.id.prep_label), (TextView) findViewById(R.id.cook_label),
-								(TextView) findViewById(R.id.cost_label)};
-
 			Button[] btns = {(Button) findViewById(R.id.name_button), (Button) findViewById(R.id.description_button),
 								(Button) findViewById(R.id.prep_button), (Button) findViewById(R.id.cook_button),
 								(Button) findViewById(R.id.cost_button)};
@@ -109,17 +108,18 @@ public class RecipeDisplay extends Activity {
 				}
 			});
 
+			findViewById(R.id.category_button).setVisibility(View.GONE);
+			ViewGroup categories = (ViewGroup) findViewById(R.id.category_box);
 
-			if(edit) {
-				for(TextView label : labels) {
-					label.setVisibility(View.GONE);
-				}
-			} else {
-				for(Button b : btns) {
-					b.setVisibility(View.GONE);
-				}
-				doneButton.setVisibility(View.GONE);
+			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			for(Category c : r.getCategories()) {
+				View v = li.inflate(R.layout.autoitem, null);
+				TextView ctv = (TextView) v.findViewById(R.id.child_name);
+				ctv.setText(c.getName());
+				categories.addView(v);
 			}
+
+			setEditing(edit);
 		}
 	}
 
@@ -423,12 +423,6 @@ public class RecipeDisplay extends Activity {
 		int min = minutes % 60;
 
 		return String.format("%02d:%02d", hours, min);
-	}
-
-	public void onStop() {
-		super.onStop();
-
-		AppData.getSingleton().close();
 	}
 
 }

@@ -47,6 +47,12 @@ public class ListAutoCompleteAdapter<T> extends BaseAdapter implements Filterabl
 		return data.size();
 	}
 
+	public void clear() {
+		if(data != null) {
+			data.clear();
+		}
+	}
+
 	public Filter getFilter() {
 		return filter;
 	}
@@ -71,7 +77,7 @@ public class ListAutoCompleteAdapter<T> extends BaseAdapter implements Filterabl
 			if(results == null) {
 				return;
 			}
-			data = (List<T>) results.values;
+			data = specifics.publishFilter(seq, data, (List<T>) results.values);
 			if(data.size() > 0) {
 				notifyDataSetChanged();
 			} else {
@@ -94,6 +100,8 @@ public class ListAutoCompleteAdapter<T> extends BaseAdapter implements Filterabl
 		public long getItemId(T item);
 
 		public List<T> filter(CharSequence seq);
+
+		public List<T> publishFilter(CharSequence seq, List<T> oldData, List<T> newData);
 
 		public String convertResultToString(T result);
 

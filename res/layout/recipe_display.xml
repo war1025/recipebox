@@ -6,7 +6,8 @@
 			android:id="@+id/time_bar"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true" >
+			android:layout_alignParentBottom="true"
+			android:layout_centerHorizontal="true" >
 		<LinearLayout
 				android:id="@+id/prep_group"
 				android:orientation="horizontal"
@@ -40,7 +41,8 @@
 				android:orientation="horizontal"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:paddingLeft="10dip"
+				android:paddingLeft="20dip"
+				android:layout_marginRight="20dip"
 				android:layout_toRightOf="@id/prep_group" >
 			<TextView
 					android:id="@+id/cook_label"
@@ -68,7 +70,6 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_toRightOf="@id/cook_group"
-				android:paddingLeft="10dip"
 				android:textSize="18sp"
 				android:text="Total Time" />
 		<TextView
@@ -173,10 +174,9 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:orientation="vertical"
-					android:paddingLeft="10dip"
-					android:paddingTop="10dip"
 					android:gravity="right"
-					android:layout_below="@id/description_edit" >
+					android:layout_below="@id/description_edit"
+					android:layout_alignParentRight="true" >
 				<LinearLayout
 						android:id="@+id/cost_group"
 						android:orientation="horizontal"
@@ -201,6 +201,33 @@
 						android:singleLine="true"
 						android:gravity="right"
 						android:textSize="24sp" />
+			</LinearLayout>
+
+			<LinearLayout
+					android:id="@+id/category_box"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:orientation="vertical"
+					android:layout_below="@id/description_edit"
+					android:layout_alignParentLeft="true"
+					android:layout_toLeftOf="@id/cost_box" >
+				<LinearLayout
+						android:id="@+id/category_group"
+						android:orientation="horizontal"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content" >
+					<TextView
+							android:id="@+id/category_label"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textSize="18sp"
+							android:text="Categories" />
+					<Button
+							android:id="@+id/category_button"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:text="Categories" />
+				</LinearLayout>
 			</LinearLayout>
 		</RelativeLayout>
 	</ScrollView>

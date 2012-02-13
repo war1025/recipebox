@@ -3,6 +3,7 @@ package org.wrowclif.recipebox.impl;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
+import android.util.Log;
 
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.AppData.Transaction;
@@ -25,6 +26,7 @@ public class CategoryImpl implements Category {
 	private String description;
 
 	private CategoryImpl(long id) {
+		this.id = id;
 		this.name = "";
 		this.description = "";
 	}
@@ -191,6 +193,27 @@ public class CategoryImpl implements Category {
 
 						ci = new CategoryImpl(id);
 						ci.name = category;
+					}
+					c.close();
+					return ci;
+				}
+			});
+		}
+
+		protected Category getCategoryById(final long id) {
+			final String stmt =
+				"SELECT c.cid, c.name, c.description " +
+				"FROM Category c " +
+				"WHERE c.cid = ?;";
+
+			return data.sqlTransaction(new Transaction<Category>() {
+				public Category exec(SQLiteDatabase db) {
+					CategoryImpl ci = null;
+					Cursor c = db.rawQuery(stmt, new String[] {id + ""});
+					if(c.moveToNext()) {
+						ci = new CategoryImpl(id);
+						ci.name = c.getString(1);
+						ci.description = c.getString(2);
 					}
 					c.close();
 					return ci;

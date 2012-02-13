@@ -212,6 +212,10 @@ public class IngredientDialog extends Dialog {
 				return UtilityImpl.singleton.searchIngredients(seq.toString(), 5);
 			}
 
+			public List<Ingredient> publishFilter(CharSequence seq, List<Ingredient> oldData, List<Ingredient> newData) {
+				return newData;
+			}
+
 			public String convertResultToString(Ingredient result) {
 				return result.getName();
 			}

@@ -42,11 +42,11 @@
 				android:layout_weight="1"
 				android:text="Browse" />
 		<Button
-				android:id="@+id/settings"
+				android:id="@+id/categories"
 				android:layout_width="0px"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
-				android:text="Search" />
+				android:text="Categories" />
 	</LinearLayout>
 	<LinearLayout
 			android:layout_width="fill_parent"

@@ -3,6 +3,7 @@ package org.wrowclif.recipebox;
 import android.content.Context;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
@@ -43,6 +44,7 @@ public class AppData {
 
 	public <E> E sqlTransaction(Transaction<E> t) {
 		E ret = null;
+		Log.d("Recipebox", "Context: " + appContext + " Helper: " + helper);
 		SQLiteDatabase db = helper.getWritableDatabase();
 		db.beginTransaction();
 		try {
