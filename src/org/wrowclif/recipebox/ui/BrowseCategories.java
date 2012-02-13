@@ -8,8 +8,8 @@ import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox.R;
 import org.wrowclif.recipebox.impl.UtilityImpl;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter.Specifics;
+
+import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
 import java.util.List;
 
@@ -45,8 +45,7 @@ import java.util.ArrayList;
 public class BrowseCategories extends Activity {
 
 	private Utility util;
-	private ListAutoCompleteAdapter<Category> recentAdapter;
-	private DynamicBrowse dynamic;
+	private DynamicLoadAdapter<Category> recentAdapter;
 	private static final int CREATE_CATEGORY_DIALOG = 1;
 
 	/** Called when the activity is first created. */
@@ -59,13 +58,9 @@ public class BrowseCategories extends Activity {
 
 		ListView lv = (ListView) findViewById(R.id.category_list);
 
-		dynamic = new DynamicBrowse();
-		recentAdapter = new ListAutoCompleteAdapter<Category>(dynamic);
+		createDynamicLoadAdapter();
 
-		dynamic.setFilter(recentAdapter.getFilter());
-
-		lv.setAdapter(recentAdapter);
-		lv.setOnItemClickListener(recentAdapter.onClick);
+		recentAdapter.setUpList(lv);
 
 		View addButton = findViewById(R.id.category_add);
 
@@ -79,9 +74,6 @@ public class BrowseCategories extends Activity {
 
     public void onResume() {
 		super.onResume();
-		dynamic.clear();
-		recentAdapter.clear();
-		recentAdapter.getFilter().filter("");
 	}
 
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
@@ -117,9 +109,7 @@ public class BrowseCategories extends Activity {
 				builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						util.createOrRetrieveCategory(input.getText().toString());
-						dynamic.clear();
 						recentAdapter.clear();
-						recentAdapter.getFilter().filter("");
 					}
 				});
 				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -137,85 +127,60 @@ public class BrowseCategories extends Activity {
 		return dialog;
 	}
 
-	protected class DynamicBrowse implements Specifics<Category> {
+	private void createDynamicLoadAdapter() {
 
-		private int size;
-		private Filter filter;
+		DynamicLoadAdapter.Specifics<Category> sp = new DynamicLoadAdapter.Specifics<Category>() {
 
-		public DynamicBrowse() {
-			this.size = 0;
-			this.filter = null;
-		}
-
-		public void setFilter(Filter f) {
-			this.filter = f;
-		}
-
-		public void clear() {
-			this.size = 0;
-		}
-
-		public View getView(int id, Category c, View v, ViewGroup vg) {
-			if(v == null) {
-				v = inflate(R.layout.autoitem);
-			}
-
-			TextView tv = (TextView) v.findViewById(R.id.child_name);
-
-			if(c == null) {
-				filter.filter("");
-				tv.setText("Loading...");
-			} else {
-				tv.setText(c.getName());
-			}
-
-			return v;
-		}
-
-		public long getItemId(Category item) {
-			return item.getId();
-		}
-
-		public List<Category> filter(CharSequence seq) {
-			List<Category> nextRecipes = UtilityImpl.singleton.getCategoriesByName(size, 5);
-			if(nextRecipes.size() == 5) {
-				nextRecipes.add(null);
-			}
-			return nextRecipes;
-		}
-
-		public List<Category> publishFilter(CharSequence seq, List<Category> oldData, List<Category> newData) {
-			if(oldData != null) {
-				if(oldData.size() > 0) {
-					oldData.remove(oldData.size() - 1);
+			public View getView(int id, Category c, View v, ViewGroup vg) {
+				if(v == null) {
+					v = inflate(R.layout.autoitem);
 				}
-				oldData.addAll(newData);
-			} else {
-				oldData = newData;
+
+				TextView tv = (TextView) v.findViewById(R.id.child_name);
+
+				if(c == null) {
+					tv.setText("Loading...");
+				} else {
+					tv.setText(c.getName());
+				}
+
+				return v;
 			}
-			size += (newData.size() < 5) ? newData.size() : 5;
-			return oldData;
-		}
 
-		public String convertResultToString(Category result) {
-			if(result == null) {
-				return "Null";
-			} else {
-				return result.getName();
+			public long getItemId(Category item) {
+				return item.getId();
 			}
-		}
 
-		public void onItemClick(AdapterView av, View v, int position, long id, Category item) {
-			Intent intent = new Intent(BrowseCategories.this, CategoryList.class);
-			Log.d("Recipebox", "Category: " + item + " " + id + " " + item.getId());
-			intent.putExtra("id", id);
-			startActivity(intent);
-		}
+			public List<Category> filter(int offset, int max) {
+				List<Category> nextRecipes = UtilityImpl.singleton.getCategoriesByName(offset, max);
+				if(nextRecipes.size() == max) {
+					nextRecipes.add(null);
+				}
+				return nextRecipes;
+			}
 
-		private View inflate(int layoutId) {
-			LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			return vi.inflate(layoutId, null);
-		}
+			public String convertResultToString(Category result) {
+				if(result == null) {
+					return "Null";
+				} else {
+					return result.getName();
+				}
+			}
+
+			public void onItemClick(AdapterView av, View v, int position, long id, Category item) {
+				Intent intent = new Intent(BrowseCategories.this, CategoryList.class);
+				Log.d("Recipebox", "Category: " + item + " " + id + " " + item.getId());
+				intent.putExtra("id", id);
+				startActivity(intent);
+			}
+
+			private View inflate(int layoutId) {
+				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				return vi.inflate(layoutId, null);
+			}
+		};
+
+		recentAdapter = new DynamicLoadAdapter<Category>(sp);
 	}
 
 }

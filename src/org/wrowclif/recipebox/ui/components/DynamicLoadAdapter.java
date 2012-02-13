@@ -1,10 +1,11 @@
-package org.wrowclif.recipebox.ui;
+package org.wrowclif.recipebox.ui.components;
 
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.util.Log;
@@ -12,27 +13,42 @@ import android.util.Log;
 import java.util.List;
 import java.util.ArrayList;
 
-public class ListAutoCompleteAdapter<T> extends BaseAdapter implements Filterable {
+public class DynamicLoadAdapter<T> extends BaseAdapter implements Filterable {
+
+	private static final int MAX_COUNT = 5;
 
 	private List<T> data;
 	private ListFilter filter;
 	private Specifics specifics;
 	public final OnItemClickListener onClick;
 
-	public ListAutoCompleteAdapter(Specifics sp) {
+	public DynamicLoadAdapter(Specifics sp) {
 		super();
 		this.specifics = sp;
 		this.filter = new ListFilter();
+		this.data = new ArrayList<T>();
+		this.data.add(null);
 
 		onClick = new SpecificsClick();
 	}
 
-	public View getView(int id, View v, ViewGroup vg) {
+	public void setUpList(ListView lv) {
+		lv.setAdapter(this);
+		lv.setOnItemClickListener(this.onClick);
+	}
 
-		return specifics.getView(id, data.get(id), v, vg);
+	public View getView(int position, View v, ViewGroup vg) {
+
+		if(data.get(position) == null) {
+			filter.filter((data.size() - 1) + "");
+		}
+		return specifics.getView(position, data.get(position), v, vg);
 	}
 
 	public long getItemId(int position) {
+		if(data.get(position) == null) {
+			return -1;
+		}
 		return specifics.getItemId(data.get(position));
 	}
 
@@ -41,16 +57,23 @@ public class ListAutoCompleteAdapter<T> extends BaseAdapter implements Filterabl
 	}
 
 	public int getCount() {
-		if(data == null) {
-			return 0;
-		}
 		return data.size();
 	}
 
 	public void clear() {
-		if(data != null) {
-			data.clear();
-		}
+		data.clear();
+		data.add(null);
+		notifyDataSetChanged();
+	}
+
+	public void remove(int position) {
+		data.remove(position);
+		notifyDataSetChanged();
+	}
+
+	public void add(int position, T item) {
+		data.add(position, item);
+		notifyDataSetChanged();
 	}
 
 	public Filter getFilter() {
@@ -66,18 +89,20 @@ public class ListAutoCompleteAdapter<T> extends BaseAdapter implements Filterabl
 		public Filter.FilterResults performFiltering(CharSequence seq) {
 			Filter.FilterResults results = null;
 			if(seq != null) {
+				int size = Integer.parseInt(seq.toString());
 				results = new Filter.FilterResults();
-				results.count = 1;
-				results.values = specifics.filter(seq);
+				results.count = size;
+				results.values = specifics.filter(size, MAX_COUNT);
 			}
 			return results;
 		}
 
 		public void publishResults(CharSequence seq, Filter.FilterResults results) {
-			if(results == null) {
+			if(results == null || ((data.size() - 1) != results.count)) {
 				return;
 			}
-			data = specifics.publishFilter(seq, data, (List<T>) results.values);
+			data.remove(data.size() - 1);
+			data.addAll((List<T>) results.values);
 			if(data.size() > 0) {
 				notifyDataSetChanged();
 			} else {
@@ -99,9 +124,7 @@ public class ListAutoCompleteAdapter<T> extends BaseAdapter implements Filterabl
 
 		public long getItemId(T item);
 
-		public List<T> filter(CharSequence seq);
-
-		public List<T> publishFilter(CharSequence seq, List<T> oldData, List<T> newData);
+		public List<T> filter(int offset, int maxResults);
 
 		public String convertResultToString(T result);
 

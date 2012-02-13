@@ -7,8 +7,9 @@ import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox.R;
 import org.wrowclif.recipebox.impl.UtilityImpl;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter.Specifics;
+
+import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
+import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
 import java.util.List;
 
@@ -41,7 +42,7 @@ import java.util.ArrayList;
 public class Main extends Activity {
 
 	private Utility util;
-	private ListAutoCompleteAdapter<Recipe> recentAdapter;
+	private DynamicLoadAdapter<Recipe> recentAdapter;
 	private static final int CREATE_RECIPE_DIALOG = 1;
 
 	/** Called when the activity is first created. */
@@ -56,7 +57,7 @@ public class Main extends Activity {
 
 		AutoCompleteTextView tv = (AutoCompleteTextView) findViewById(R.id.recipesearch);
 
-		Specifics<Recipe> sp = new Specifics<Recipe>() {
+		ListAutoCompleteAdapter.Specifics<Recipe> sp = new ListAutoCompleteAdapter.Specifics<Recipe>() {
 
 			public View getView(int id, Recipe r, View v, ViewGroup vg) {
 				if(v == null) {
@@ -78,10 +79,6 @@ public class Main extends Activity {
 				return UtilityImpl.singleton.searchRecipes(seq.toString(), 5);
 			}
 
-			public List<Recipe> publishFilter(CharSequence seq, List<Recipe> oldData, List<Recipe> newData) {
-				return newData;
-			}
-
 			public String convertResultToString(Recipe result) {
 				return result.getName();
 			}
@@ -100,10 +97,7 @@ public class Main extends Activity {
 
 		ListAutoCompleteAdapter<Recipe> adapter = new ListAutoCompleteAdapter<Recipe>(sp);
 
-
-		tv.setAdapter(adapter);
-
-		tv.setOnItemClickListener(adapter.onClick);
+		adapter.setUpView(tv);
 
 		tv.setOnEditorActionListener(new OnEditorActionListener() {
 			public boolean onEditorAction(TextView v, int action, KeyEvent event) {
@@ -155,7 +149,7 @@ public class Main extends Activity {
 
 		ListView lv = (ListView) findViewById(R.id.recent_recipes);
 
-		Specifics<Recipe> sp2 = new Specifics<Recipe>() {
+		DynamicLoadAdapter.Specifics<Recipe> sp2 = new DynamicLoadAdapter.Specifics<Recipe>() {
 
 			public View getView(int id, Recipe r, View v, ViewGroup vg) {
 				if(v == null) {
@@ -164,7 +158,11 @@ public class Main extends Activity {
 
 				TextView tv = (TextView) v.findViewById(R.id.child_name);
 
-				tv.setText(r.getName());
+				if(r == null) {
+					tv.setText("Loading...");
+				} else {
+					tv.setText(r.getName());
+				}
 
 				return v;
 			}
@@ -173,12 +171,8 @@ public class Main extends Activity {
 				return item.getId();
 			}
 
-			public List<Recipe> filter(CharSequence seq) {
-				return UtilityImpl.singleton.getRecentlyViewedRecipes(0, 5);
-			}
-
-			public List<Recipe> publishFilter(CharSequence seq, List<Recipe> oldData, List<Recipe> newData) {
-				return newData;
+			public List<Recipe> filter(int offset, int max) {
+				return UtilityImpl.singleton.getRecentlyViewedRecipes(offset, max);
 			}
 
 			public String convertResultToString(Recipe result) {
@@ -197,16 +191,15 @@ public class Main extends Activity {
 			}
 		};
 
-		recentAdapter = new ListAutoCompleteAdapter<Recipe>(sp2);
+		recentAdapter = new DynamicLoadAdapter<Recipe>(sp2);
 
-		lv.setAdapter(recentAdapter);
-		lv.setOnItemClickListener(recentAdapter.onClick);
+		recentAdapter.setUpList(lv);
 
     }
 
     public void onResume() {
 		super.onResume();
-		recentAdapter.getFilter().filter("");
+		recentAdapter.clear();
 	}
 
     protected Dialog onCreateDialog(int id) {

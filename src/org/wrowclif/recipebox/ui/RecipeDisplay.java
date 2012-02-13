@@ -5,9 +5,11 @@ import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox.R;
+
+import org.wrowclif.recipebox.ui.components.RecipeMenus;
+import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
+
 import org.wrowclif.recipebox.impl.UtilityImpl;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter.Specifics;
 
 import java.util.List;
 
@@ -48,6 +50,7 @@ public class RecipeDisplay extends Activity {
 	private Recipe r;
 	private Utility util;
 	private boolean edit;
+	private RecipeMenus menus;
 	private static final int NAME_DIALOG = 0;
 	private static final int DESCRIPTION_DIALOG = 1;
 	private static final int PREP_TIME_DIALOG = 2;
@@ -72,23 +75,12 @@ public class RecipeDisplay extends Activity {
 		if(r != null) {
 			setTitle(r.getName());
 
-			TextView tv = (TextView) findViewById(R.id.name_edit);
-			tv.setText(r.getName());
-
-			tv = (TextView) findViewById(R.id.description_edit);
-			tv.setText(r.getDescription());
-
-			tv = (TextView) findViewById(R.id.prep_edit);
-			tv.setText(timeFormat(r.getPrepTime()));
-
-			tv = (TextView) findViewById(R.id.cook_edit);
-			tv.setText(timeFormat(r.getCookTime()));
-
-			tv = (TextView) findViewById(R.id.total_edit);
-			tv.setText(timeFormat(r.getCookTime() + r.getPrepTime()));
-
-			tv = (TextView) findViewById(R.id.cost_edit);
-			tv.setText("$" + r.getCost());
+			setText(R.id.name_edit, r.getName());
+			setText(R.id.description_edit, r.getDescription());
+			setText(R.id.prep_edit, timeFormat(r.getPrepTime()));
+			setText(R.id.cook_edit, timeFormat(r.getCookTime()));
+			setText(R.id.total_edit, timeFormat(r.getCookTime() + r.getPrepTime()));
+			setText(R.id.cost_edit, "$" + r.getCost());
 
 			Button[] btns = {(Button) findViewById(R.id.name_button), (Button) findViewById(R.id.description_button),
 								(Button) findViewById(R.id.prep_button), (Button) findViewById(R.id.cook_button),
@@ -121,6 +113,11 @@ public class RecipeDisplay extends Activity {
 
 			setEditing(edit);
 		}
+	}
+
+	private void setText(int id, String text) {
+		TextView tv = (TextView) findViewById(id);
+		tv.setText(text);
 	}
 
 	public void onResume() {
@@ -175,89 +172,18 @@ public class RecipeDisplay extends Activity {
 	}
 
 	protected Dialog onCreateDialog(int id) {
+		if(menus != null) {
+			Dialog d = menus.createDialog(id);
+			if(d != null) {
+				return d;
+			}
+		}
 		switch(id) {
-			case CREATE_DIALOG : case EDIT_DIALOG : case DELETE_DIALOG :
-				return showMenuDialog(id);
 			case PREP_TIME_DIALOG : case COOK_TIME_DIALOG :
 				return showTimeDialog(id);
 			default :
 				return showTextDialog(id);
 		}
-	}
-
-	protected Dialog showMenuDialog(int id) {
-		Dialog dialog = null;
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		switch(id) {
-			case CREATE_DIALOG : {
-				builder.setTitle("Create New Recipe");
-				builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						Recipe r2 = UtilityImpl.singleton.newRecipe("New Recipe");
-						Intent intent = new Intent(RecipeDisplay.this, RecipeTabs.class);
-						intent.putExtra("id", r2.getId());
-						intent.putExtra("edit", true);
-						intent.putExtra("tab", 0);
-
-						RecipeDisplay.this.finish();
-						startActivity(intent);
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-
-					}
-				});
-				break;
-			}
-
-			case EDIT_DIALOG : {
-				builder.setTitle("Edit Recipe");
-				builder.setItems(new String[] {"Edit This Recipe", "Create Variant", "Cancel"},
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							switch(which) {
-								case 0 :
-									setEditing(!edit);
-									break;
-								case 1 :
-									Recipe r2 = r.branch(r.getName() + " (branch)");
-									Intent intent = new Intent(RecipeDisplay.this, RecipeTabs.class);
-									intent.putExtra("id", r2.getId());
-									intent.putExtra("edit", true);
-
-									RecipeDisplay.this.finish();
-									startActivity(intent);
-									break;
-							}
-						}
-				});
-				break;
-			}
-
-			case DELETE_DIALOG : {
-				builder.setTitle("Delete Recipe");
-				builder.setMessage("Are you sure you want to delete the recipe?");
-				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						r.delete();
-						RecipeDisplay.this.finish();
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-
-					}
-				});
-				break;
-			}
-		}
-		builder.setCancelable(true);
-
-		dialog = builder.create();
-
-		return dialog;
 	}
 
 	protected Dialog showTimeDialog(int id) {
@@ -390,31 +316,29 @@ public class RecipeDisplay extends Activity {
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.recipe_menu, menu);
+		EditSwitcher es = new EditSwitcher() {
+			public void setEditing(boolean editing) {
+				RecipeDisplay.this.setEditing(editing);
+			}
+
+			public boolean getEditing() {
+				return RecipeDisplay.this.edit;
+			}
+		};
+
+		menus = new RecipeMenus(r, this, 0, es);
+
+		menus.createMenu(menu);
 		return true;
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-			case R.id.edit :
-				if(edit) {
-					setEditing(false);
-				} else {
-					showDialog(EDIT_DIALOG);
-				}
-				return true;
+		boolean menuHandled = menus.onItemSelect(item.getItemId());
 
-			case R.id.delete :
-				showDialog(DELETE_DIALOG);
-				return true;
-
-			case R.id.create :
-				showDialog(CREATE_DIALOG);
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
+		if(!menuHandled) {
+			return super.onOptionsItemSelected(item);
+		} else {
+			return true;
 		}
 	}
 

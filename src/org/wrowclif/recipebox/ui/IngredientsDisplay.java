@@ -5,9 +5,12 @@ import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.RecipeIngredient;
 import org.wrowclif.recipebox.R;
+
+import org.wrowclif.recipebox.ui.components.IngredientDialog;
+import org.wrowclif.recipebox.ui.components.RecipeMenus;
+import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
+
 import org.wrowclif.recipebox.impl.UtilityImpl;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter.Specifics;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -49,6 +52,7 @@ public class IngredientsDisplay extends Activity {
 	private Recipe r;
 	private ArrayAdapter<RecipeIngredient> adapter;
 	private int moveableItem;
+	private RecipeMenus menus;
 
 	private static final int NEW_INGREDIENT_DIALOG = 0;
 	private static final int DELETE_INGREDIENT_DIALOG = 1;
@@ -185,8 +189,6 @@ public class IngredientsDisplay extends Activity {
 				done.setVisibility(View.GONE);
 			}
 		}
-
-
     }
 
 	public void onResume() {
@@ -245,6 +247,12 @@ public class IngredientsDisplay extends Activity {
 	}
 
 	protected Dialog onCreateDialog(int id, Bundle bundle) {
+		if(menus != null) {
+			Dialog d = menus.createDialog(id);
+			if(d != null) {
+				return d;
+			}
+		}
 		Dialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -270,70 +278,6 @@ public class IngredientsDisplay extends Activity {
 				});
 				break;
 			}
-
-			case CREATE_DIALOG : {
-				builder.setTitle("Create New Recipe");
-				builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						Recipe r2 = UtilityImpl.singleton.newRecipe("New Recipe");
-						Intent intent = new Intent(IngredientsDisplay.this, RecipeTabs.class);
-						intent.putExtra("id", r2.getId());
-						intent.putExtra("edit", true);
-						intent.putExtra("tab", 1);
-
-						IngredientsDisplay.this.finish();
-						startActivity(intent);
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-
-					}
-				});
-				break;
-			}
-
-			case EDIT_DIALOG : {
-				builder.setTitle("Edit Recipe");
-				builder.setItems(new String[] {"Edit This Recipe", "Create Variant", "Cancel"},
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							switch(which) {
-								case 0 :
-									setEditing(!edit);
-									break;
-								case 1 :
-									Recipe r2 = r.branch(r.getName() + " (branch)");
-									Intent intent = new Intent(IngredientsDisplay.this, RecipeTabs.class);
-									intent.putExtra("id", r2.getId());
-									intent.putExtra("edit", true);
-									intent.putExtra("tab", 1);
-
-									IngredientsDisplay.this.finish();
-									startActivity(intent);
-									break;
-							}
-						}
-				});
-				break;
-			}
-
-			case DELETE_DIALOG : {
-				builder.setTitle("Delete Recipe");
-				builder.setMessage("Are you sure you want to delete the recipe?");
-				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						r.delete();
-						IngredientsDisplay.this.finish();
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-
-					}
-				});
-				break;
-			}
 		}
 		builder.setCancelable(true);
 
@@ -343,31 +287,28 @@ public class IngredientsDisplay extends Activity {
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.recipe_menu, menu);
+		EditSwitcher es = new EditSwitcher() {
+			public void setEditing(boolean editing) {
+				IngredientsDisplay.this.setEditing(editing);
+			}
+
+			public boolean getEditing() {
+				return IngredientsDisplay.this.edit;
+			}
+		};
+		menus = new RecipeMenus(r, this, 1, es);
+
+		menus.createMenu(menu);
 		return true;
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-			case R.id.edit :
-				if(edit) {
-					setEditing(false);
-				} else {
-					showDialog(EDIT_DIALOG);
-				}
-				return true;
+		boolean menuHandled = menus.onItemSelect(item.getItemId());
 
-			case R.id.delete :
-				showDialog(DELETE_DIALOG);
-				return true;
-
-			case R.id.create :
-				showDialog(CREATE_DIALOG);
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
+		if(!menuHandled) {
+			return super.onOptionsItemSelected(item);
+		} else {
+			return true;
 		}
 	}
 

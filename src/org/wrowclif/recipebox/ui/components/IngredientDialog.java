@@ -1,12 +1,14 @@
-package org.wrowclif.recipebox.ui;
+package org.wrowclif.recipebox.ui.components;
 
 import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.RecipeIngredient;
 import org.wrowclif.recipebox.R;
+
 import org.wrowclif.recipebox.impl.UtilityImpl;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter;
-import org.wrowclif.recipebox.ui.ListAutoCompleteAdapter.Specifics;
+
+import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
+import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter.Specifics;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -210,10 +212,6 @@ public class IngredientDialog extends Dialog {
 
 			public List<Ingredient> filter(CharSequence seq) {
 				return UtilityImpl.singleton.searchIngredients(seq.toString(), 5);
-			}
-
-			public List<Ingredient> publishFilter(CharSequence seq, List<Ingredient> oldData, List<Ingredient> newData) {
-				return newData;
 			}
 
 			public String convertResultToString(Ingredient result) {
