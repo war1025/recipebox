@@ -9,6 +9,9 @@ import org.wrowclif.recipebox.R;
 import org.wrowclif.recipebox.ui.components.IngredientDialog;
 import org.wrowclif.recipebox.ui.components.RecipeMenus;
 import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
+import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
+import org.wrowclif.recipebox.ui.components.ReorderableItemDecorator;
+import org.wrowclif.recipebox.ui.components.ReorderableItemDecorator.ItemSwap;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
@@ -50,8 +53,8 @@ public class IngredientsDisplay extends Activity {
 
 	private boolean edit;
 	private Recipe r;
-	private ArrayAdapter<RecipeIngredient> adapter;
-	private int moveableItem;
+	private DynamicLoadAdapter<RecipeIngredient> adapter;
+	private ReorderableItemDecorator reorderDecorator;
 	private RecipeMenus menus;
 
 	private static final int NEW_INGREDIENT_DIALOG = 0;
@@ -70,125 +73,42 @@ public class IngredientsDisplay extends Activity {
 
 		r = ((RecipeTabs) getParent()).curRecipe;
 		edit = ((RecipeTabs) getParent()).editing;
-		moveableItem = -1;
 
-		if(r != null) {
-			setTitle(r.getName());
+		setTitle(r.getName());
 
-			ListView lv = (ListView) findViewById(R.id.ingredient_list);
-			adapter = new ArrayAdapter<RecipeIngredient>(this, R.layout.ingredient_display_item, r.getIngredients()) {
-				public View getView(final int position, View convert, ViewGroup group) {
-					if(convert == null) {
-						LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-						convert = vi.inflate(R.layout.ingredient_display_item, null);
-					}
+		createDynamicLoadAdapter();
 
-					final RecipeIngredient i = getItem(position);
-
-					TextView tv = (TextView) convert.findViewById(R.id.ingredient_box);
-					tv.setText(i.getAmount() + " " + i.getName());
-
-					Button be = (Button) convert.findViewById(R.id.edit_button);
-					Button bd = (Button) convert.findViewById(R.id.delete_button);
-
-					if(edit) {
-						be.setVisibility(View.VISIBLE);
-						bd.setVisibility(View.VISIBLE);
-
-						be.setOnClickListener(new OnClickListener() {
-							public void onClick(View v) {
-								Bundle bundle = new Bundle();
-								bundle.putInt("position", position);
-
-								showDialog(NEW_INGREDIENT_DIALOG, bundle);
-							}
-						});
-						bd.setOnClickListener(new OnClickListener() {
-							public void onClick(View v) {
-								Bundle bundle = new Bundle();
-								bundle.putInt("position", position);
-
-								showDialog(DELETE_INGREDIENT_DIALOG, bundle);
-							}
-						});
-						convert.setOnLongClickListener(new OnLongClickListener() {
-							public boolean onLongClick(View v) {
-								if(moveableItem != position) {
-									moveableItem = position;
-								} else {
-									moveableItem = -1;
-								}
-								adapter.notifyDataSetChanged();
-								return true;
-							}
-						});
-					} else {
-						be.setVisibility(View.GONE);
-						bd.setVisibility(View.GONE);
-						convert.setOnLongClickListener(null);
-					}
-
-					Button mu = (Button) convert.findViewById(R.id.up_button);
-					Button md = (Button) convert.findViewById(R.id.down_button);
-
-					if(moveableItem == position) {
-						mu.setVisibility(View.VISIBLE);
-						mu.setOnClickListener(new OnClickListener() {
-							public void onClick(View v) {
-								if(position > 0) {
-									r.swapIngredientPositions(adapter.getItem(position), adapter.getItem(position -1));
-									RecipeIngredient i = adapter.getItem(position);
-									moveableItem = position - 1;
-									adapter.remove(i);
-									adapter.insert(i, position -1);
-								}
-							}
-						});
-						md.setVisibility(View.VISIBLE);
-						md.setOnClickListener(new OnClickListener() {
-							public void onClick(View v) {
-								if(position < adapter.getCount() - 1) {
-									r.swapIngredientPositions(adapter.getItem(position), adapter.getItem(position + 1));
-									RecipeIngredient i = adapter.getItem(position + 1);
-									moveableItem = position + 1;
-									adapter.remove(i);
-									adapter.insert(i, position);
-								}
-							}
-						});
-					} else {
-						mu.setVisibility(View.GONE);
-						md.setVisibility(View.GONE);
-					}
-					return convert;
-				}
-			};
-
-			lv.setAdapter(adapter);
-
-			Button add = (Button) findViewById(R.id.add_button);
-
-			add.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					Bundle bundle = new Bundle();
-
-					showDialog(NEW_INGREDIENT_DIALOG, bundle);
-				}
-			});
-
-			Button done = (Button) findViewById(R.id.done_button);
-
-			done.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					setEditing(false);
-				}
-			});
-
-			if(!edit) {
-				add.setVisibility(View.GONE);
-				done.setVisibility(View.GONE);
+		ItemSwap swapper = new ItemSwap() {
+			public void swapItems(int a, int b) {
+				r.swapIngredientPositions(adapter.getItem(a), adapter.getItem(b));
 			}
-		}
+		};
+
+		reorderDecorator = new ReorderableItemDecorator(adapter, swapper);
+
+		ListView lv = (ListView) findViewById(R.id.ingredient_list);
+
+		lv.setAdapter(adapter);
+
+		Button add = (Button) findViewById(R.id.add_button);
+
+		add.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Bundle bundle = new Bundle();
+
+				showDialog(NEW_INGREDIENT_DIALOG, bundle);
+			}
+		});
+
+		Button done = (Button) findViewById(R.id.done_button);
+
+		done.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				setEditing(false);
+			}
+		});
+
+		setEditing(edit);
     }
 
 	public void onResume() {
@@ -208,9 +128,9 @@ public class IngredientsDisplay extends Activity {
 		} else {
 			add.setVisibility(View.GONE);
 			done.setVisibility(View.GONE);
-			moveableItem = -1;
 		}
 		edit = editing;
+		reorderDecorator.setEditing(editing);
 		adapter.notifyDataSetChanged();
 
 		((RecipeTabs) getParent()).editing = editing;
@@ -233,12 +153,13 @@ public class IngredientsDisplay extends Activity {
 
 			case DELETE_INGREDIENT_DIALOG : {
 				AlertDialog dialog = (AlertDialog) d;
-				final RecipeIngredient ri = adapter.getItem(bundle.getInt("position", -1));
+				final int position = bundle.getInt("position", -1);
+				final RecipeIngredient ri = adapter.getItem(position);
 				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						r.removeIngredient(ri);
 
-						adapter.remove(ri);
+						adapter.remove(position);
 					}
 				});
 				break;
@@ -261,14 +182,15 @@ public class IngredientsDisplay extends Activity {
 				return new IngredientDialog(this);
 			}
 			case DELETE_INGREDIENT_DIALOG : {
-				final RecipeIngredient ri = adapter.getItem(bundle.getInt("position", -1));
+				final int position = bundle.getInt("position", -1);
+				final RecipeIngredient ri = adapter.getItem(position);
 				builder.setTitle("Delete Ingredient");
 				builder.setMessage("Are you sure you want to delete this ingredient?");
 				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						r.removeIngredient(ri);
 
-						adapter.remove(ri);
+						adapter.remove(position);
 					}
 				});
 				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -312,4 +234,81 @@ public class IngredientsDisplay extends Activity {
 		}
 	}
 
+	private void createDynamicLoadAdapter() {
+
+		DynamicLoadAdapter.Specifics<RecipeIngredient> sp = new DynamicLoadAdapter.Specifics<RecipeIngredient>() {
+			public View getView(final int position, RecipeIngredient i, View convert, ViewGroup group) {
+				if(convert == null) {
+					LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					convert = vi.inflate(R.layout.ingredient_display_item, null);
+				}
+
+				TextView tv = (TextView) convert.findViewById(R.id.ingredient_box);
+
+				Button be = (Button) convert.findViewById(R.id.edit_button);
+				Button bd = (Button) convert.findViewById(R.id.delete_button);
+
+				if(i == null) {
+					tv.setText("Loading...");
+					be.setVisibility(View.GONE);
+					bd.setVisibility(View.GONE);
+					return convert;
+				} else {
+					tv.setText(i.getAmount() + " " + i.getName());
+				}
+
+				if(edit) {
+					be.setVisibility(View.VISIBLE);
+					bd.setVisibility(View.VISIBLE);
+
+					be.setOnClickListener(new OnClickListener() {
+						public void onClick(View v) {
+							Bundle bundle = new Bundle();
+							bundle.putInt("position", position);
+
+							showDialog(NEW_INGREDIENT_DIALOG, bundle);
+						}
+					});
+					bd.setOnClickListener(new OnClickListener() {
+						public void onClick(View v) {
+							Bundle bundle = new Bundle();
+							bundle.putInt("position", position);
+
+							showDialog(DELETE_INGREDIENT_DIALOG, bundle);
+						}
+					});
+				} else {
+					be.setVisibility(View.GONE);
+					bd.setVisibility(View.GONE);
+				}
+
+				reorderDecorator.decorateItem(convert, position);
+				return convert;
+			}
+
+			public long getItemId(RecipeIngredient item) {
+				return item.getIngredient().getId();
+			}
+
+			public List<RecipeIngredient> filter(int offset, int max) {
+				List<RecipeIngredient> ingredients = r.getIngredients();
+				return ingredients;
+			}
+
+			public String convertResultToString(RecipeIngredient result) {
+				return "Ingredient";
+			}
+
+			public void onItemClick(AdapterView av, View v, int position, long id, RecipeIngredient item) {
+
+			}
+
+			private View inflate(int layoutId) {
+				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				return vi.inflate(layoutId, null);
+			}
+		};
+
+		adapter = new DynamicLoadAdapter<RecipeIngredient>(sp);
+	}
 }

@@ -9,6 +9,7 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 
 import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
 import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter.Specifics;
+import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class IngredientDialog extends Dialog {
 	private Button cancelButton;
 
 	private Recipe recipe;
-	private ArrayAdapter<RecipeIngredient> adapter;
+	private DynamicLoadAdapter<RecipeIngredient> adapter;
 	private RecipeIngredient ingredient;
 	private int position;
 
@@ -84,7 +85,7 @@ public class IngredientDialog extends Dialog {
 		inUseOkOnClick = confirmCancelOnClick;
 	}
 
-	public void prepareNew(Recipe recipe, ArrayAdapter<RecipeIngredient> adapter) {
+	public void prepareNew(Recipe recipe, DynamicLoadAdapter<RecipeIngredient> adapter) {
 		this.recipe = recipe;
 		this.adapter = adapter;
 		this.ingredient = null;
@@ -93,7 +94,7 @@ public class IngredientDialog extends Dialog {
 		showNew();
 	}
 
-	public void prepareExisiting(Recipe r, ArrayAdapter<RecipeIngredient> adapter, RecipeIngredient ingredient, int position) {
+	public void prepareExisiting(Recipe r, DynamicLoadAdapter<RecipeIngredient> adapter, RecipeIngredient ingredient, int position) {
 		this.recipe = r;
 		this.adapter = adapter;
 		this.ingredient = ingredient;
@@ -247,7 +248,7 @@ public class IngredientDialog extends Dialog {
 					showAlreadyInUse();
 				} else {
 					ri.setAmount(amountText);
-					adapter.add(ri);
+					adapter.add(adapter.getCount(), ri);
 					IngredientDialog.this.dismiss();
 				}
 			}

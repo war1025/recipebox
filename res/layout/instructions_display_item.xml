@@ -12,11 +12,13 @@
 				android:id="@+id/up_button"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:visibility="gone"
 				android:text="^" />
 		<Button
 				android:id="@+id/down_button"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:visibility="gone"
 				android:text="V" />
 	</LinearLayout>
 	<TextView
