@@ -130,7 +130,7 @@
 					android:textSize="22sp"
 					android:paddingLeft="10dp"
 					android:imeOptions="actionDone"
-					android:inputType="text|textCapWords"
+					android:singleLine="false"
 					android:layout_below="@id/name_group"
 					android:layout_alignLeft="@id/name_group" />
 
