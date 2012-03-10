@@ -74,10 +74,22 @@ public class RecipeDisplay extends Activity {
 		if(r != null) {
 			setTitle(r.getName());
 
-			setText(R.id.name_edit, r.getName());
-			setText(R.id.description_edit, r.getDescription());
-			setText(R.id.prep_edit, timeFormat(r.getPrepTime()));
-			setText(R.id.cook_edit, timeFormat(r.getCookTime()));
+			String name = r.getName();
+			setText(R.id.name_edit, name);
+			setText(R.id.name_button, name.equals("") ? "Edit Name" : name);
+
+			String description = r.getDescription();
+			setText(R.id.description_edit, description);
+			setText(R.id.description_button, description.equals("") ? "Edit Description" : description);
+
+			String prepTime = timeFormat(r.getPrepTime());
+			setText(R.id.prep_edit, prepTime);
+			setText(R.id.prep_button, prepTime);
+
+			String cookTime = timeFormat(r.getCookTime());
+			setText(R.id.cook_edit, cookTime);
+			setText(R.id.cook_button, cookTime);
+
 			setText(R.id.total_edit, timeFormat(r.getCookTime() + r.getPrepTime()));
 
 			Button[] btns = {(Button) findViewById(R.id.name_button), (Button) findViewById(R.id.description_button),
@@ -126,14 +138,13 @@ public class RecipeDisplay extends Activity {
 	}
 
 	protected void setEditing(boolean editing) {
-		TextView[] labels = {(TextView) findViewById(R.id.name_label), (TextView) findViewById(R.id.description_label),
-								(TextView) findViewById(R.id.prep_label), (TextView) findViewById(R.id.cook_label),
+		TextView[] labels = {(TextView) findViewById(R.id.name_edit), (TextView) findViewById(R.id.description_edit),
+								(TextView) findViewById(R.id.prep_edit), (TextView) findViewById(R.id.cook_edit),
 								(TextView) findViewById(R.id.total_label), (TextView) findViewById(R.id.total_edit)};
 
 		Button[] btns = {(Button) findViewById(R.id.name_button), (Button) findViewById(R.id.description_button),
 							(Button) findViewById(R.id.prep_button), (Button) findViewById(R.id.cook_button),
 							(Button) findViewById(R.id.done_editing)};
-
 		if(editing) {
 			for(Button b : btns) {
 				b.setVisibility(View.VISIBLE);
@@ -190,11 +201,12 @@ public class RecipeDisplay extends Activity {
 				return new TimePickerDialog(RecipeDisplay.this, new OnTimeSetListener() {
 						public void onTimeSet(TimePicker picker, int hour, int minute) {
 							r.setPrepTime(hour * 60 + minute);
-							TextView tv = (TextView) findViewById(R.id.prep_edit);
-							tv.setText(timeFormat(r.getPrepTime()));
 
-							tv = (TextView) findViewById(R.id.total_edit);
-							tv.setText(timeFormat(r.getPrepTime() + r.getCookTime()));
+							String prepTime = timeFormat(r.getPrepTime());
+							setText(R.id.prep_edit, prepTime);
+							setText(R.id.prep_button, prepTime);
+
+							setText(R.id.total_edit, timeFormat(r.getPrepTime() + r.getCookTime()));
 						}
 					}, time / 60, time % 60, true);
 
@@ -205,11 +217,12 @@ public class RecipeDisplay extends Activity {
 				return new TimePickerDialog(RecipeDisplay.this, new OnTimeSetListener() {
 						public void onTimeSet(TimePicker picker, int hour, int minute) {
 							r.setCookTime(hour * 60 + minute);
-							TextView tv = (TextView) findViewById(R.id.cook_edit);
-							tv.setText(timeFormat(r.getCookTime()));
 
-							tv = (TextView) findViewById(R.id.total_edit);
-							tv.setText(timeFormat(r.getPrepTime() + r.getCookTime()));
+							String cookTime = timeFormat(r.getCookTime());
+							setText(R.id.cook_edit, cookTime);
+							setText(R.id.cook_button, cookTime);
+
+							setText(R.id.total_edit, timeFormat(r.getPrepTime() + r.getCookTime()));
 						}
 					}, time / 60, time % 60, true);
 			}
@@ -250,8 +263,10 @@ public class RecipeDisplay extends Activity {
 						EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
 						String value = input.getText().toString();
 						r.setName(value);
-						TextView tv = (TextView) findViewById(R.id.name_edit);
-						tv.setText(r.getName());
+
+						String name = r.getName();
+						setText(R.id.name_edit, name);
+						setText(R.id.name_button, name.equals("") ? "Edit Name" : name);
 					}
 				});
 
@@ -271,8 +286,10 @@ public class RecipeDisplay extends Activity {
 						EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
 						String value = input.getText().toString();
 						r.setDescription(value);
-						TextView tv = (TextView) findViewById(R.id.description_edit);
-						tv.setText(r.getDescription());
+
+						String description = r.getDescription();
+						setText(R.id.description_edit, description);
+						setText(R.id.description_button, description.equals("") ? "Edit Description" : description);
 					}
 				});
 

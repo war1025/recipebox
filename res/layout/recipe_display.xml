@@ -8,68 +8,77 @@
 			android:layout_height="wrap_content"
 			android:layout_alignParentBottom="true"
 			android:layout_centerHorizontal="true" >
+
+		<TextView
+				android:id="@+id/prep_label"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="18sp"
+				android:text="Prep Time" />
+
 		<LinearLayout
 				android:id="@+id/prep_group"
 				android:orientation="horizontal"
 				android:layout_width="wrap_content"
-				android:layout_height="wrap_content" >
+				android:layout_height="wrap_content"
+				android:layout_below="@id/prep_label"
+				android:layout_alignRight="@id/prep_label" >
 			<TextView
-					android:id="@+id/prep_label"
+					android:id="@+id/prep_edit"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:textSize="18sp"
-					android:text="Prep Time" />
+					android:singleLine="true"
+					android:gravity="right"
+					android:textSize="24sp" />
 			<Button
 					android:id="@+id/prep_button"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Prep Time" />
+					android:text="Prep Time"
+					android:singleLine="true"
+					android:gravity="right"
+					android:textSize="24sp" />
 		</LinearLayout>
 
 		<TextView
-				android:id="@+id/prep_edit"
+				android:id="@+id/cook_label"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:singleLine="true"
-				android:gravity="right"
-				android:textSize="24sp"
-				android:layout_below="@id/prep_group"
-				android:layout_alignRight="@id/prep_group" />
+				android:textSize="18sp"
+				android:paddingLeft="20dip"
+				android:layout_marginRight="20dip"
+				android:text="Cook Time"
+				android:layout_toRightOf="@id/prep_label" />
 
 		<LinearLayout
 				android:id="@+id/cook_group"
 				android:orientation="horizontal"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:paddingLeft="20dip"
-				android:layout_marginRight="20dip"
-				android:layout_toRightOf="@id/prep_group" >
+				android:layout_below="@id/cook_label"
+				android:layout_alignRight="@id/cook_label" >
 			<TextView
-					android:id="@+id/cook_label"
+					android:id="@+id/cook_edit"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:textSize="18sp"
-					android:text="Cook Time" />
+					android:singleLine="true"
+					android:gravity="right"
+					android:textSize="24sp" />
 			<Button
 					android:id="@+id/cook_button"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text="Cook Time" />
+					android:text="Cook Time"
+					android:singleLine="true"
+					android:gravity="right"
+					android:textSize="24sp" />
 		</LinearLayout>
-		<TextView
-				android:id="@+id/cook_edit"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:singleLine="true"
-				android:gravity="right"
-				android:textSize="24sp"
-				android:layout_below="@id/cook_group"
-				android:layout_alignRight="@id/cook_group" />
+
 		<TextView
 				android:id="@+id/total_label"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_toRightOf="@id/cook_group"
+				android:layout_toRightOf="@id/cook_label"
 				android:textSize="18sp"
 				android:text="Total Time" />
 		<TextView
@@ -88,7 +97,7 @@
 				android:layout_height="wrap_content"
 				android:text="Done Editing"
 				android:gravity="center_vertical"
-				android:layout_below="@id/cook_group"
+				android:layout_alignBottom="@id/cook_group"
 				android:layout_alignParentRight="true" />
 	</RelativeLayout>
 	<ScrollView
@@ -102,78 +111,87 @@
 				android:layout_width="fill_parent"
 				android:layout_height="fill_parent" >
 
+			<TextView
+					android:id="@+id/name_label"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:textSize="18sp"
+					android:text="Name" />
+
 			<LinearLayout
 					android:id="@+id/name_group"
 					android:orientation="horizontal"
 					android:layout_width="wrap_content"
-					android:layout_height="wrap_content" >
+					android:layout_height="wrap_content"
+					android:layout_below="@id/name_label"
+					android:layout_alignLeft="@id/name_label" >
 
 				<TextView
-						android:id="@+id/name_label"
+						android:id="@+id/name_edit"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:textSize="18sp"
-						android:text="Name" />
+						android:textSize="22sp"
+						android:paddingLeft="10dp"
+						android:imeOptions="actionDone"
+						android:singleLine="false" />
 				<Button
 						android:id="@+id/name_button"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:text="Name"
-						android:layout_toRightOf="@id/name_label"
-						android:layout_alignBaseline="@id/name_label" />
+						android:gravity="left"
+						android:textSize="22sp"
+						android:paddingLeft="10dp"
+						android:singleLine="false"
+						android:layout_toRightOf="@id/name_edit"
+						android:layout_alignBaseline="@id/name_edit" />
 			</LinearLayout>
 
 			<TextView
-					android:id="@+id/name_edit"
+					android:id="@+id/description_label"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:textSize="22sp"
-					android:paddingLeft="10dp"
-					android:imeOptions="actionDone"
-					android:singleLine="false"
-					android:layout_below="@id/name_group"
-					android:layout_alignLeft="@id/name_group" />
+					android:text="Description"
+					android:textSize="18sp"
+					android:layout_below="@id/name_group" />
 
 			<LinearLayout
 					android:id="@+id/description_group"
 					android:orientation="horizontal"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:layout_below="@id/name_edit" >
-
+					android:layout_below="@id/description_label"
+					android:layout_alignLeft="@id/description_label" >
 				<TextView
-						android:id="@+id/description_label"
+						android:id="@+id/description_edit"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="Description"
+						android:paddingLeft="10dp"
 						android:textSize="18sp"
-						android:layout_below="@id/name_edit" />
+						android:imeOptions="actionDone"
+						android:inputType="text|textMultiLine" />
 				<Button
 						android:id="@+id/description_button"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:text="Description"
-						android:layout_toRightOf="@id/description_label"
-						android:layout_alignBaseline="@id/description_label" />
+						android:gravity="left"
+						android:paddingLeft="10dp"
+						android:textSize="18sp"
+						android:imeOptions="actionDone"
+						android:inputType="text|textMultiLine"
+						android:layout_toRightOf="@id/description_edit"
+						android:layout_alignBaseline="@id/description_edit" />
 			</LinearLayout>
 
-			<TextView
-					android:id="@+id/description_edit"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:paddingLeft="10dp"
-					android:textSize="18sp"
-					android:imeOptions="actionDone"
-					android:inputType="text|textMultiLine"
-					android:layout_below="@id/description_group"
-					android:layout_alignLeft="@id/description_group" />
+
 
 			<LinearLayout
 					android:id="@+id/category_box"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
 					android:orientation="vertical"
-					android:layout_below="@id/description_edit"
+					android:layout_below="@id/description_group"
 					android:layout_alignParentLeft="true" >
 				<LinearLayout
 						android:id="@+id/category_group"
