@@ -172,11 +172,15 @@ public class Main extends Activity {
 			}
 
 			public List<Recipe> filter(int offset, int max) {
-				return UtilityImpl.singleton.getRecentlyViewedRecipes(offset, max);
+				List<Recipe> list = UtilityImpl.singleton.getRecentlyViewedRecipes(offset, max);
+				if(list.size() == max) {
+					list.add(null);
+				}
+				return list;
 			}
 
 			public String convertResultToString(Recipe result) {
-				return result.getName();
+				return (result == null) ? "Null" : result.getName();
 			}
 
 			public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
