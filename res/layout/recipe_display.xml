@@ -168,49 +168,13 @@
 					android:layout_below="@id/description_group"
 					android:layout_alignLeft="@id/description_group" />
 
-
-			<LinearLayout
-					android:id="@+id/cost_box"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:orientation="vertical"
-					android:gravity="right"
-					android:layout_below="@id/description_edit"
-					android:layout_alignParentRight="true" >
-				<LinearLayout
-						android:id="@+id/cost_group"
-						android:orientation="horizontal"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content" >
-					<TextView
-							android:id="@+id/cost_label"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:textSize="18sp"
-							android:text="Cost" />
-					<Button
-							android:id="@+id/cost_button"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:text="Cost" />
-				</LinearLayout>
-				<TextView
-						android:id="@+id/cost_edit"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:singleLine="true"
-						android:gravity="right"
-						android:textSize="24sp" />
-			</LinearLayout>
-
 			<LinearLayout
 					android:id="@+id/category_box"
-					android:layout_width="wrap_content"
+					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
 					android:orientation="vertical"
 					android:layout_below="@id/description_edit"
-					android:layout_alignParentLeft="true"
-					android:layout_toLeftOf="@id/cost_box" >
+					android:layout_alignParentLeft="true" >
 				<LinearLayout
 						android:id="@+id/category_group"
 						android:orientation="horizontal"

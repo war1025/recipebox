@@ -55,7 +55,6 @@ public class RecipeDisplay extends Activity {
 	private static final int DESCRIPTION_DIALOG = 1;
 	private static final int PREP_TIME_DIALOG = 2;
 	private static final int COOK_TIME_DIALOG = 3;
-	private static final int COST_DIALOG = 4;
 	private static final int EDIT_DIALOG = 5;
 	private static final int DELETE_DIALOG = 6;
 	private static final int CREATE_DIALOG = 7;
@@ -80,13 +79,11 @@ public class RecipeDisplay extends Activity {
 			setText(R.id.prep_edit, timeFormat(r.getPrepTime()));
 			setText(R.id.cook_edit, timeFormat(r.getCookTime()));
 			setText(R.id.total_edit, timeFormat(r.getCookTime() + r.getPrepTime()));
-			setText(R.id.cost_edit, "$" + r.getCost());
 
 			Button[] btns = {(Button) findViewById(R.id.name_button), (Button) findViewById(R.id.description_button),
-								(Button) findViewById(R.id.prep_button), (Button) findViewById(R.id.cook_button),
-								(Button) findViewById(R.id.cost_button)};
+								(Button) findViewById(R.id.prep_button), (Button) findViewById(R.id.cook_button)};
 
-			int[] dialogs = {NAME_DIALOG, DESCRIPTION_DIALOG, PREP_TIME_DIALOG, COOK_TIME_DIALOG, COST_DIALOG};
+			int[] dialogs = {NAME_DIALOG, DESCRIPTION_DIALOG, PREP_TIME_DIALOG, COOK_TIME_DIALOG};
 
 			for(int i = 0; i < btns.length; i++) {
 				btns[i].setOnClickListener(new EditClickListener(dialogs[i]));
@@ -131,12 +128,11 @@ public class RecipeDisplay extends Activity {
 	protected void setEditing(boolean editing) {
 		TextView[] labels = {(TextView) findViewById(R.id.name_label), (TextView) findViewById(R.id.description_label),
 								(TextView) findViewById(R.id.prep_label), (TextView) findViewById(R.id.cook_label),
-								(TextView) findViewById(R.id.cost_label), (TextView) findViewById(R.id.total_label),
-								(TextView) findViewById(R.id.total_edit)};
+								(TextView) findViewById(R.id.total_label), (TextView) findViewById(R.id.total_edit)};
 
 		Button[] btns = {(Button) findViewById(R.id.name_button), (Button) findViewById(R.id.description_button),
 							(Button) findViewById(R.id.prep_button), (Button) findViewById(R.id.cook_button),
-							(Button) findViewById(R.id.cost_button), (Button) findViewById(R.id.done_editing)};
+							(Button) findViewById(R.id.done_editing)};
 
 		if(editing) {
 			for(Button b : btns) {
@@ -283,26 +279,6 @@ public class RecipeDisplay extends Activity {
 				break;
 			}
 
-			case COST_DIALOG : {
-				title = "Edit Cost";
-
-				initialText = r.getCost() + "";
-
-				input.setSingleLine(true);
-				input.setKeyListener(new DigitsKeyListener(false, false));
-
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
-						int value = Integer.parseInt(input.getText().toString());
-						r.setCost(value);
-						TextView tv = (TextView) findViewById(R.id.cost_edit);
-						tv.setText("$" + r.getCost());
-					}
-				});
-
-				break;
-			}
 			default :
 				break;
 		}
