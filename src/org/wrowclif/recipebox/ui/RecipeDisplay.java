@@ -113,10 +113,20 @@ public class RecipeDisplay extends Activity {
 			ViewGroup categories = (ViewGroup) findViewById(R.id.category_box);
 
 			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			for(Category c : r.getCategories()) {
+			for(final Category c : r.getCategories()) {
 				View v = li.inflate(R.layout.autoitem, null);
 				TextView ctv = (TextView) v.findViewById(R.id.child_name);
 				ctv.setText(c.getName());
+
+				v.setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						Intent i = new Intent(RecipeDisplay.this, CategoryList.class);
+						i.putExtra("id", c.getId());
+						i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+						startActivity(i);
+					}
+				});
+
 				categories.addView(v);
 			}
 

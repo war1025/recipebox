@@ -65,7 +65,11 @@ public class CategoryList extends Activity {
 
 		util = UtilityImpl.singleton;
 
-		category = util.getCategoryById(getIntent().getLongExtra("id", -1));
+		onNewIntent(getIntent());
+	}
+
+	public void onNewIntent(Intent intent) {
+		category = util.getCategoryById(intent.getLongExtra("id", -1));
 
 		ListView lv = (ListView) findViewById(R.id.category_list);
 
