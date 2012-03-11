@@ -77,8 +77,6 @@ public class InstructionsDisplay extends Activity {
 
 		reorderDecorator = new ReorderableItemDecorator(adapter, swapper);
 
-		setTitle(r.getName());
-
 		ListView lv = (ListView) findViewById(R.id.instruction_list);
 		lv.setAdapter(adapter);
 

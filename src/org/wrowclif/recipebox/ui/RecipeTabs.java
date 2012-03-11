@@ -30,6 +30,8 @@ public class RecipeTabs extends TabActivity {
 		this.curRecipe = UtilityImpl.singleton.getRecipeById(id);
 		this.editing = edit;
 
+		setTitle(curRecipe.getName());
+
 		curRecipe.updateLastViewTime();
 
 		intent = new Intent(this, RecipeDisplay.class);

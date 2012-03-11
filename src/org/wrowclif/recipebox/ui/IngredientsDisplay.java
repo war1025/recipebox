@@ -74,8 +74,6 @@ public class IngredientsDisplay extends Activity {
 		r = ((RecipeTabs) getParent()).curRecipe;
 		edit = ((RecipeTabs) getParent()).editing;
 
-		setTitle(r.getName());
-
 		createDynamicLoadAdapter();
 
 		ItemSwap swapper = new ItemSwap() {

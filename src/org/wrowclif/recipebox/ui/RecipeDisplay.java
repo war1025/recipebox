@@ -72,7 +72,6 @@ public class RecipeDisplay extends Activity {
 		edit = ((RecipeTabs) getParent()).editing;
 
 		if(r != null) {
-			setTitle(r.getName());
 
 			String name = r.getName();
 			setText(R.id.name_edit, name);
@@ -277,6 +276,8 @@ public class RecipeDisplay extends Activity {
 						String name = r.getName();
 						setText(R.id.name_edit, name);
 						setText(R.id.name_button, name.equals("") ? "Edit Name" : name);
+
+						((RecipeTabs) getParent()).setTitle(name.equals("") ? "Recipe Box" : name);
 					}
 				});
 
