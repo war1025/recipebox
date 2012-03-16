@@ -279,6 +279,11 @@ public class RecipeImpl implements Recipe {
 					"and in1.num = in2.num " +
 					"and ii.instid = in2.iid; " +
 
+			"INSERT INTO RecipeCategory(rid, cid) " +
+				"SELECT ? as rid, rc.cid " +
+				"FROM RecipeCategory rc " +
+				"WHERE rc.rid = $; " +
+
 			"UPDATE Ingredient " +
 				"SET usecount = usecount + 1 " +
 				"WHERE iid IN ( " +
