@@ -51,6 +51,8 @@ public class RecipeDisplay extends Activity {
 	private Utility util;
 	private boolean edit;
 	private RecipeMenus menus;
+	private ViewGroup categories;
+
 	private static final int NAME_DIALOG = 0;
 	private static final int DESCRIPTION_DIALOG = 1;
 	private static final int PREP_TIME_DIALOG = 2;
@@ -58,6 +60,7 @@ public class RecipeDisplay extends Activity {
 	private static final int EDIT_DIALOG = 5;
 	private static final int DELETE_DIALOG = 6;
 	private static final int CREATE_DIALOG = 7;
+	private static final int DELETE_CATEGORY_DIALOG = 8;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -109,13 +112,16 @@ public class RecipeDisplay extends Activity {
 			});
 
 			findViewById(R.id.category_button).setVisibility(View.GONE);
-			ViewGroup categories = (ViewGroup) findViewById(R.id.category_box);
+			this.categories = (ViewGroup) findViewById(R.id.category_box);
 
 			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			for(final Category c : r.getCategories()) {
-				View v = li.inflate(R.layout.autoitem, null);
-				TextView ctv = (TextView) v.findViewById(R.id.child_name);
+				View v = li.inflate(R.layout.category_item, null);
+				TextView ctv = (TextView) v.findViewById(R.id.name_box);
 				ctv.setText(c.getName());
+
+				TextView idBox = (TextView) v.findViewById(R.id.edit_button);
+				idBox.setText(c.getId() + "");
 
 				v.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
@@ -123,6 +129,18 @@ public class RecipeDisplay extends Activity {
 						i.putExtra("id", c.getId());
 						i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 						startActivity(i);
+					}
+				});
+
+				View deleteButton = v.findViewById(R.id.delete_button);
+				deleteButton.setVisibility(View.VISIBLE);
+
+				deleteButton.setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						Bundle bundle = new Bundle();
+
+						bundle.putLong("id", c.getId());
+						showDialog(DELETE_CATEGORY_DIALOG, bundle);
 					}
 				});
 
@@ -197,6 +215,8 @@ public class RecipeDisplay extends Activity {
 		switch(id) {
 			case PREP_TIME_DIALOG : case COOK_TIME_DIALOG :
 				return showTimeDialog(id);
+			case DELETE_CATEGORY_DIALOG :
+				return showConfirmDialog(id);
 			default :
 				return showTextDialog(id);
 		}
@@ -317,6 +337,55 @@ public class RecipeDisplay extends Activity {
 		input.setText(initialText);
 
 		return dialog;
+	}
+
+	protected Dialog showConfirmDialog(int id) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Remove Category");
+		builder.setMessage("");
+		builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+
+			}
+		});
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+
+			}
+		});
+		builder.setCancelable(true);
+		return builder.create();
+	}
+
+	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
+
+		switch(id) {
+			case DELETE_CATEGORY_DIALOG : {
+				AlertDialog dialog = (AlertDialog) d;
+				final long categoryId = bundle.getLong("id", -1);
+				final Category category = util.getCategoryById(categoryId);
+				dialog.setMessage("Are you sure you want to remove "  + r.getName() +
+										" from the " + category.getName() + " category?");
+
+				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Remove", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						r.removeCategory(category);
+
+						for(int i = 1; i < categories.getChildCount(); i++) {
+							View child = categories.getChildAt(i);
+							TextView idBox = (TextView) child.findViewById(R.id.edit_button);
+							long childId = Long.parseLong(idBox.getText().toString());
+							if(childId == categoryId) {
+								categories.removeView(child);
+								categories.invalidate();
+								break;
+							}
+						}
+					}
+				});
+				break;
+			}
+		}
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
