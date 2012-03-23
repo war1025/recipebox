@@ -111,8 +111,14 @@ public class RecipeDisplay extends Activity {
 				}
 			});
 
-			findViewById(R.id.category_button).setVisibility(View.GONE);
-			this.categories = (ViewGroup) findViewById(R.id.category_box);
+			this.categories = (ViewGroup) findViewById(R.id.category_list);
+
+			Button addCategoryButton = findViewById(R.id.category_button);
+			addCategoryButton.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					showDialog(ADD_CATEGORY_DIALOG);
+				}
+			});
 
 			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			for(final Category c : r.getCategories()) {
@@ -371,7 +377,7 @@ public class RecipeDisplay extends Activity {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						r.removeCategory(category);
 
-						for(int i = 1; i < categories.getChildCount(); i++) {
+						for(int i = 0; i < categories.getChildCount(); i++) {
 							View child = categories.getChildAt(i);
 							TextView idBox = (TextView) child.findViewById(R.id.edit_button);
 							long childId = Long.parseLong(idBox.getText().toString());
