@@ -48,7 +48,7 @@ public class IngredientDialog extends Dialog {
 	private View.OnClickListener editOkOnClick;
 	private View.OnClickListener editCancelOnClick;
 	private OnEditorActionListener editOnIngredientAction;
-	private View.OnClickListener	newOkOnClick;
+	private View.OnClickListener newOkOnClick;
 	private View.OnClickListener newCancelOnClick;
 	private OnEditorActionListener newOnIngredientAction;
 	private View.OnClickListener confirmOkOnClick;
