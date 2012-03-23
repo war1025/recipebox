@@ -132,7 +132,8 @@ public class CategoryImpl implements Category {
 				"SELECT c.cid, c.name, c.description " +
 				"FROM Category c, RecipeCategory rc " +
 				"WHERE c.cid = rc.cid " +
-					"and rc.rid = ?; ";
+					"and rc.rid = ? " +
+				"ORDER BY c.name ASC; ";
 
 			return data.sqlTransaction(new Transaction<List<Category>>() {
 				public List<Category> exec(SQLiteDatabase db) {
