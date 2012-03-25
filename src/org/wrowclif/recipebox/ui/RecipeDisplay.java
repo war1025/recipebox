@@ -11,6 +11,8 @@ import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
+import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
+
 import java.util.List;
 
 import android.app.Activity;
@@ -53,14 +55,15 @@ public class RecipeDisplay extends Activity {
 	private RecipeMenus menus;
 	private ViewGroup categories;
 
-	private static final int NAME_DIALOG = 0;
-	private static final int DESCRIPTION_DIALOG = 1;
-	private static final int PREP_TIME_DIALOG = 2;
-	private static final int COOK_TIME_DIALOG = 3;
-	private static final int EDIT_DIALOG = 5;
-	private static final int DELETE_DIALOG = 6;
-	private static final int CREATE_DIALOG = 7;
-	private static final int DELETE_CATEGORY_DIALOG = 8;
+	private static final int NAME_DIALOG = assignId();
+	private static final int DESCRIPTION_DIALOG = assignId();
+	private static final int PREP_TIME_DIALOG = assignId();
+	private static final int COOK_TIME_DIALOG = assignId();
+	private static final int EDIT_DIALOG = assignId();
+	private static final int DELETE_DIALOG = assignId();
+	private static final int CREATE_DIALOG = assignId();
+	private static final int DELETE_CATEGORY_DIALOG = assignId();
+	private static final int ADD_CATEGORY_DIALOG = assignId();
 
 	/** Called when the activity is first created. */
 	@Override
@@ -113,7 +116,7 @@ public class RecipeDisplay extends Activity {
 
 			this.categories = (ViewGroup) findViewById(R.id.category_list);
 
-			Button addCategoryButton = findViewById(R.id.category_button);
+			Button addCategoryButton = (Button) findViewById(R.id.category_button);
 			addCategoryButton.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
 					showDialog(ADD_CATEGORY_DIALOG);
@@ -218,49 +221,47 @@ public class RecipeDisplay extends Activity {
 				return d;
 			}
 		}
-		switch(id) {
-			case PREP_TIME_DIALOG : case COOK_TIME_DIALOG :
-				return showTimeDialog(id);
-			case DELETE_CATEGORY_DIALOG :
-				return showConfirmDialog(id);
-			default :
-				return showTextDialog(id);
+
+		if((id == PREP_TIME_DIALOG) || (id == COOK_TIME_DIALOG)) {
+			return showTimeDialog(id);
+		} else if(id == DELETE_CATEGORY_DIALOG) {
+			return showConfirmDialog(id);
+		} else {
+			return showTextDialog(id);
 		}
+
 	}
 
 	protected Dialog showTimeDialog(int id) {
-		switch(id) {
-			case PREP_TIME_DIALOG : {
-				int time = r.getPrepTime();
+		if(id == PREP_TIME_DIALOG) {
+			int time = r.getPrepTime();
 
-				return new TimePickerDialog(RecipeDisplay.this, new OnTimeSetListener() {
-						public void onTimeSet(TimePicker picker, int hour, int minute) {
-							r.setPrepTime(hour * 60 + minute);
+			return new TimePickerDialog(RecipeDisplay.this, new OnTimeSetListener() {
+					public void onTimeSet(TimePicker picker, int hour, int minute) {
+						r.setPrepTime(hour * 60 + minute);
 
-							String prepTime = timeFormat(r.getPrepTime());
-							setText(R.id.prep_edit, prepTime);
-							setText(R.id.prep_button, prepTime);
+						String prepTime = timeFormat(r.getPrepTime());
+						setText(R.id.prep_edit, prepTime);
+						setText(R.id.prep_button, prepTime);
 
-							setText(R.id.total_edit, timeFormat(r.getPrepTime() + r.getCookTime()));
-						}
-					}, time / 60, time % 60, true);
+						setText(R.id.total_edit, timeFormat(r.getPrepTime() + r.getCookTime()));
+					}
+				}, time / 60, time % 60, true);
 
-			}
-			case COOK_TIME_DIALOG : {
-				int time = r.getCookTime();
+		} else if(id == COOK_TIME_DIALOG) {
+			int time = r.getCookTime();
 
-				return new TimePickerDialog(RecipeDisplay.this, new OnTimeSetListener() {
-						public void onTimeSet(TimePicker picker, int hour, int minute) {
-							r.setCookTime(hour * 60 + minute);
+			return new TimePickerDialog(RecipeDisplay.this, new OnTimeSetListener() {
+					public void onTimeSet(TimePicker picker, int hour, int minute) {
+						r.setCookTime(hour * 60 + minute);
 
-							String cookTime = timeFormat(r.getCookTime());
-							setText(R.id.cook_edit, cookTime);
-							setText(R.id.cook_button, cookTime);
+						String cookTime = timeFormat(r.getCookTime());
+						setText(R.id.cook_edit, cookTime);
+						setText(R.id.cook_button, cookTime);
 
-							setText(R.id.total_edit, timeFormat(r.getPrepTime() + r.getCookTime()));
-						}
-					}, time / 60, time % 60, true);
-			}
+						setText(R.id.total_edit, timeFormat(r.getPrepTime() + r.getCookTime()));
+					}
+				}, time / 60, time % 60, true);
 		}
 
 		return null;
@@ -284,58 +285,49 @@ public class RecipeDisplay extends Activity {
 			}
 		});
 
-		switch(id) {
-			case NAME_DIALOG : {
-				title = "Edit Name";
+		if(id == NAME_DIALOG) {
+			title = "Edit Name";
 
-				initialText = r.getName();
+			initialText = r.getName();
 
-				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-				input.setSingleLine(true);
+			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			input.setSingleLine(true);
 
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
-						String value = input.getText().toString();
-						r.setName(value);
+			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
+					String value = input.getText().toString();
+					r.setName(value);
 
-						String name = r.getName();
-						setText(R.id.name_edit, name);
-						setText(R.id.name_button, name.equals("") ? "Edit Name" : name);
+					String name = r.getName();
+					setText(R.id.name_edit, name);
+					setText(R.id.name_button, name.equals("") ? "Edit Name" : name);
 
-						((RecipeTabs) getParent()).setTitle(name.equals("") ? "Recipe Box" : name);
-					}
-				});
+					((RecipeTabs) getParent()).setTitle(name.equals("") ? "Recipe Box" : name);
+				}
+			});
 
+		} else if(id == DESCRIPTION_DIALOG) {
+			title = "Edit Description";
 
-				break;
-			}
-			case DESCRIPTION_DIALOG : {
-				title = "Edit Description";
+			initialText = r.getDescription();
 
-				initialText = r.getDescription();
+			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+			input.setSingleLine(false);
 
-				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-				input.setSingleLine(false);
+			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
+					String value = input.getText().toString();
+					r.setDescription(value);
 
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
-						String value = input.getText().toString();
-						r.setDescription(value);
-
-						String description = r.getDescription();
-						setText(R.id.description_edit, description);
-						setText(R.id.description_button, description.equals("") ? "Edit Description" : description);
-					}
-				});
-
-				break;
-			}
-
-			default :
-				break;
+					String description = r.getDescription();
+					setText(R.id.description_edit, description);
+					setText(R.id.description_button, description.equals("") ? "Edit Description" : description);
+				}
+			});
 		}
+
 		builder.setCancelable(true);
 		builder.setTitle(title);
 		dialog = builder.create();
@@ -365,32 +357,29 @@ public class RecipeDisplay extends Activity {
 
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
-		switch(id) {
-			case DELETE_CATEGORY_DIALOG : {
-				AlertDialog dialog = (AlertDialog) d;
-				final long categoryId = bundle.getLong("id", -1);
-				final Category category = util.getCategoryById(categoryId);
-				dialog.setMessage("Are you sure you want to remove "  + r.getName() +
-										" from the " + category.getName() + " category?");
+		if(id == DELETE_CATEGORY_DIALOG) {
+			AlertDialog dialog = (AlertDialog) d;
+			final long categoryId = bundle.getLong("id", -1);
+			final Category category = util.getCategoryById(categoryId);
+			dialog.setMessage("Are you sure you want to remove "  + r.getName() +
+									" from the " + category.getName() + " category?");
 
-				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Remove", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						r.removeCategory(category);
+			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Remove", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					r.removeCategory(category);
 
-						for(int i = 0; i < categories.getChildCount(); i++) {
-							View child = categories.getChildAt(i);
-							TextView idBox = (TextView) child.findViewById(R.id.edit_button);
-							long childId = Long.parseLong(idBox.getText().toString());
-							if(childId == categoryId) {
-								categories.removeView(child);
-								categories.invalidate();
-								break;
-							}
+					for(int i = 0; i < categories.getChildCount(); i++) {
+						View child = categories.getChildAt(i);
+						TextView idBox = (TextView) child.findViewById(R.id.edit_button);
+						long childId = Long.parseLong(idBox.getText().toString());
+						if(childId == categoryId) {
+							categories.removeView(child);
+							categories.invalidate();
+							break;
 						}
 					}
-				});
-				break;
-			}
+				}
+			});
 		}
 	}
 

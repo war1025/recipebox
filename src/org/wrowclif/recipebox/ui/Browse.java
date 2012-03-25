@@ -11,6 +11,8 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
+import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
+
 import java.util.List;
 
 import android.app.Activity;
@@ -44,7 +46,7 @@ public class Browse extends Activity {
 
 	private Utility util;
 	private DynamicLoadAdapter<Recipe> recentAdapter;
-	private static final int CREATE_RECIPE_DIALOG = 1;
+	private static final int CREATE_RECIPE_DIALOG = assignId();
 
 	/** Called when the activity is first created. */
 	@Override

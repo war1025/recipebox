@@ -15,6 +15,8 @@ import org.wrowclif.recipebox.ui.components.ReorderableItemDecorator.ItemSwap;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
+import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -57,11 +59,11 @@ public class IngredientsDisplay extends Activity {
 	private ReorderableItemDecorator reorderDecorator;
 	private RecipeMenus menus;
 
-	private static final int NEW_INGREDIENT_DIALOG = 0;
-	private static final int DELETE_INGREDIENT_DIALOG = 1;
-	private static final int EDIT_DIALOG = 2;
-	private static final int CREATE_DIALOG = 3;
-	private static final int DELETE_DIALOG = 4;
+	private static final int NEW_INGREDIENT_DIALOG = assignId();
+	private static final int DELETE_INGREDIENT_DIALOG = assignId();
+	private static final int EDIT_DIALOG = assignId();
+	private static final int CREATE_DIALOG = assignId();
+	private static final int DELETE_DIALOG = assignId();
 
 	/** Called when the activity is first created. */
 	@Override
@@ -136,32 +138,26 @@ public class IngredientsDisplay extends Activity {
 
 	protected void onPrepareDialog(int id, Dialog d, final Bundle bundle) {
 
-		switch(id) {
-			case NEW_INGREDIENT_DIALOG : {
-				IngredientDialog iDialog = (IngredientDialog) d;
+		if(id == NEW_INGREDIENT_DIALOG) {
+			IngredientDialog iDialog = (IngredientDialog) d;
 
-				int position = bundle.getInt("position", -1);
-				if(position < 0) {
-					iDialog.prepareNew(r, adapter);
-				} else {
-					iDialog.prepareExisiting(r, adapter, adapter.getItem(position), position);
+			int position = bundle.getInt("position", -1);
+			if(position < 0) {
+				iDialog.prepareNew(r, adapter);
+			} else {
+				iDialog.prepareExisiting(r, adapter, adapter.getItem(position), position);
+			}
+		} else if(id == DELETE_INGREDIENT_DIALOG) {
+			AlertDialog dialog = (AlertDialog) d;
+			final int position = bundle.getInt("position", -1);
+			final RecipeIngredient ri = adapter.getItem(position);
+			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					r.removeIngredient(ri);
+
+					adapter.remove(position);
 				}
-				break;
-			}
-
-			case DELETE_INGREDIENT_DIALOG : {
-				AlertDialog dialog = (AlertDialog) d;
-				final int position = bundle.getInt("position", -1);
-				final RecipeIngredient ri = adapter.getItem(position);
-				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						r.removeIngredient(ri);
-
-						adapter.remove(position);
-					}
-				});
-				break;
-			}
+			});
 		}
 	}
 
@@ -175,30 +171,27 @@ public class IngredientsDisplay extends Activity {
 		Dialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		switch(id) {
-			case NEW_INGREDIENT_DIALOG : {
-				return new IngredientDialog(this);
-			}
-			case DELETE_INGREDIENT_DIALOG : {
-				final int position = bundle.getInt("position", -1);
-				final RecipeIngredient ri = adapter.getItem(position);
-				builder.setTitle("Delete Ingredient");
-				builder.setMessage("Are you sure you want to delete this ingredient?");
-				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						r.removeIngredient(ri);
+		if(id == NEW_INGREDIENT_DIALOG) {
+			return new IngredientDialog(this);
+		} else if(id == DELETE_INGREDIENT_DIALOG) {
+			final int position = bundle.getInt("position", -1);
+			final RecipeIngredient ri = adapter.getItem(position);
+			builder.setTitle("Delete Ingredient");
+			builder.setMessage("Are you sure you want to delete this ingredient?");
+			builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					r.removeIngredient(ri);
 
-						adapter.remove(position);
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
+					adapter.remove(position);
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-					}
-				});
-				break;
-			}
+				}
+			});
 		}
+
 		builder.setCancelable(true);
 
 		dialog = builder.create();

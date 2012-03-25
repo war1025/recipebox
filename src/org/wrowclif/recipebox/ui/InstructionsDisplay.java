@@ -13,6 +13,8 @@ import org.wrowclif.recipebox.ui.components.ReorderableItemDecorator.ItemSwap;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
+import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
+
 import java.util.List;
 
 import android.app.Activity;
@@ -53,8 +55,8 @@ public class InstructionsDisplay extends Activity {
 	private ReorderableItemDecorator<Instruction> reorderDecorator;
 	private RecipeMenus menus;
 
-	private static final int EDIT_INSTRUCTION_DIALOG = 1;
-	private static final int DELETE_INSTRUCTION_DIALOG = 2;
+	private static final int EDIT_INSTRUCTION_DIALOG = assignId();
+	private static final int DELETE_INSTRUCTION_DIALOG = assignId();
 
 	/** Called when the activity is first created. */
 	@Override
@@ -135,47 +137,41 @@ public class InstructionsDisplay extends Activity {
 
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
-		switch(id) {
-			case EDIT_INSTRUCTION_DIALOG : {
-				AlertDialog dialog = (AlertDialog) d;
-				final int position = bundle.getInt("position", -1);
-				final Instruction instruction = adapter.getItem(position);
-				final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
-				final boolean deleteOnCancel = bundle.getBoolean("deleteOnCancel", false);
-				input.setText(instruction.getText());
+		if(id == EDIT_INSTRUCTION_DIALOG) {
+			AlertDialog dialog = (AlertDialog) d;
+			final int position = bundle.getInt("position", -1);
+			final Instruction instruction = adapter.getItem(position);
+			final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
+			final boolean deleteOnCancel = bundle.getBoolean("deleteOnCancel", false);
+			input.setText(instruction.getText());
 
-				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Done", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						instruction.setText(input.getText().toString());
+			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Done", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					instruction.setText(input.getText().toString());
 
-						adapter.notifyDataSetChanged();
-					}
-				});
+					adapter.notifyDataSetChanged();
+				}
+			});
 
-				dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						if(deleteOnCancel) {
-							r.removeInstruction(instruction);
-							adapter.remove(position);
-						}
-					}
-				});
-				break;
-			}
-
-			case DELETE_INSTRUCTION_DIALOG : {
-				AlertDialog dialog = (AlertDialog) d;
-				final int position = bundle.getInt("position", -1);
-				final Instruction instruction = adapter.getItem(position);
-				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
+			dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					if(deleteOnCancel) {
 						r.removeInstruction(instruction);
-
 						adapter.remove(position);
 					}
-				});
-				break;
-			}
+				}
+			});
+		} else if(id == DELETE_INSTRUCTION_DIALOG) {
+			AlertDialog dialog = (AlertDialog) d;
+			final int position = bundle.getInt("position", -1);
+			final Instruction instruction = adapter.getItem(position);
+			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					r.removeInstruction(instruction);
+
+					adapter.remove(position);
+				}
+			});
 		}
 	}
 
@@ -189,56 +185,51 @@ public class InstructionsDisplay extends Activity {
 		Dialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		switch(id) {
-			case EDIT_INSTRUCTION_DIALOG : {
-				final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
+		if(id == EDIT_INSTRUCTION_DIALOG) {
+			final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
 
-				Log.d("Recipebox", "Edit dialog position: " + bundle.getInt("position", -1) + " instruction: " + instruction.getId());
+			Log.d("Recipebox", "Edit dialog position: " + bundle.getInt("position", -1) + " instruction: " + instruction.getId());
 
-				LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View v = li.inflate(R.layout.enter_text_dialog, null);
-				final EditText input = (EditText) v.findViewById(R.id.text_edit);
-				builder.setView(v);
-				input.setText(instruction.getText());
-				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-				input.setSingleLine(false);
+			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View v = li.inflate(R.layout.enter_text_dialog, null);
+			final EditText input = (EditText) v.findViewById(R.id.text_edit);
+			builder.setView(v);
+			input.setText(instruction.getText());
+			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+			input.setSingleLine(false);
 
-				builder.setTitle("Edit Instruction");
-				builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						instruction.setText(input.getText().toString());
+			builder.setTitle("Edit Instruction");
+			builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					instruction.setText(input.getText().toString());
 
-						adapter.notifyDataSetChanged();
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
+					adapter.notifyDataSetChanged();
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-					}
-				});
-				break;
-			}
+				}
+			});
+		} else if(id == DELETE_INSTRUCTION_DIALOG) {
+			final int position = bundle.getInt("position", -1);
+			final Instruction instruction = adapter.getItem(position);
+			builder.setTitle("Delete Instruction");
+			builder.setMessage("Are you sure you want to delete this instruction?");
+			builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					r.removeInstruction(instruction);
 
-			case DELETE_INSTRUCTION_DIALOG : {
-				final int position = bundle.getInt("position", -1);
-				final Instruction instruction = adapter.getItem(position);
-				builder.setTitle("Delete Instruction");
-				builder.setMessage("Are you sure you want to delete this instruction?");
-				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						r.removeInstruction(instruction);
+					adapter.remove(position);
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-						adapter.remove(position);
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-
-					}
-				});
-				break;
-			}
+				}
+			});
 		}
+
 		builder.setCancelable(true);
 
 		dialog = builder.create();

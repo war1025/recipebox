@@ -11,6 +11,8 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
+import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
+
 import java.util.List;
 
 import android.app.Activity;
@@ -43,7 +45,7 @@ public class Main extends Activity {
 
 	private Utility util;
 	private DynamicLoadAdapter<Recipe> recentAdapter;
-	private static final int CREATE_RECIPE_DIALOG = 1;
+	private static final int CREATE_RECIPE_DIALOG = assignId();
 
 	/** Called when the activity is first created. */
 	@Override
@@ -210,32 +212,30 @@ public class Main extends Activity {
 		Dialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		switch(id) {
-			case CREATE_RECIPE_DIALOG : {
-				builder.setTitle("Create New Recipe");
-				builder.setMessage("There are no recipes by that name. Would you like to create a new recipe?");
-				builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						TextView tv = (TextView) findViewById(R.id.recipesearch);
+		if(id == CREATE_RECIPE_DIALOG) {
+			builder.setTitle("Create New Recipe");
+			builder.setMessage("There are no recipes by that name. Would you like to create a new recipe?");
+			builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					TextView tv = (TextView) findViewById(R.id.recipesearch);
 
-						String name = tv.getText().toString();
-						Recipe r = util.newRecipe(name);
-						Intent intent = new Intent(Main.this, RecipeTabs.class);
+					String name = tv.getText().toString();
+					Recipe r = util.newRecipe(name);
+					Intent intent = new Intent(Main.this, RecipeTabs.class);
 
-						intent.putExtra("id", r.getId());
-						intent.putExtra("edit", true);
+					intent.putExtra("id", r.getId());
+					intent.putExtra("edit", true);
 
-						startActivity(intent);
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
+					startActivity(intent);
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-					}
-				});
-				break;
-			}
+				}
+			});
 		}
+
 		builder.setCancelable(true);
 
 		dialog = builder.create();

@@ -13,6 +13,8 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
+import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
+
 import java.util.List;
 
 import android.app.Activity;
@@ -54,8 +56,8 @@ public class CategoryList extends Activity {
 	private DynamicLoadAdapter<Recipe> adapter;
 	private boolean edit;
 
-	private static final int ADD_RECIPE_DIALOG = 1;
-	private static final int DELETE_RECIPE_DIALOG = 2;
+	private static final int ADD_RECIPE_DIALOG = assignId();
+	private static final int DELETE_RECIPE_DIALOG = assignId();
 
 	/** Called when the activity is first created. */
 	@Override
@@ -124,28 +126,22 @@ public class CategoryList extends Activity {
 
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
-		switch(id) {
-			case ADD_RECIPE_DIALOG : {
-				AlertDialog dialog = (AlertDialog) d;
-				TextView tv = (TextView) dialog.findViewById(R.id.text_edit);
-				tv.setText("");
-				break;
-			}
+		if(id == ADD_RECIPE_DIALOG) {
+			AlertDialog dialog = (AlertDialog) d;
+			TextView tv = (TextView) dialog.findViewById(R.id.text_edit);
+			tv.setText("");
+		} else if(id == DELETE_RECIPE_DIALOG) {
+			AlertDialog dialog = (AlertDialog) d;
+			final int position = bundle.getInt("position", -1);
+			final Recipe recipe = adapter.getItem(position);
 
-			case DELETE_RECIPE_DIALOG : {
-				AlertDialog dialog = (AlertDialog) d;
-				final int position = bundle.getInt("position", -1);
-				final Recipe recipe = adapter.getItem(position);
-
-				dialog.setMessage("Are you sure you want to remove " + recipe.getName() + " from this category?");
-				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Remove", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						category.removeRecipe(recipe);
-						adapter.remove(position);
-					}
-				});
-				break;
-			}
+			dialog.setMessage("Are you sure you want to remove " + recipe.getName() + " from this category?");
+			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Remove", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					category.removeRecipe(recipe);
+					adapter.remove(position);
+				}
+			});
 		}
 	}
 
@@ -153,107 +149,102 @@ public class CategoryList extends Activity {
 		Dialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		switch(id) {
-			case ADD_RECIPE_DIALOG : {
+		if(id == ADD_RECIPE_DIALOG) {
 
-				LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View v = li.inflate(R.layout.enter_recipe_dialog, null);
-				final AutoCompleteTextView input = (AutoCompleteTextView) v.findViewById(R.id.text_edit);
-				final long[] idHolder = new long[1];
-				builder.setView(v);
+			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View v = li.inflate(R.layout.enter_recipe_dialog, null);
+			final AutoCompleteTextView input = (AutoCompleteTextView) v.findViewById(R.id.text_edit);
+			final long[] idHolder = new long[1];
+			builder.setView(v);
 
-				input.setHint("Recipe Name");
-				input.setText("");
-				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-				input.setSingleLine(true);
+			input.setHint("Recipe Name");
+			input.setText("");
+			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			input.setSingleLine(true);
 
-				ListAutoCompleteAdapter.Specifics<Recipe> sp = new ListAutoCompleteAdapter.Specifics<Recipe>() {
+			ListAutoCompleteAdapter.Specifics<Recipe> sp = new ListAutoCompleteAdapter.Specifics<Recipe>() {
 
-					public View getView(int id, Recipe r, View v, ViewGroup vg) {
-						if(v == null) {
-							v = inflate(R.layout.autoitem);
-						}
-
-						TextView tv = (TextView) v.findViewById(R.id.child_name);
-
-						tv.setText(r.getName());
-
-						return v;
+				public View getView(int id, Recipe r, View v, ViewGroup vg) {
+					if(v == null) {
+						v = inflate(R.layout.autoitem);
 					}
 
-					public long getItemId(Recipe item) {
-						return item.getId();
-					}
+					TextView tv = (TextView) v.findViewById(R.id.child_name);
 
-					public List<Recipe> filter(CharSequence seq) {
-						return util.searchRecipes(seq.toString(), 5);
-					}
+					tv.setText(r.getName());
 
-					public String convertResultToString(Recipe result) {
-						return result.getName();
-					}
+					return v;
+				}
 
-					public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
-						idHolder[0] = id;
-					}
+				public long getItemId(Recipe item) {
+					return item.getId();
+				}
 
-					private View inflate(int layoutId) {
-						LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-						return vi.inflate(layoutId, null);
-					}
-				};
+				public List<Recipe> filter(CharSequence seq) {
+					return util.searchRecipes(seq.toString(), 5);
+				}
 
-				final ListAutoCompleteAdapter<Recipe> acAdapter = new ListAutoCompleteAdapter<Recipe>(sp);
+				public String convertResultToString(Recipe result) {
+					return result.getName();
+				}
+
+				public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
+					idHolder[0] = id;
+				}
+
+				private View inflate(int layoutId) {
+					LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					return vi.inflate(layoutId, null);
+				}
+			};
+
+			final ListAutoCompleteAdapter<Recipe> acAdapter = new ListAutoCompleteAdapter<Recipe>(sp);
 
 
-				input.setAdapter(acAdapter);
+			input.setAdapter(acAdapter);
 
-				input.setOnItemClickListener(acAdapter.onClick);
+			input.setOnItemClickListener(acAdapter.onClick);
 
-				builder.setTitle("Add Recipe To Category");
-				builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						if(idHolder[0] >= 0) {
-							Recipe r = util.getRecipeById(idHolder[0]);
+			builder.setTitle("Add Recipe To Category");
+			builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					if(idHolder[0] >= 0) {
+						Recipe r = util.getRecipeById(idHolder[0]);
 
-							if(r != null) {
-								category.addRecipe(r);
+						if(r != null) {
+							category.addRecipe(r);
 
-								idHolder[0] = -1;
+							idHolder[0] = -1;
 
-								adapter.clear();
-							}
+							adapter.clear();
 						}
 					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-					}
-				});
-				break;
-			}
+				}
+			});
+		} else if(id == DELETE_RECIPE_DIALOG) {
+			final int position = bundle.getInt("position", -1);
+			final Recipe recipe = adapter.getItem(position);
 
-			case DELETE_RECIPE_DIALOG : {
-				final int position = bundle.getInt("position", -1);
-				final Recipe recipe = adapter.getItem(position);
+			builder.setTitle("Remove Recipe");
+			builder.setMessage("Are you sure you want to remove " + recipe.getName() + " from this category?");
+			builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					category.removeRecipe(recipe);
+					adapter.remove(position);
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-				builder.setTitle("Remove Recipe");
-				builder.setMessage("Are you sure you want to remove " + recipe.getName() + " from this category?");
-				builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						category.removeRecipe(recipe);
-						adapter.remove(position);
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-
-					}
-				});
-				break;
-			}
+				}
+			});
 		}
+
 		builder.setCancelable(true);
 
 		dialog = builder.create();

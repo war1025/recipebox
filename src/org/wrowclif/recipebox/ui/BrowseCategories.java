@@ -11,6 +11,8 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
+import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
+
 import java.util.List;
 
 import android.app.Activity;
@@ -51,9 +53,9 @@ public class BrowseCategories extends Activity {
 	private DynamicLoadAdapter<Category> adapter;
 	private boolean edit;
 
-	private static final int CREATE_CATEGORY_DIALOG = 1;
-	private static final int EDIT_CATEGORY_NAME_DIALOG = 2;
-	private static final int DELETE_CATEGORY_DIALOG = 3;
+	private static final int CREATE_CATEGORY_DIALOG = assignId();
+	private static final int EDIT_CATEGORY_NAME_DIALOG = assignId();
+	private static final int DELETE_CATEGORY_DIALOG = assignId();
 
 	/** Called when the activity is first created. */
 	@Override
@@ -111,45 +113,36 @@ public class BrowseCategories extends Activity {
 
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
-		switch(id) {
-			case CREATE_CATEGORY_DIALOG : {
-				AlertDialog dialog = (AlertDialog) d;
-				final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
-				input.setText("");
-				break;
-			}
+		if(id == CREATE_CATEGORY_DIALOG) {
+			AlertDialog dialog = (AlertDialog) d;
+			final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
+			input.setText("");
+		} else if(id == EDIT_CATEGORY_NAME_DIALOG) {
+			AlertDialog dialog = (AlertDialog) d;
+			final int position = bundle.getInt("position", -1);
+			final Category category = adapter.getItem(position);
+			final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
 
-			case EDIT_CATEGORY_NAME_DIALOG : {
-				AlertDialog dialog = (AlertDialog) d;
-				final int position = bundle.getInt("position", -1);
-				final Category category = adapter.getItem(position);
-				final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
+			input.setText(category.getName());
 
-				input.setText(category.getName());
+			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Done", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					category.setName(input.getText().toString());
+					adapter.notifyDataSetChanged();
+				}
+			});
 
-				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Done", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						category.setName(input.getText().toString());
-						adapter.notifyDataSetChanged();
-					}
-				});
+		} else if(id == DELETE_CATEGORY_DIALOG) {
+			AlertDialog dialog = (AlertDialog) d;
+			final int position = bundle.getInt("position", -1);
+			final Category category = adapter.getItem(position);
 
-				break;
-			}
-
-			case DELETE_CATEGORY_DIALOG : {
-				AlertDialog dialog = (AlertDialog) d;
-				final int position = bundle.getInt("position", -1);
-				final Category category = adapter.getItem(position);
-
-				dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						category.delete();
-						adapter.remove(position);
-					}
-				});
-				break;
-			}
+			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					category.delete();
+					adapter.remove(position);
+				}
+			});
 		}
 	}
 
@@ -158,79 +151,71 @@ public class BrowseCategories extends Activity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		switch(id) {
-			case CREATE_CATEGORY_DIALOG : {
-				View v = li.inflate(R.layout.enter_text_dialog, null);
-				final EditText input = (EditText) v.findViewById(R.id.text_edit);
-				builder.setView(v);
+		if(id == CREATE_CATEGORY_DIALOG) {
+			View v = li.inflate(R.layout.enter_text_dialog, null);
+			final EditText input = (EditText) v.findViewById(R.id.text_edit);
+			builder.setView(v);
 
-				input.setHint("Category Name");
-				input.setText("");
-				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-				input.setSingleLine(true);
+			input.setHint("Category Name");
+			input.setText("");
+			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			input.setSingleLine(true);
 
-				builder.setTitle("Create Category");
-				builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						util.createOrRetrieveCategory(input.getText().toString());
-						adapter.clear();
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
+			builder.setTitle("Create Category");
+			builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					util.createOrRetrieveCategory(input.getText().toString());
+					adapter.clear();
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-					}
-				});
-				break;
-			}
+				}
+			});
+		} else if(id == EDIT_CATEGORY_NAME_DIALOG) {
+			final int position = bundle.getInt("position", -1);
+			final Category category = adapter.getItem(position);
 
-			case EDIT_CATEGORY_NAME_DIALOG : {
-				final int position = bundle.getInt("position", -1);
-				final Category category = adapter.getItem(position);
+			View v = li.inflate(R.layout.enter_text_dialog, null);
+			final EditText input = (EditText) v.findViewById(R.id.text_edit);
+			builder.setView(v);
 
-				View v = li.inflate(R.layout.enter_text_dialog, null);
-				final EditText input = (EditText) v.findViewById(R.id.text_edit);
-				builder.setView(v);
+			input.setText(category.getName());
+			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			input.setSingleLine(true);
 
-				input.setText(category.getName());
-				input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-				input.setSingleLine(true);
+			builder.setTitle("Edit Category Name");
+			builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					category.setName(input.getText().toString());
+					adapter.notifyDataSetChanged();
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-				builder.setTitle("Edit Category Name");
-				builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						category.setName(input.getText().toString());
-						adapter.notifyDataSetChanged();
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
+				}
+			});
+		} else if(id == DELETE_CATEGORY_DIALOG) {
+			final int position = bundle.getInt("position", -1);
+			final Category category = adapter.getItem(position);
 
-					}
-				});
-				break;
-			}
+			builder.setTitle("Delete Category");
+			builder.setMessage("Are you sure you want to delete this category?");
+			builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					category.delete();
+					adapter.remove(position);
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-			case DELETE_CATEGORY_DIALOG : {
-				final int position = bundle.getInt("position", -1);
-				final Category category = adapter.getItem(position);
-
-				builder.setTitle("Delete Category");
-				builder.setMessage("Are you sure you want to delete this category?");
-				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						category.delete();
-						adapter.remove(position);
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-
-					}
-				});
-				break;
-			}
+				}
+			});
 		}
+
 		builder.setCancelable(true);
 
 		dialog = builder.create();

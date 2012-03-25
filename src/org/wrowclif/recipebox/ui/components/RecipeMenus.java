@@ -5,6 +5,8 @@ import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.impl.UtilityImpl;
 import org.wrowclif.recipebox.ui.RecipeTabs;
 
+import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.AlertDialog;
@@ -21,9 +23,9 @@ public class RecipeMenus {
 	private int tab;
 	private EditSwitcher switcher;
 
-	private static final int CREATE_RECIPE_DIALOG = 1 << 5;
-	private static final int EDIT_RECIPE_DIALOG = 2 << 5;
-	private static final int DELETE_RECIPE_DIALOG = 3 << 5;
+	private static final int CREATE_RECIPE_DIALOG = assignId();
+	private static final int EDIT_RECIPE_DIALOG = assignId();
+	private static final int DELETE_RECIPE_DIALOG = assignId();
 
 	public RecipeMenus(Recipe recipe, Activity activity, int tab, EditSwitcher switcher) {
 		this.recipe = recipe;
@@ -65,21 +67,17 @@ public class RecipeMenus {
 	}
 
 	public Dialog createDialog(int id) {
-		switch(id) {
-			case CREATE_RECIPE_DIALOG : {
-				return createRecipeDialog();
-			}
+		if(id == CREATE_RECIPE_DIALOG) {
+			return createRecipeDialog();
 
-			case EDIT_RECIPE_DIALOG : {
-				return editRecipeDialog();
-			}
+		} else if(id == EDIT_RECIPE_DIALOG) {
+			return editRecipeDialog();
 
-			case DELETE_RECIPE_DIALOG : {
-				return deleteRecipeDialog();
-			}
+		} else if(id == DELETE_RECIPE_DIALOG) {
+			return deleteRecipeDialog();
 
-			default :
-				return null;
+		} else {
+			return null;
 		}
 	}
 
