@@ -107,6 +107,7 @@
 			android:layout_height="fill_parent"
 			android:layout_above="@id/time_bar" >
 		<RelativeLayout
+				android:id="@+id/info_group"
 				android:orientation="vertical"
 				android:layout_width="fill_parent"
 				android:layout_height="fill_parent" >
@@ -182,34 +183,6 @@
 						android:inputType="text|textMultiLine"
 						android:layout_toRightOf="@id/description_edit"
 						android:layout_alignBaseline="@id/description_edit" />
-			</LinearLayout>
-
-
-
-			<LinearLayout
-					android:id="@+id/category_box"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:orientation="vertical"
-					android:layout_below="@id/description_group"
-					android:layout_alignParentLeft="true" >
-				<TextView
-						android:id="@+id/category_label"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:textSize="18sp"
-						android:text="Categories" />
-				<LinearLayout
-						android:id="@+id/category_list"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:orientation="vertical">
-				</LinearLayout>
-				<Button
-						android:id="@+id/category_button"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="Add Category" />
 			</LinearLayout>
 		</RelativeLayout>
 	</ScrollView>
