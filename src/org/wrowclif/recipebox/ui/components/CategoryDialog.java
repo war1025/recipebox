@@ -104,7 +104,7 @@ public class CategoryDialog extends Dialog {
 		messageView.setVisibility(View.VISIBLE);
 
 		messageView.setText("Are you sure you want to remove " + recipe.getName() +
-							" from the " + categoryInput.getText() + " category?");
+							" from the " + category.getName() + " category?");
 
 		okButton.setText("Delete");
 		okButton.setOnClickListener(deleteOkOnClick);
