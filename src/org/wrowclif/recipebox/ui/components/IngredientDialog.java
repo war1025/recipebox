@@ -11,8 +11,6 @@ import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
 import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter.Specifics;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
-import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
-
 import java.util.List;
 import java.util.ArrayList;
 
