@@ -66,8 +66,6 @@ public class CategoryList extends Activity {
 		setContentView(R.layout.categories);
 
 		util = UtilityImpl.singleton;
-
-		onNewIntent(getIntent());
 	}
 
 	public void onNewIntent(Intent intent) {
@@ -105,6 +103,8 @@ public class CategoryList extends Activity {
 
     public void onResume() {
 		super.onResume();
+
+		onNewIntent(getIntent());
 	}
 
 	protected void setEditing(boolean editing) {
