@@ -24,6 +24,8 @@ public interface Utility {
 
 	public List<Category> getCategoriesByName(int offset, int maxResults);
 
+	public Category getCategoryByName(String category);
+
 	public Category createOrRetrieveCategory(String category);
 
 	public Category getCategoryById(long id);

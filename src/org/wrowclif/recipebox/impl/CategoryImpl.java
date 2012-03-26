@@ -202,6 +202,27 @@ public class CategoryImpl implements Category {
 			});
 		}
 
+		protected Category getCategoryByName(final String name) {
+			final String stmt =
+				"SELECT c.cid, c.name, c.description " +
+				"FROM Category c " +
+				"WHERE c.name = ?;";
+
+			return data.sqlTransaction(new Transaction<Category>() {
+				public Category exec(SQLiteDatabase db) {
+					CategoryImpl ci = null;
+					Cursor c = db.rawQuery(stmt, new String[] {name});
+					if(c.moveToNext()) {
+						ci = new CategoryImpl(c.getLong(0));
+						ci.name = c.getString(1);
+						ci.description = c.getString(2);
+					}
+					c.close();
+					return ci;
+				}
+			});
+		}
+
 		protected Category getCategoryById(final long id) {
 			final String stmt =
 				"SELECT c.cid, c.name, c.description " +

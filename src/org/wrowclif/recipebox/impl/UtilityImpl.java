@@ -152,6 +152,10 @@ public class UtilityImpl implements Utility {
 		});
 	}
 
+	public Category getCategoryByName(String category) {
+		return CategoryImpl.factory.getCategoryByName(category);
+	}
+
 	public Category createOrRetrieveCategory(String category) {
 		return CategoryImpl.factory.createOrRetrieveCategory(category);
 	}
