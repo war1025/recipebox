@@ -8,6 +8,7 @@ import org.wrowclif.recipebox.R;
 
 import org.wrowclif.recipebox.ui.components.RecipeMenus;
 import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
+import org.wrowclif.recipebox.ui.components.CategoryListWidget;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
@@ -31,6 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.view.LayoutInflater;
@@ -53,7 +55,7 @@ public class RecipeDisplay extends Activity {
 	private Utility util;
 	private boolean edit;
 	private RecipeMenus menus;
-	private ViewGroup categories;
+	private CategoryListWidget categories;
 
 	private static final int NAME_DIALOG = assignId();
 	private static final int DESCRIPTION_DIALOG = assignId();
@@ -62,8 +64,6 @@ public class RecipeDisplay extends Activity {
 	private static final int EDIT_DIALOG = assignId();
 	private static final int DELETE_DIALOG = assignId();
 	private static final int CREATE_DIALOG = assignId();
-	private static final int DELETE_CATEGORY_DIALOG = assignId();
-	private static final int ADD_CATEGORY_DIALOG = assignId();
 
 	/** Called when the activity is first created. */
 	@Override
@@ -114,47 +114,15 @@ public class RecipeDisplay extends Activity {
 				}
 			});
 
-			this.categories = (ViewGroup) findViewById(R.id.category_list);
+			categories = new CategoryListWidget(r, this);
 
-			Button addCategoryButton = (Button) findViewById(R.id.category_button);
-			addCategoryButton.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					showDialog(ADD_CATEGORY_DIALOG);
-				}
-			});
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+				ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			params.addRule(RelativeLayout.BELOW, R.id.description_group);
+			params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 
-			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			for(final Category c : r.getCategories()) {
-				View v = li.inflate(R.layout.category_item, null);
-				TextView ctv = (TextView) v.findViewById(R.id.name_box);
-				ctv.setText(c.getName());
-
-				TextView idBox = (TextView) v.findViewById(R.id.edit_button);
-				idBox.setText(c.getId() + "");
-
-				v.setOnClickListener(new OnClickListener() {
-					public void onClick(View v) {
-						Intent i = new Intent(RecipeDisplay.this, CategoryList.class);
-						i.putExtra("id", c.getId());
-						i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-						startActivity(i);
-					}
-				});
-
-				View deleteButton = v.findViewById(R.id.delete_button);
-				deleteButton.setVisibility(View.VISIBLE);
-
-				deleteButton.setOnClickListener(new OnClickListener() {
-					public void onClick(View v) {
-						Bundle bundle = new Bundle();
-
-						bundle.putLong("id", c.getId());
-						showDialog(DELETE_CATEGORY_DIALOG, bundle);
-					}
-				});
-
-				categories.addView(v);
-			}
+			ViewGroup info = (ViewGroup) findViewById(R.id.info_group);
+			info.addView(categories.getView(), params);
 
 			setEditing(edit);
 		}
@@ -196,6 +164,8 @@ public class RecipeDisplay extends Activity {
 				label.setVisibility(View.VISIBLE);
 			}
 		}
+
+		categories.setEditing(editing);
 		edit = editing;
 
 		((RecipeTabs) getParent()).editing = editing;
@@ -215,17 +185,20 @@ public class RecipeDisplay extends Activity {
 	}
 
 	protected Dialog onCreateDialog(int id) {
+		Dialog d = null;
 		if(menus != null) {
-			Dialog d = menus.createDialog(id);
+			d = menus.createDialog(id);
 			if(d != null) {
 				return d;
 			}
 		}
+		d = categories.createDialog(id);
+		if(d != null) {
+			return d;
+		}
 
 		if((id == PREP_TIME_DIALOG) || (id == COOK_TIME_DIALOG)) {
 			return showTimeDialog(id);
-		} else if(id == DELETE_CATEGORY_DIALOG) {
-			return showConfirmDialog(id);
 		} else {
 			return showTextDialog(id);
 		}
@@ -357,29 +330,10 @@ public class RecipeDisplay extends Activity {
 
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
-		if(id == DELETE_CATEGORY_DIALOG) {
-			AlertDialog dialog = (AlertDialog) d;
-			final long categoryId = bundle.getLong("id", -1);
-			final Category category = util.getCategoryById(categoryId);
-			dialog.setMessage("Are you sure you want to remove "  + r.getName() +
-									" from the " + category.getName() + " category?");
-
-			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Remove", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					r.removeCategory(category);
-
-					for(int i = 0; i < categories.getChildCount(); i++) {
-						View child = categories.getChildAt(i);
-						TextView idBox = (TextView) child.findViewById(R.id.edit_button);
-						long childId = Long.parseLong(idBox.getText().toString());
-						if(childId == categoryId) {
-							categories.removeView(child);
-							categories.invalidate();
-							break;
-						}
-					}
-				}
-			});
+		if(categories.prepareDialog(id, d, bundle)) {
+			return;
+		} else {
+			super.onPrepareDialog(id, d, bundle);
 		}
 	}
 
