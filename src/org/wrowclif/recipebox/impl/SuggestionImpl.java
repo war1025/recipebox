@@ -34,7 +34,7 @@ public class SuggestionImpl implements Suggestion {
 			this.hiId = r2.getId();
 		} else {
 			this.lowId = r2.getId();
-			this.hiId = r2.getId();
+			this.hiId = r1.getId();
 		}
 		this.comments = "";
 	}
@@ -79,7 +79,8 @@ public class SuggestionImpl implements Suggestion {
 				values.put("description", c.getString(3));
 				values.put("preptime", c.getInt(4));
 				values.put("cooktime", c.getInt(5));
-				values.put("vid", c.getLong(6));
+				values.put("cost", c.getInt(6));
+				values.put("vid", c.getLong(7));
 				Recipe r2 = RecipeImpl.factory.createRecipeFromData(values);
 				SuggestionImpl si = new SuggestionImpl(r, r2);
 				si.comments = c.getString(1);
@@ -129,9 +130,10 @@ public class SuggestionImpl implements Suggestion {
 			data.sqlTransaction(new Transaction<Void>() {
 				public Void exec(SQLiteDatabase db) {
 					Cursor c = db.rawQuery(selectStmt, new String[] {si.lowId + "", si.hiId + ""});
-					if(c.getCount() > 0) {
+					if(c.moveToNext()) {
 						si.comments = c.getString(0);
 					}
+					c.close();
 					db.execSQL(stmt, new Object[] {si.lowId, si.hiId});
 					return null;
 				}
