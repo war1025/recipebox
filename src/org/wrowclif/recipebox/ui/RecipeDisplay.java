@@ -9,6 +9,7 @@ import org.wrowclif.recipebox.R;
 import org.wrowclif.recipebox.ui.components.RecipeMenus;
 import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
 import org.wrowclif.recipebox.ui.components.CategoryListWidget;
+import org.wrowclif.recipebox.ui.components.RelatedRecipeListWidget;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
@@ -56,6 +57,7 @@ public class RecipeDisplay extends Activity {
 	private boolean edit;
 	private RecipeMenus menus;
 	private CategoryListWidget categories;
+	private RelatedRecipeListWidget related;
 
 	private static final int NAME_DIALOG = assignId();
 	private static final int DESCRIPTION_DIALOG = assignId();
@@ -115,6 +117,8 @@ public class RecipeDisplay extends Activity {
 			});
 
 			categories = new CategoryListWidget(r, this);
+			View categoryView = categories.getView();
+			categoryView.setId(9876);
 
 			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
 				ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -122,7 +126,16 @@ public class RecipeDisplay extends Activity {
 			params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 
 			ViewGroup info = (ViewGroup) findViewById(R.id.info_group);
-			info.addView(categories.getView(), params);
+			info.addView(categoryView, params);
+
+			related = new RelatedRecipeListWidget(r, this);
+
+			params = new RelativeLayout.LayoutParams(
+				ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			params.addRule(RelativeLayout.BELOW, categoryView.getId());
+			params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+
+			info.addView(related.getView(), params);
 
 			setEditing(edit);
 		}
@@ -166,6 +179,7 @@ public class RecipeDisplay extends Activity {
 		}
 
 		categories.setEditing(editing);
+		related.setEditing(editing);
 		edit = editing;
 
 		((RecipeTabs) getParent()).editing = editing;
@@ -193,6 +207,11 @@ public class RecipeDisplay extends Activity {
 			}
 		}
 		d = categories.createDialog(id);
+		if(d != null) {
+			return d;
+		}
+
+		d = related.createDialog(id);
 		if(d != null) {
 			return d;
 		}
@@ -331,6 +350,8 @@ public class RecipeDisplay extends Activity {
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
 		if(categories.prepareDialog(id, d, bundle)) {
+			return;
+		} else if(related.prepareDialog(id, d, bundle)) {
 			return;
 		} else {
 			super.onPrepareDialog(id, d, bundle);
