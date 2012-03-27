@@ -102,6 +102,11 @@ public class CategoryListWidget {
 
 	public void setEditing(boolean editing) {
 		this.editing = editing;
+		if(editing) {
+			listWidget.setVisibility(View.VISIBLE);
+		} else if(categories.getChildCount() == 0) {
+			listWidget.setVisibility(View.GONE);
+		}
 		for(int i = 0; i < categories.getChildCount(); i++) {
 			View child = categories.getChildAt(i);
 			View deleteButton = child.findViewById(R.id.delete_button);
@@ -112,12 +117,7 @@ public class CategoryListWidget {
 
 	public Dialog createDialog(int id) {
 		Dialog retDialog = null;
-		if(id == ADD_CATEGORY_DIALOG) {
-			if(categoryDialog == null) {
-				categoryDialog = new CategoryDialog(context, recipe, this);
-			}
-			retDialog = categoryDialog;
-		} else if(id == DELETE_CATEGORY_DIALOG) {
+		if((id == ADD_CATEGORY_DIALOG) || (id == DELETE_CATEGORY_DIALOG)) {
 			if(categoryDialog == null) {
 				categoryDialog = new CategoryDialog(context, recipe, this);
 			}
