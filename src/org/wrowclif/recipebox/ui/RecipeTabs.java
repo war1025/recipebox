@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import android.app.TabActivity;
+import android.view.WindowManager;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 
@@ -18,6 +19,7 @@ public class RecipeTabs extends TabActivity {
 
 	public void onCreate(Bundle savedInstance) {
 		super.onCreate(savedInstance);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		setContentView(R.layout.recipe_tabs);
 
 		TabHost host = getTabHost();
