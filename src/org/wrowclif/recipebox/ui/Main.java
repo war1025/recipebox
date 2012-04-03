@@ -12,6 +12,7 @@ import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
+import org.wrowclif.recipebox.util.ShareUtil;
 
 import java.util.List;
 
@@ -56,6 +57,13 @@ public class Main extends Activity {
 		AppData.initialSingleton(this);
 
 		util = UtilityImpl.singleton;
+
+		Intent intent = getIntent();
+
+		if(intent.getData() != null) {
+			Log.d("Recipebox", "Intent data not null!");
+			ShareUtil.loadRecipe(this, intent.getData());
+		}
 
 		AutoCompleteTextView tv = (AutoCompleteTextView) findViewById(R.id.recipesearch);
 
