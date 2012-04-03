@@ -4,6 +4,7 @@ import org.wrowclif.recipebox.R;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.impl.UtilityImpl;
 import org.wrowclif.recipebox.ui.RecipeTabs;
+import org.wrowclif.recipebox.util.ShareUtil;
 
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
@@ -23,7 +24,7 @@ public class RecipeMenus {
 	private int tab;
 	private EditSwitcher switcher;
 
-	private static final int CREATE_RECIPE_DIALOG = assignId();
+	private static final int SHARE_RECIPE_DIALOG = assignId();
 	private static final int EDIT_RECIPE_DIALOG = assignId();
 	private static final int DELETE_RECIPE_DIALOG = assignId();
 
@@ -36,8 +37,8 @@ public class RecipeMenus {
 
 	public boolean onItemSelect(int id) {
 		switch(id) {
-			case R.id.create : {
-				activity.showDialog(CREATE_RECIPE_DIALOG);
+			case R.id.share : {
+				activity.showDialog(SHARE_RECIPE_DIALOG);
 				return true;
 			}
 
@@ -67,8 +68,8 @@ public class RecipeMenus {
 	}
 
 	public Dialog createDialog(int id) {
-		if(id == CREATE_RECIPE_DIALOG) {
-			return createRecipeDialog();
+		if(id == SHARE_RECIPE_DIALOG) {
+			return shareRecipeDialog();
 
 		} else if(id == EDIT_RECIPE_DIALOG) {
 			return editRecipeDialog();
@@ -81,19 +82,12 @@ public class RecipeMenus {
 		}
 	}
 
-	private Dialog createRecipeDialog() {
+	private Dialog shareRecipeDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle("Create New Recipe");
-		builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+		builder.setTitle("Share Recipe");
+		builder.setPositiveButton("Share", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
-				Recipe r2 = UtilityImpl.singleton.newRecipe("New Recipe");
-				Intent intent = new Intent(activity, RecipeTabs.class);
-				intent.putExtra("id", r2.getId());
-				intent.putExtra("edit", true);
-				intent.putExtra("tab", tab);
-
-				activity.finish();
-				activity.startActivity(intent);
+				ShareUtil.share(activity, recipe);
 			}
 		});
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
