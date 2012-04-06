@@ -1,6 +1,9 @@
 package org.wrowclif.recipebox.util;
 
 import org.wrowclif.recipebox.Recipe;
+import org.wrowclif.recipebox.RecipeIngredient;
+import org.wrowclif.recipebox.Instruction;
+
 import org.wrowclif.recipebox.ui.RecipeTabs;
 
 import android.content.Context;
@@ -31,10 +34,10 @@ public class ShareUtil {
 
 			out.println(JsonUtil.toJson(r));
 
-			Log.d(LOG_TAG, "File URI: " + temp.toURI());
+			String recipeText = toHumanReadable(r);
 
 			intent.putExtra(Intent.EXTRA_SUBJECT, "Recipebox Recipe: " + r.getName());
-			intent.putExtra(Intent.EXTRA_TEXT, "A recipe for making " + r.getName() + " is attached");
+			intent.putExtra(Intent.EXTRA_TEXT, "A recipe for making " + r.getName() + " is attached.\n\n" + recipeText);
 			intent.setType("text/rcpb");
 			intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(temp.toURI().toString()));
 		} catch(IOException e) {
@@ -80,6 +83,35 @@ public class ShareUtil {
 			intent.putExtra("id", recipe.getId());
 			ctx.startActivity(intent);
 		}
+	}
+
+	public static String toHumanReadable(Recipe r) {
+		StringBuilder out = new StringBuilder();
+
+		println(out, r.getName());
+
+		println(out, "\n\n");
+
+		println(out, "Ingredients:");
+
+		for(RecipeIngredient ri : r.getIngredients()) {
+			println(out, ri.getAmount() + " " + ri.getName());
+		}
+
+		println(out, "\n\n");
+
+		int i = 1;
+		for(Instruction in : r.getInstructions()) {
+			println(out, i + ". " + in.getText());
+			i++;
+		}
+
+		return out.toString();
+
+	}
+
+	private static void println(StringBuilder out, String str) {
+		out.append(str).append("\n");
 	}
 
 }
