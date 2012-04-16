@@ -38,7 +38,7 @@ public class RecipeMenus {
 	public boolean onItemSelect(int id) {
 		switch(id) {
 			case R.id.share : {
-				activity.showDialog(SHARE_RECIPE_DIALOG);
+				ShareUtil.share(activity, recipe);
 				return true;
 			}
 
@@ -68,10 +68,7 @@ public class RecipeMenus {
 	}
 
 	public Dialog createDialog(int id) {
-		if(id == SHARE_RECIPE_DIALOG) {
-			return shareRecipeDialog();
-
-		} else if(id == EDIT_RECIPE_DIALOG) {
+		if(id == EDIT_RECIPE_DIALOG) {
 			return editRecipeDialog();
 
 		} else if(id == DELETE_RECIPE_DIALOG) {
@@ -80,23 +77,6 @@ public class RecipeMenus {
 		} else {
 			return null;
 		}
-	}
-
-	private Dialog shareRecipeDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle("Share Recipe");
-		builder.setPositiveButton("Share", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				ShareUtil.share(activity, recipe);
-			}
-		});
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-
-			}
-		});
-		builder.setCancelable(true);
-		return builder.create();
 	}
 
 	private Dialog editRecipeDialog() {
