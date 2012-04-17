@@ -64,7 +64,7 @@ public class ShareUtil {
 
 			Scanner in = new Scanner(temp);
 
-			in.useDelimiter("\\z");
+			in.useDelimiter("\\A");
 
 			recipe = JsonUtil.fromJson(in.next());
 		} catch(IOException e) {
