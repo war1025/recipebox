@@ -95,7 +95,8 @@
 				android:id="@+id/done_editing"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Done Editing"
+				android:layout_margin="2dip"
+				android:background="@drawable/save"
 				android:gravity="center_vertical"
 				android:layout_alignBottom="@id/cook_group"
 				android:layout_alignParentRight="true" />
@@ -112,27 +113,18 @@
 				android:layout_width="fill_parent"
 				android:layout_height="fill_parent" >
 
-			<TextView
-					android:id="@+id/name_label"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:textSize="18sp"
-					android:text="Name" />
-
 			<LinearLayout
 					android:id="@+id/name_group"
 					android:orientation="horizontal"
 					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_below="@id/name_label"
-					android:layout_alignLeft="@id/name_label" >
+					android:layout_height="wrap_content" >
 
 				<TextView
 						android:id="@+id/name_edit"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:textSize="22sp"
-						android:paddingLeft="10dp"
+						android:textSize="26sp"
+						android:textStyle="bold"
 						android:imeOptions="actionDone"
 						android:singleLine="false" />
 				<Button
@@ -141,33 +133,24 @@
 						android:layout_height="wrap_content"
 						android:text="Name"
 						android:gravity="left"
-						android:textSize="22sp"
+						android:textSize="28sp"
 						android:paddingLeft="10dp"
 						android:singleLine="false"
 						android:layout_toRightOf="@id/name_edit"
 						android:layout_alignBaseline="@id/name_edit" />
 			</LinearLayout>
 
-			<TextView
-					android:id="@+id/description_label"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:text="Description"
-					android:textSize="18sp"
-					android:layout_below="@id/name_group" />
-
 			<LinearLayout
 					android:id="@+id/description_group"
 					android:orientation="horizontal"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:layout_below="@id/description_label"
-					android:layout_alignLeft="@id/description_label" >
+					android:layout_below="@id/name_group"
+					android:layout_alignLeft="@id/name_group" >
 				<TextView
 						android:id="@+id/description_edit"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:paddingLeft="10dp"
 						android:textSize="18sp"
 						android:imeOptions="actionDone"
 						android:inputType="text|textMultiLine" />

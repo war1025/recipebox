@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/category_box"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:paddingTop="20dip">
+	<TextView
+			android:id="@+id/category_label"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:textSize="14sp"
+			android:textStyle="italic"
+			android:text="Categories" />
+	<LinearLayout
+			android:id="@+id/category_list"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_below="@id/category_label"
+			android:layout_alignLeft="@id/category_label"
+			android:orientation="vertical">
+	</LinearLayout>
+	<Button
+			android:id="@+id/category_button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@id/category_list"
+			android:layout_margin="2dip"
+			android:background="@drawable/add" />
+</RelativeLayout>

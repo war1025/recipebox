@@ -4,38 +4,20 @@
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:layout_margin="10dip" >
-	<LinearLayout
-			android:orientation="vertical"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content" >
-		<Button
-				android:id="@+id/up_button"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_margin="2dip"
-				android:visibility="gone"
-				android:background="@drawable/up" />
-		<Button
-				android:id="@+id/down_button"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_margin="2dip"
-				android:visibility="gone"
-				android:background="@drawable/down" />
-	</LinearLayout>
 	<TextView
-			android:id="@+id/ingredient_box"
+			android:id="@+id/name_box"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
 			android:singleLine="false"
 			android:text="Child"
-			android:textSize="18sp"
-			android:padding="10dip" />
+			android:textSize="21sp"
+			android:paddingLeft="10dip" />
 
 	<LinearLayout
+			android:id="@+id/edit_group"
 			android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
+			android:layout_height="44dip"
 			android:orientation="horizontal"
 			android:gravity="center_vertical" >
 		<Button
@@ -43,6 +25,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:background="@drawable/edit"
+				android:visibility="gone"
 				android:layout_margin="2dip" />
 
 		<Button
@@ -50,6 +33,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:background="@drawable/delete"
+				android:visibility="gone"
 				android:layout_margin="2dip" />
 	</LinearLayout>
 </LinearLayout>
