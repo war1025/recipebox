@@ -41,7 +41,7 @@ public class RelatedRecipeListWidget {
 	public RelatedRecipeListWidget(Recipe recipe, Activity context) {
 		this.recipe = recipe;
 		this.context = context;
-		this.listWidget = getLayoutInflater().inflate(R.layout.category_list_widget, null);
+		this.listWidget = getLayoutInflater().inflate(R.layout.list_widget, null);
 		this.recipes = (ViewGroup) listWidget.findViewById(R.id.category_list);
 		this.editing = false;
 		this.util = UtilityImpl.singleton;
@@ -50,7 +50,6 @@ public class RelatedRecipeListWidget {
 		title.setText("Related Recipes");
 
 		this.addButton = (Button) listWidget.findViewById(R.id.category_button);
-		addButton.setText("Add Recipe");
 
 		addButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -77,7 +76,7 @@ public class RelatedRecipeListWidget {
 		final Recipe suggested = s.getSuggestedRecipe();
 		final long id = suggested.getId();
 
-		View v = getLayoutInflater().inflate(R.layout.category_item, null);
+		View v = getLayoutInflater().inflate(R.layout.list_widget_item, null);
 		TextView ctv = (TextView) v.findViewById(R.id.name_box);
 		ctv.setText(suggested.getName());
 
@@ -93,7 +92,7 @@ public class RelatedRecipeListWidget {
 		});
 
 		View deleteButton = v.findViewById(R.id.delete_button);
-		deleteButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
+		deleteButton.setVisibility(View.VISIBLE);
 
 		deleteButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -116,8 +115,8 @@ public class RelatedRecipeListWidget {
 		}
 		for(int i = 0; i < recipes.getChildCount(); i++) {
 			View child = recipes.getChildAt(i);
-			View deleteButton = child.findViewById(R.id.delete_button);
-			deleteButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
+			View editGroup = child.findViewById(R.id.edit_group);
+			editGroup.setVisibility((editing) ? View.VISIBLE : View.GONE);
 		}
 		addButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
 	}

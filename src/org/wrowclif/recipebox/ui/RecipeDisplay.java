@@ -176,6 +176,9 @@ public class RecipeDisplay extends Activity {
 			for(TextView label : labels) {
 				label.setVisibility(View.VISIBLE);
 			}
+			if(r.getDescription().equals("")) {
+				labels[1].setVisibility(View.GONE);
+			}
 		}
 
 		categories.setEditing(editing);

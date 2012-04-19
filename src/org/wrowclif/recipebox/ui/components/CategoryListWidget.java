@@ -41,7 +41,7 @@ public class CategoryListWidget {
 	public CategoryListWidget(Recipe recipe, Activity context) {
 		this.recipe = recipe;
 		this.context = context;
-		this.listWidget = getLayoutInflater().inflate(R.layout.category_list_widget, null);
+		this.listWidget = getLayoutInflater().inflate(R.layout.list_widget, null);
 		this.categories = (ViewGroup) listWidget.findViewById(R.id.category_list);
 		this.editing = false;
 		this.util = UtilityImpl.singleton;
@@ -69,7 +69,7 @@ public class CategoryListWidget {
 	}
 
 	protected View createCategoryEntry(final Category c) {
-		View v = getLayoutInflater().inflate(R.layout.category_item, null);
+		View v = getLayoutInflater().inflate(R.layout.list_widget_item, null);
 		TextView ctv = (TextView) v.findViewById(R.id.name_box);
 		ctv.setText(c.getName());
 
@@ -86,7 +86,7 @@ public class CategoryListWidget {
 		});
 
 		View deleteButton = v.findViewById(R.id.delete_button);
-		deleteButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
+		deleteButton.setVisibility(View.VISIBLE);
 
 		deleteButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -109,8 +109,8 @@ public class CategoryListWidget {
 		}
 		for(int i = 0; i < categories.getChildCount(); i++) {
 			View child = categories.getChildAt(i);
-			View deleteButton = child.findViewById(R.id.delete_button);
-			deleteButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
+			View editGroup = child.findViewById(R.id.edit_group);
+			editGroup.setVisibility((editing) ? View.VISIBLE : View.GONE);
 		}
 		addButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
 	}
