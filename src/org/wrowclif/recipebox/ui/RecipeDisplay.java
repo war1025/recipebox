@@ -83,11 +83,9 @@ public class RecipeDisplay extends Activity {
 
 			String name = r.getName();
 			setText(R.id.name_edit, name);
-			setText(R.id.name_button, name.equals("") ? "Edit Name" : name);
 
 			String description = r.getDescription();
-			setText(R.id.description_edit, description);
-			setText(R.id.description_button, description.equals("") ? "Edit Description" : description);
+			setText(R.id.description_edit, (description.equals("")) ? "Description" : description);
 
 			String prepTime = timeFormat(r.getPrepTime());
 			setText(R.id.prep_edit, prepTime);
@@ -155,8 +153,7 @@ public class RecipeDisplay extends Activity {
 	}
 
 	protected void setEditing(boolean editing) {
-		TextView[] labels = {(TextView) findViewById(R.id.name_edit), (TextView) findViewById(R.id.description_edit),
-								(TextView) findViewById(R.id.prep_edit), (TextView) findViewById(R.id.cook_edit),
+		TextView[] labels = {(TextView) findViewById(R.id.prep_edit), (TextView) findViewById(R.id.cook_edit),
 								(TextView) findViewById(R.id.total_label), (TextView) findViewById(R.id.total_edit)};
 
 		Button[] btns = {(Button) findViewById(R.id.name_button), (Button) findViewById(R.id.description_button),
@@ -169,6 +166,7 @@ public class RecipeDisplay extends Activity {
 			for(TextView label : labels) {
 				label.setVisibility(View.GONE);
 			}
+			findViewById(R.id.description_edit).setVisibility(View.VISIBLE);
 		} else {
 			for(Button b : btns) {
 				b.setVisibility(View.GONE);
@@ -177,7 +175,7 @@ public class RecipeDisplay extends Activity {
 				label.setVisibility(View.VISIBLE);
 			}
 			if(r.getDescription().equals("")) {
-				labels[1].setVisibility(View.GONE);
+				findViewById(R.id.description_edit).setVisibility(View.GONE);
 			}
 		}
 
@@ -295,8 +293,7 @@ public class RecipeDisplay extends Activity {
 					r.setName(value);
 
 					String name = r.getName();
-					setText(R.id.name_edit, name);
-					setText(R.id.name_button, name.equals("") ? "Edit Name" : name);
+					setText(R.id.name_edit, name.equals("") ? "Name" : name);
 
 					((RecipeTabs) getParent()).setTitle(name.equals("") ? "Recipe Box" : name);
 				}
@@ -317,8 +314,7 @@ public class RecipeDisplay extends Activity {
 					r.setDescription(value);
 
 					String description = r.getDescription();
-					setText(R.id.description_edit, description);
-					setText(R.id.description_button, description.equals("") ? "Edit Description" : description);
+					setText(R.id.description_edit, description.equals("") ? "Description" : description);
 				}
 			});
 		}

@@ -116,41 +116,40 @@
 			<LinearLayout
 					android:id="@+id/name_group"
 					android:orientation="horizontal"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content" >
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical" >
 
 				<TextView
 						android:id="@+id/name_edit"
-						android:layout_width="wrap_content"
+						android:layout_width="0px"
 						android:layout_height="wrap_content"
 						android:textSize="26sp"
 						android:textStyle="bold"
+						android:layout_weight="1"
 						android:imeOptions="actionDone"
 						android:singleLine="false" />
 				<Button
 						android:id="@+id/name_button"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="Name"
-						android:gravity="left"
-						android:textSize="28sp"
-						android:paddingLeft="10dp"
-						android:singleLine="false"
-						android:layout_toRightOf="@id/name_edit"
-						android:layout_alignBaseline="@id/name_edit" />
+						android:layout_margin="10dip"
+						android:background="@drawable/edit" />
 			</LinearLayout>
 
 			<LinearLayout
 					android:id="@+id/description_group"
 					android:orientation="horizontal"
-					android:layout_width="wrap_content"
+					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
 					android:layout_below="@id/name_group"
-					android:layout_alignLeft="@id/name_group" >
+					android:layout_alignLeft="@id/name_group"
+					android:gravity="center_vertical" >
 				<TextView
 						android:id="@+id/description_edit"
-						android:layout_width="wrap_content"
+						android:layout_width="0px"
 						android:layout_height="wrap_content"
+						android:layout_weight="1"
 						android:textSize="18sp"
 						android:imeOptions="actionDone"
 						android:inputType="text|textMultiLine" />
@@ -158,14 +157,8 @@
 						android:id="@+id/description_button"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:text="Description"
-						android:gravity="left"
-						android:paddingLeft="10dp"
-						android:textSize="18sp"
-						android:imeOptions="actionDone"
-						android:inputType="text|textMultiLine"
-						android:layout_toRightOf="@id/description_edit"
-						android:layout_alignBaseline="@id/description_edit" />
+						android:layout_margin="10dip"
+						android:background="@drawable/edit" />
 			</LinearLayout>
 		</RelativeLayout>
 	</ScrollView>
