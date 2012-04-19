@@ -8,14 +8,22 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import android.app.TabActivity;
+import android.graphics.Color;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
+import android.widget.TabHost.OnTabChangeListener;
+import android.widget.TextView;
 
 public class RecipeTabs extends TabActivity {
 
 	protected Recipe curRecipe;
 	protected boolean editing;
+
+	private static final int INACTIVE_COLOR = Color.parseColor("#439595");
+	private static final int ACTIVE_COLOR = Color.parseColor("#7dd3d3");
+	private static final int TEXT_COLOR = Color.parseColor("#000000");
 
 	public void onCreate(Bundle savedInstance) {
 		super.onCreate(savedInstance);
@@ -57,5 +65,27 @@ public class RecipeTabs extends TabActivity {
 
 		host.setCurrentTab(tab);
 
+		View tabView = null;
+
+		for(int i = 0; i < 3; i++) {
+			tabView = host.getTabWidget().getChildAt(i);
+			tabView.setBackgroundColor((tab == i) ? ACTIVE_COLOR : INACTIVE_COLOR);
+			((TextView) tabView.findViewById(android.R.id.title)).setTextColor(TEXT_COLOR);
+		}
+
+		host.getTabWidget().getChildAt(tab).setBackgroundColor(ACTIVE_COLOR);
+
+		host.setOnTabChangedListener(new OnTabChangeListener() {
+			public void onTabChanged(String tabId) {
+				View tab = null;
+				int currentTab = getTabHost().getCurrentTab();
+				for(int i = 0; i < 3; i++) {
+					tab = getTabHost().getTabWidget().getChildAt(i);
+					tab.setBackgroundColor((currentTab == i) ? ACTIVE_COLOR : INACTIVE_COLOR);
+					((TextView) tab.findViewById(android.R.id.title)).setTextColor(TEXT_COLOR);
+				}
+			}
+		});
 	}
+
 }
