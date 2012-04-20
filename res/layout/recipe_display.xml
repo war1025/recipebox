@@ -13,6 +13,7 @@
 				android:id="@+id/prep_label"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:textColor="#000"
 				android:textSize="18sp"
 				android:text="Prep Time" />
 
@@ -29,6 +30,7 @@
 					android:layout_height="wrap_content"
 					android:singleLine="true"
 					android:gravity="right"
+					android:textColor="#000"
 					android:textSize="24sp" />
 			<Button
 					android:id="@+id/prep_button"
@@ -45,6 +47,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:textSize="18sp"
+				android:textColor="#000"
 				android:paddingLeft="20dip"
 				android:layout_marginRight="20dip"
 				android:text="Cook Time"
@@ -63,6 +66,7 @@
 					android:layout_height="wrap_content"
 					android:singleLine="true"
 					android:gravity="right"
+					android:textColor="#000"
 					android:textSize="24sp" />
 			<Button
 					android:id="@+id/cook_button"
@@ -80,6 +84,7 @@
 				android:layout_height="wrap_content"
 				android:layout_toRightOf="@id/cook_label"
 				android:textSize="18sp"
+				android:textColor="#000"
 				android:text="Total Time" />
 		<TextView
 				android:id="@+id/total_edit"
@@ -88,6 +93,7 @@
 				android:singleLine="true"
 				android:gravity="right"
 				android:textSize="24sp"
+				android:textColor="#000"
 				android:layout_below="@id/total_label"
 				android:layout_alignRight="@id/total_label" />
 
@@ -118,7 +124,10 @@
 					android:orientation="horizontal"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:gravity="center_vertical" >
+					android:gravity="center_vertical"
+					android:background="#439595"
+					android:paddingTop="8dip"
+					android:paddingBottom="8dip">
 
 				<TextView
 						android:id="@+id/name_edit"
@@ -126,6 +135,8 @@
 						android:layout_height="wrap_content"
 						android:textSize="26sp"
 						android:textStyle="bold"
+						android:textColor="#f4f4f4"
+						android:gravity="center_horizontal"
 						android:layout_weight="1"
 						android:imeOptions="actionDone"
 						android:singleLine="false" />
@@ -133,7 +144,7 @@
 						android:id="@+id/name_button"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:layout_margin="10dip"
+						android:layout_margin="5dip"
 						android:background="@drawable/edit" />
 			</LinearLayout>
 
@@ -150,14 +161,16 @@
 						android:layout_width="0px"
 						android:layout_height="wrap_content"
 						android:layout_weight="1"
+						android:paddingLeft="5dip"
 						android:textSize="18sp"
+						android:textColor="#000"
 						android:imeOptions="actionDone"
 						android:inputType="text|textMultiLine" />
 				<Button
 						android:id="@+id/description_button"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:layout_margin="10dip"
+						android:layout_margin="5dip"
 						android:background="@drawable/edit" />
 			</LinearLayout>
 		</RelativeLayout>

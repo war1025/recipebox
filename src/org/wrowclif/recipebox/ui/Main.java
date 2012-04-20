@@ -163,10 +163,10 @@ public class Main extends Activity {
 
 			public View getView(int id, Recipe r, View v, ViewGroup vg) {
 				if(v == null) {
-					v = inflate(R.layout.autoitem);
+					v = inflate(R.layout.category_item);
 				}
 
-				TextView tv = (TextView) v.findViewById(R.id.child_name);
+				TextView tv = (TextView) v.findViewById(R.id.name_box);
 
 				if(r == null) {
 					tv.setText("Loading...");

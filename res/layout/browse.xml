@@ -2,18 +2,26 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="vertical"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent" >
+		android:layout_height="fill_parent"
+		android:background="#f4f4f4" >
 	<TextView
 			android:id="@+id/browse_label"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
+			android:gravity="center_horizontal"
+			android:background="#439595"
+			android:textColor="#f4f4f4"
+			android:textStyle="bold"
 			android:text="Recipes By Name"
-			android:textSize="18sp" />
+			android:textSize="24sp"
+			android:padding="8dip" />
 	<ListView
 			android:id="@+id/browse_recipes"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:layout_below="@id/browse_label"
-			android:layout_weight="1" />
+			android:layout_weight="1"
+			android:divider="#a1b375"
+			android:dividerHeight="1dip" />
 </RelativeLayout>
 

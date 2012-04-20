@@ -3,7 +3,8 @@
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:layout_margin="10dip" >
+		android:layout_margin="6dip"
+		android:background="#f4f4f4" >
 	<LinearLayout
 			android:orientation="vertical"
 			android:layout_width="wrap_content"
@@ -30,7 +31,8 @@
 			android:layout_weight="1"
 			android:singleLine="false"
 			android:text="Child"
-			android:textSize="18sp"
+			android:textSize="20sp"
+			android:textColor="#000"
 			android:padding="10dip" />
 
 	<LinearLayout

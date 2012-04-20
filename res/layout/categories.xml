@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="vertical"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent" >
+		android:layout_height="fill_parent"
+		android:background="#f4f4f4" >
 	<LinearLayout
 			android:id="@+id/bottom_group"
 			android:orientation="horizontal"
@@ -26,14 +27,21 @@
 			android:id="@+id/category_label"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
+			android:gravity="center_horizontal"
+			android:background="#439595"
 			android:text="Categories"
-			android:textSize="18sp" />
+			android:textStyle="bold"
+			android:textColor="#f4f4f4"
+			android:textSize="24sp"
+			android:padding="8dip" />
 	<ListView
 			android:id="@+id/category_list"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:layout_below="@id/category_label"
 			android:layout_above="@id/bottom_group"
-			android:layout_weight="1" />
+			android:layout_weight="1"
+			android:divider="#a1b375"
+			android:dividerHeight="1dip" />
 </RelativeLayout>
 

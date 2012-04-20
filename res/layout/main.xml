@@ -2,18 +2,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="vertical"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent" >
+		android:layout_height="fill_parent"
+		android:background="#f4f4f4" >
 	<LinearLayout
 			android:id="@+id/top_search"
 			android:orientation="vertical"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:layout_alignParentTop="true" >
+			android:layout_alignParentTop="true"
+			android:background="#439595" >
 		<TextView
 				android:id="@+id/recipe_label"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Search Recipes" />
+				android:text="Search Recipes"
+				android:textColor="#f4f4f4" />
 		<AutoCompleteTextView
 				android:id="@+id/recipesearch"
 				android:layout_width="fill_parent"
@@ -28,6 +31,7 @@
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:orientation="horizontal"
+			android:background="#439595"
 			android:layout_alignParentBottom="true" >
 		<Button
 				android:id="@+id/addrecipe"
@@ -54,15 +58,13 @@
 			android:orientation="vertical"
 			android:layout_above="@id/bottom_buttons"
 			android:layout_below="@id/top_search" >
-		<TextView
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:text="Recently Viewed" />
 		<ListView
 				android:id="@+id/recent_recipes"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:layout_weight="1" />
+				android:layout_weight="1"
+				android:divider="#a1b375"
+				android:dividerHeight="1dip" />
 	</LinearLayout>
 </RelativeLayout>
 
