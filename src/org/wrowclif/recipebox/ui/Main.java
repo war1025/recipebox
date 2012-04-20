@@ -127,7 +127,7 @@ public class Main extends Activity {
 			}
 		});
 
-		Button addRecipe = (Button) findViewById(R.id.addrecipe);
+		View addRecipe = findViewById(R.id.addrecipe);
 
 		addRecipe.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -139,7 +139,7 @@ public class Main extends Activity {
 			}
 		});
 
-		Button browseRecipe = (Button) findViewById(R.id.browse);
+		View browseRecipe = findViewById(R.id.browse);
 
 		browseRecipe.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -148,7 +148,7 @@ public class Main extends Activity {
 			}
 		});
 
-		Button browseCategories = (Button) findViewById(R.id.categories);
+		View browseCategories = findViewById(R.id.categories);
 
 		browseCategories.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {

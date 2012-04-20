@@ -33,23 +33,41 @@
 			android:orientation="horizontal"
 			android:background="@color/background_colored"
 			android:layout_alignParentBottom="true" >
-		<Button
+		<TextView
 				android:id="@+id/addrecipe"
 				android:layout_width="0px"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
+				android:gravity="center_horizontal|center_vertical"
+				android:background="@drawable/tab_inactive"
+				android:paddingTop="20dip"
+				android:paddingBottom="20dip"
+				android:textColor="@color/background_light"
+				android:textSize="18sp"
 				android:text="Create" />
-		<Button
+		<TextView
 				android:id="@+id/browse"
 				android:layout_width="0px"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
+				android:gravity="center_horizontal|center_vertical"
+				android:background="@drawable/tab_inactive"
+				android:paddingTop="20dip"
+				android:paddingBottom="20dip"
+				android:textColor="@color/background_light"
+				android:textSize="18sp"
 				android:text="Browse" />
-		<Button
+		<TextView
 				android:id="@+id/categories"
 				android:layout_width="0px"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
+				android:gravity="center_horizontal|center_vertical"
+				android:background="@drawable/tab_inactive"
+				android:paddingTop="20dip"
+				android:paddingBottom="20dip"
+				android:textColor="@color/background_light"
+				android:textSize="18sp"
 				android:text="Categories" />
 	</LinearLayout>
 	<LinearLayout

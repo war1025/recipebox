@@ -9,8 +9,10 @@ import android.os.Bundle;
 
 import android.app.TabActivity;
 import android.graphics.Color;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TabHost.OnTabChangeListener;
@@ -20,6 +22,9 @@ public class RecipeTabs extends TabActivity {
 
 	protected Recipe curRecipe;
 	protected boolean editing;
+
+	private int active_text_color;
+	private int inactive_text_color;
 
 	public void onCreate(Bundle savedInstance) {
 		super.onCreate(savedInstance);
@@ -61,22 +66,41 @@ public class RecipeTabs extends TabActivity {
 
 		host.setCurrentTab(tab);
 
+		active_text_color = getResources().getColor(R.color.text_color);
+		inactive_text_color = getResources().getColor(R.color.background_light);
+
 		View tabView = null;
 
 		for(int i = 0; i < 3; i++) {
 			tabView = host.getTabWidget().getChildAt(i);
-			tabView.setBackgroundResource((tab == i) ? R.color.tab_active : R.drawable.tab_inactive);
-			((TextView) tabView.findViewById(android.R.id.title)).setTextColor(getResources().getColor(R.color.text_color));
+			TextView tabText = (TextView) tabView.findViewById(android.R.id.title);
+			tabText.setTextSize(18);
+			tabText.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT,
+																	RelativeLayout.LayoutParams.FILL_PARENT));
+			tabText.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+			if(tab == i) {
+				tabView.setBackgroundResource(R.color.tab_active);
+				tabText.setTextColor(active_text_color);
+			} else {
+				tabView.setBackgroundResource(R.drawable.tab_inactive);
+				tabText.setTextColor(inactive_text_color);
+
+			}
 		}
 
 		host.setOnTabChangedListener(new OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
-				View tab = null;
-				int currentTab = getTabHost().getCurrentTab();
+				int tab = getTabHost().getCurrentTab();
 				for(int i = 0; i < 3; i++) {
-					tab = getTabHost().getTabWidget().getChildAt(i);
-					tab.setBackgroundResource((currentTab == i) ? R.color.tab_active : R.drawable.tab_inactive);
-					((TextView) tab.findViewById(android.R.id.title)).setTextColor(getResources().getColor(R.color.text_color));
+					View tabView = getTabHost().getTabWidget().getChildAt(i);
+					if(tab == i) {
+						tabView.setBackgroundResource(R.color.tab_active);
+						((TextView) tabView.findViewById(android.R.id.title)).setTextColor(active_text_color);
+					} else {
+						tabView.setBackgroundResource(R.drawable.tab_inactive);
+						((TextView) tabView.findViewById(android.R.id.title)).setTextColor(inactive_text_color);
+
+					}
 				}
 			}
 		});
