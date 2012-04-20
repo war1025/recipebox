@@ -3,14 +3,14 @@
 		android:orientation="vertical"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:background="#f4f4f4" >
+		android:background="@color/background_light" >
 	<TextView
 			android:id="@+id/browse_label"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:gravity="center_horizontal"
-			android:background="#439595"
-			android:textColor="#f4f4f4"
+			android:background="@color/background_colored"
+			android:textColor="@color/background_light"
 			android:textStyle="bold"
 			android:text="Recipes By Name"
 			android:textSize="24sp"
@@ -21,7 +21,7 @@
 			android:layout_height="wrap_content"
 			android:layout_below="@id/browse_label"
 			android:layout_weight="1"
-			android:divider="#a1b375"
+			android:divider="@color/item_divider"
 			android:dividerHeight="1dip" />
 </RelativeLayout>
 

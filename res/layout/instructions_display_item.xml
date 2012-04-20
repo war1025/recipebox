@@ -4,7 +4,7 @@
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:layout_margin="6dip"
-		android:background="#f4f4f4" >
+		android:background="@color/background_light" >
 	<LinearLayout
 			android:orientation="vertical"
 			android:layout_width="wrap_content"
@@ -30,7 +30,7 @@
 			android:layout_height="wrap_content"
 			android:text="Child"
 			android:textSize="20sp"
-			android:textColor="#000"
+			android:textColor="@color/text_color"
 			android:paddingTop="10dip"
 			android:paddingBottom="10dip"
 			android:paddingRight="3dip"
@@ -43,7 +43,7 @@
 			android:layout_weight="1"
 			android:singleLine="false"
 			android:text="Child"
-			android:textColor="#000"
+			android:textColor="@color/text_color"
 			android:textSize="20sp"
 			android:paddingTop="10dip"
 			android:paddingBottom="10dip"

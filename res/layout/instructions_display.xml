@@ -28,7 +28,7 @@
 			android:layout_height="fill_parent"
 			android:layout_above="@id/bottom_group"
 			android:layout_weight="1"
-			android:divider="#a1b375"
+			android:divider="@color/item_divider"
 			android:dividerHeight="1dip" />
 
 </RelativeLayout>

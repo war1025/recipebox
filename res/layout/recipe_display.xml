@@ -13,7 +13,7 @@
 				android:id="@+id/prep_label"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:textColor="#000"
+				android:textColor="@color/text_color"
 				android:textSize="18sp"
 				android:text="Prep Time" />
 
@@ -30,7 +30,7 @@
 					android:layout_height="wrap_content"
 					android:singleLine="true"
 					android:gravity="right"
-					android:textColor="#000"
+					android:textColor="@color/text_color"
 					android:textSize="24sp" />
 			<Button
 					android:id="@+id/prep_button"
@@ -47,7 +47,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:textSize="18sp"
-				android:textColor="#000"
+				android:textColor="@color/text_color"
 				android:paddingLeft="20dip"
 				android:layout_marginRight="20dip"
 				android:text="Cook Time"
@@ -66,7 +66,7 @@
 					android:layout_height="wrap_content"
 					android:singleLine="true"
 					android:gravity="right"
-					android:textColor="#000"
+					android:textColor="@color/text_color"
 					android:textSize="24sp" />
 			<Button
 					android:id="@+id/cook_button"
@@ -84,7 +84,7 @@
 				android:layout_height="wrap_content"
 				android:layout_toRightOf="@id/cook_label"
 				android:textSize="18sp"
-				android:textColor="#000"
+				android:textColor="@color/text_color"
 				android:text="Total Time" />
 		<TextView
 				android:id="@+id/total_edit"
@@ -93,7 +93,7 @@
 				android:singleLine="true"
 				android:gravity="right"
 				android:textSize="24sp"
-				android:textColor="#000"
+				android:textColor="@color/text_color"
 				android:layout_below="@id/total_label"
 				android:layout_alignRight="@id/total_label" />
 
@@ -125,7 +125,7 @@
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center_vertical"
-					android:background="#439595"
+					android:background="@color/background_colored"
 					android:paddingTop="8dip"
 					android:paddingBottom="8dip">
 
@@ -135,7 +135,7 @@
 						android:layout_height="wrap_content"
 						android:textSize="26sp"
 						android:textStyle="bold"
-						android:textColor="#f4f4f4"
+						android:textColor="@color/background_light"
 						android:gravity="center_horizontal"
 						android:layout_weight="1"
 						android:imeOptions="actionDone"
@@ -163,7 +163,7 @@
 						android:layout_weight="1"
 						android:paddingLeft="5dip"
 						android:textSize="18sp"
-						android:textColor="#000"
+						android:textColor="@color/text_color"
 						android:imeOptions="actionDone"
 						android:inputType="text|textMultiLine" />
 				<Button

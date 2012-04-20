@@ -3,20 +3,20 @@
 		android:orientation="vertical"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:background="#f4f4f4" >
+		android:background="@color/background_light" >
 	<LinearLayout
 			android:id="@+id/top_search"
 			android:orientation="vertical"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:layout_alignParentTop="true"
-			android:background="#439595" >
+			android:background="@color/background_colored" >
 		<TextView
 				android:id="@+id/recipe_label"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="Search Recipes"
-				android:textColor="#f4f4f4" />
+				android:textColor="@color/background_light" />
 		<AutoCompleteTextView
 				android:id="@+id/recipesearch"
 				android:layout_width="fill_parent"
@@ -31,7 +31,7 @@
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:orientation="horizontal"
-			android:background="#439595"
+			android:background="@color/background_colored"
 			android:layout_alignParentBottom="true" >
 		<Button
 				android:id="@+id/addrecipe"
@@ -63,7 +63,7 @@
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
 				android:layout_weight="1"
-				android:divider="#a1b375"
+				android:divider="@color/item_divider"
 				android:dividerHeight="1dip" />
 	</LinearLayout>
 </RelativeLayout>
