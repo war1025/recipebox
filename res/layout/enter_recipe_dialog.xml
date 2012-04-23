@@ -2,7 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="vertical"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent" >
+		android:layout_height="fill_parent"
+		android:background="@color/background_light" >
+	<TextView
+			android:id="@+id/title"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_horizontal"
+			android:background="@color/background_colored"
+			android:textColor="@color/background_light"
+			android:textStyle="bold"
+			android:text="Edit Text"
+			android:textSize="20sp"
+			android:padding="8dip" />
 	<AutoCompleteTextView
 				android:id="@+id/text_edit"
 				android:layout_width="fill_parent"
@@ -10,4 +22,36 @@
 				android:singleLine="true"
 				android:inputType="text|textCapWords"
 				android:completionThreshold="2" />
+	<LinearLayout
+			android:orientation="horizontal"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center" >
+		<Button
+				android:id="@+id/ok_button"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:layout_margin="3dip"
+				android:drawablePadding="0dip"
+				android:padding="0dip"
+				android:drawableLeft="@drawable/save"
+				android:textColor="@color/button_foreground"
+				android:background="@drawable/button_background"
+				android:textSize="18sp"
+				android:text="Ok" />
+		<Button
+				android:id="@+id/cancel_button"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:layout_margin="3dip"
+				android:padding="0dip"
+				android:drawablePadding="0dip"
+				android:drawableLeft="@drawable/delete"
+				android:textColor="@color/button_foreground"
+				android:background="@drawable/button_background"
+				android:textSize="18sp"
+				android:text="Cancel" />
+	</LinearLayout>
 </LinearLayout>

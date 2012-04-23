@@ -36,7 +36,10 @@
 					android:id="@+id/prep_button"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
+					android:layout_margin="2dip"
 					android:text="Prep Time"
+					android:textColor="@color/button_foreground"
+					android:background="@drawable/button_background"
 					android:singleLine="true"
 					android:gravity="right"
 					android:textSize="24sp" />
@@ -72,7 +75,10 @@
 					android:id="@+id/cook_button"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
+					android:layout_margin="2dip"
 					android:text="Cook Time"
+					android:textColor="@color/button_foreground"
+					android:background="@drawable/button_background"
 					android:singleLine="true"
 					android:gravity="right"
 					android:textSize="24sp" />

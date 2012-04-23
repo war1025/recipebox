@@ -23,7 +23,6 @@
 				android:layout_alignBaseline="@id/category_button"
 				android:textSize="17sp"
 				android:textColor="@color/text_color"
-				android:textStyle="italic"
 				android:text="Categories" />
 	</RelativeLayout>
 	<LinearLayout

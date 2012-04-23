@@ -21,6 +21,18 @@
 	<color name="text_color">
 		#000
 	</color>
+	<color name="button_fg_pressed">
+		#c3ffff
+	</color>
+	<color name="button_bg_pressed">
+		#005858
+	</color>
+	<color name="button_bg">
+		#008080
+	</color>
+	<color name="button_fg">
+		#fff
+	</color>
 
 </resources>
 
