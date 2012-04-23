@@ -4,44 +4,20 @@
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:background="@color/background_light" >
-	<LinearLayout
-			android:id="@+id/bottom_group"
-			android:orientation="horizontal"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true" >
-		<Button
-				android:id="@+id/add_button"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_margin="2dip"
-				android:background="@drawable/add" />
-		<Button
-				android:id="@+id/done_button"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_margin="2dip"
-				android:background="@drawable/save" />
-	</LinearLayout>
+	<include
+			layout="@layout/add_done_buttons"
+			android:layout_alignParentBottom="true" />
 	<TextView
 			android:id="@+id/category_label"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:gravity="center_horizontal"
-			android:background="@color/background_colored"
-			android:text="Categories"
-			android:textStyle="bold"
-			android:textColor="@color/background_light"
-			android:textSize="24sp"
-			android:padding="8dip" />
+			style="@style/Heading"
+			android:text="Categories" />
 	<ListView
 			android:id="@+id/category_list"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:layout_below="@id/category_label"
-			android:layout_above="@id/bottom_group"
+			android:layout_above="@id/add_done_buttons"
 			android:layout_weight="1"
-			android:divider="@color/item_divider"
-			android:dividerHeight="1dip" />
+			style="@style/List" />
 </RelativeLayout>
 

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/dialog_buttons"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center" >
+	<Button
+			android:id="@+id/ok_button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:layout_margin="3dip"
+			android:drawablePadding="0dip"
+			android:padding="0dip"
+			android:drawableLeft="@drawable/save"
+			android:textColor="@color/button_foreground"
+			android:background="@drawable/button_background"
+			android:textSize="18sp" />
+	<Button
+			android:id="@+id/cancel_button"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:layout_margin="3dip"
+			android:padding="0dip"
+			android:drawablePadding="0dip"
+			android:drawableLeft="@drawable/delete"
+			android:textColor="@color/button_foreground"
+			android:background="@drawable/button_background"
+			android:textSize="18sp" />
+</LinearLayout>
