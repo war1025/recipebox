@@ -235,6 +235,7 @@ public class IngredientsDisplay extends Activity {
 				}
 
 				TextView tv = (TextView) convert.findViewById(R.id.ingredient_box);
+				AppData.getSingleton().useTextFont(tv);
 
 				Button be = (Button) convert.findViewById(R.id.edit_button);
 				Button bd = (Button) convert.findViewById(R.id.delete_button);

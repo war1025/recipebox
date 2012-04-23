@@ -2,6 +2,7 @@ package org.wrowclif.recipebox.ui.components;
 
 import org.wrowclif.recipebox.R;
 
+import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Suggestion;
 import org.wrowclif.recipebox.Utility;
@@ -48,6 +49,7 @@ public class RelatedRecipeListWidget {
 
 		TextView title = (TextView) listWidget.findViewById(R.id.category_label);
 		title.setText("Related Recipes");
+		AppData.getSingleton().useHeadingFont(title);
 
 		this.addButton = (Button) listWidget.findViewById(R.id.category_button);
 
@@ -78,6 +80,7 @@ public class RelatedRecipeListWidget {
 
 		View v = getLayoutInflater().inflate(R.layout.list_widget_item, null);
 		TextView ctv = (TextView) v.findViewById(R.id.name_box);
+		AppData.getSingleton().useTextFont(ctv);
 		ctv.setText(suggested.getName());
 
 		TextView idBox = (TextView) v.findViewById(R.id.edit_button);

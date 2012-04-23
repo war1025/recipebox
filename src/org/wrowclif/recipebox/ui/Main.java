@@ -65,7 +65,10 @@ public class Main extends Activity {
 			ShareUtil.loadRecipe(this, intent.getData());
 		}
 
+		AppData.getSingleton().useHeadingFont((TextView) findViewById(R.id.recipe_label));
+
 		AutoCompleteTextView tv = (AutoCompleteTextView) findViewById(R.id.recipesearch);
+		AppData.getSingleton().useTextFont(tv);
 
 		ListAutoCompleteAdapter.Specifics<Recipe> sp = new ListAutoCompleteAdapter.Specifics<Recipe>() {
 
@@ -75,6 +78,7 @@ public class Main extends Activity {
 				}
 
 				TextView tv = (TextView) v.findViewById(R.id.child_name);
+				AppData.getSingleton().useTextFont(tv);
 
 				tv.setText(r.getName());
 
@@ -127,7 +131,8 @@ public class Main extends Activity {
 			}
 		});
 
-		View addRecipe = findViewById(R.id.addrecipe);
+		TextView addRecipe = (TextView) findViewById(R.id.addrecipe);
+		AppData.getSingleton().useHeadingFont(addRecipe);
 
 		addRecipe.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -139,7 +144,8 @@ public class Main extends Activity {
 			}
 		});
 
-		View browseRecipe = findViewById(R.id.browse);
+		TextView browseRecipe = (TextView) findViewById(R.id.browse);
+		AppData.getSingleton().useHeadingFont(browseRecipe);
 
 		browseRecipe.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -148,7 +154,8 @@ public class Main extends Activity {
 			}
 		});
 
-		View browseCategories = findViewById(R.id.categories);
+		TextView browseCategories = (TextView) findViewById(R.id.categories);
+		AppData.getSingleton().useHeadingFont(browseCategories);
 
 		browseCategories.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -167,6 +174,7 @@ public class Main extends Activity {
 				}
 
 				TextView tv = (TextView) v.findViewById(R.id.name_box);
+				AppData.getSingleton().useTextFont(tv);
 
 				if(r == null) {
 					tv.setText("Loading...");

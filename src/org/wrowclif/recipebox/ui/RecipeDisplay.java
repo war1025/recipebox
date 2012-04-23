@@ -6,6 +6,7 @@ import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox.R;
 
+import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.RecipeMenus;
 import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
 import org.wrowclif.recipebox.ui.components.CategoryListWidget;
@@ -54,6 +55,7 @@ public class RecipeDisplay extends Activity {
 
 	private Recipe r;
 	private Utility util;
+	private AppData appData;
 	private boolean edit;
 	private RecipeMenus menus;
 	private CategoryListWidget categories;
@@ -75,6 +77,7 @@ public class RecipeDisplay extends Activity {
 
 		Intent intent = getIntent();
 		util = UtilityImpl.singleton;
+		appData = AppData.getSingleton();
 
 		r = ((RecipeTabs) getParent()).curRecipe;
 		edit = ((RecipeTabs) getParent()).editing;
@@ -83,19 +86,29 @@ public class RecipeDisplay extends Activity {
 
 			String name = r.getName();
 			setText(R.id.name_edit, name);
+			appData.useHeadingFont((TextView) findViewById(R.id.name_edit));
 
 			String description = r.getDescription();
 			setText(R.id.description_edit, (description.equals("")) ? "Description" : description);
+			appData.useTextFont((TextView) findViewById(R.id.description_edit));
 
 			String prepTime = timeFormat(r.getPrepTime());
 			setText(R.id.prep_edit, prepTime);
 			setText(R.id.prep_button, prepTime);
+			appData.useHeadingFont((TextView) findViewById(R.id.prep_label));
+			appData.useTextFont((TextView) findViewById(R.id.prep_edit));
+			appData.useTextFont((TextView) findViewById(R.id.prep_button));
 
 			String cookTime = timeFormat(r.getCookTime());
 			setText(R.id.cook_edit, cookTime);
 			setText(R.id.cook_button, cookTime);
+			appData.useHeadingFont((TextView) findViewById(R.id.cook_label));
+			appData.useTextFont((TextView) findViewById(R.id.cook_edit));
+			appData.useTextFont((TextView) findViewById(R.id.cook_button));
 
 			setText(R.id.total_edit, timeFormat(r.getCookTime() + r.getPrepTime()));
+			appData.useHeadingFont((TextView) findViewById(R.id.total_label));
+			appData.useTextFont((TextView) findViewById(R.id.total_edit));
 
 			Button[] btns = {(Button) findViewById(R.id.name_button), (Button) findViewById(R.id.description_button),
 								(Button) findViewById(R.id.prep_button), (Button) findViewById(R.id.cook_button)};
@@ -261,35 +274,20 @@ public class RecipeDisplay extends Activity {
 	}
 
 	protected Dialog showTextDialog(int id) {
-		Dialog dialog = null;
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		String title = null;
-		String initialText = null;
-		boolean singleLine = false;
-		DigitsKeyListener dklistener = null;
-
-		LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View v = li.inflate(R.layout.enter_text_dialog, null);
-		EditText input = (EditText) v.findViewById(R.id.text_edit);
-		builder.setView(v);
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-
-			}
-		});
+		final EnterTextDialog dialog = new EnterTextDialog(this);
 
 		if(id == NAME_DIALOG) {
-			title = "Edit Name";
+			dialog.setTitle("Edit Name");
 
-			initialText = r.getName();
+			dialog.setEditText(r.getName());
 
-			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-			input.setSingleLine(true);
+			dialog.getEditView().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			dialog.getEditView().setSingleLine(true);
 
-			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
-					String value = input.getText().toString();
+			dialog.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
+					String value = dialog.getEditText();
+
 					r.setName(value);
 
 					String name = r.getName();
@@ -300,17 +298,17 @@ public class RecipeDisplay extends Activity {
 			});
 
 		} else if(id == DESCRIPTION_DIALOG) {
-			title = "Edit Description";
+			dialog.setTitle("Edit Description");
 
-			initialText = r.getDescription();
+			dialog.setEditText(r.getDescription());
 
-			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-			input.setSingleLine(false);
+			dialog.getEditView().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+			dialog.getEditView().setSingleLine(false);
 
-			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					EditText input = (EditText) ((Dialog)dialog).findViewById(R.id.text_edit);
-					String value = input.getText().toString();
+			dialog.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
+					String value = dialog.getEditText();
+
 					r.setDescription(value);
 
 					String description = r.getDescription();
@@ -319,11 +317,7 @@ public class RecipeDisplay extends Activity {
 			});
 		}
 
-		builder.setCancelable(true);
-		builder.setTitle(title);
-		dialog = builder.create();
-
-		input.setText(initialText);
+		dialog.setCancelable(true);
 
 		return dialog;
 	}

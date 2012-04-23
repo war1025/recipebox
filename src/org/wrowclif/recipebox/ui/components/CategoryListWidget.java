@@ -2,6 +2,7 @@ package org.wrowclif.recipebox.ui.components;
 
 import org.wrowclif.recipebox.R;
 
+import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Utility;
@@ -46,6 +47,8 @@ public class CategoryListWidget {
 		this.editing = false;
 		this.util = UtilityImpl.singleton;
 
+		AppData.getSingleton().useHeadingFont((TextView) listWidget.findViewById(R.id.category_label));
+
 		this.addButton = (Button) listWidget.findViewById(R.id.category_button);
 
 		addButton.setOnClickListener(new OnClickListener() {
@@ -71,6 +74,7 @@ public class CategoryListWidget {
 	protected View createCategoryEntry(final Category c) {
 		View v = getLayoutInflater().inflate(R.layout.list_widget_item, null);
 		TextView ctv = (TextView) v.findViewById(R.id.name_box);
+		AppData.getSingleton().useTextFont(ctv);
 		ctv.setText(c.getName());
 
 		TextView idBox = (TextView) v.findViewById(R.id.edit_button);

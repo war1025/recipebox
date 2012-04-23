@@ -5,6 +5,7 @@ import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox.R;
 
+import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.RecipeMenus;
 import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
@@ -138,23 +139,23 @@ public class InstructionsDisplay extends Activity {
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
 		if(id == EDIT_INSTRUCTION_DIALOG) {
-			AlertDialog dialog = (AlertDialog) d;
+			final EnterTextDialog dialog = (EnterTextDialog) d;
 			final int position = bundle.getInt("position", -1);
 			final Instruction instruction = adapter.getItem(position);
-			final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
 			final boolean deleteOnCancel = bundle.getBoolean("deleteOnCancel", false);
-			input.setText(instruction.getText());
 
-			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Done", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					instruction.setText(input.getText().toString());
+			dialog.setEditText(instruction.getText());
+
+			dialog.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
+					instruction.setText(dialog.getEditText());
 
 					adapter.notifyDataSetChanged();
 				}
 			});
 
-			dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			dialog.setCancelListener(new OnClickListener() {
+				public void onClick(View v) {
 					if(deleteOnCancel) {
 						r.removeInstruction(instruction);
 						adapter.remove(position);
@@ -183,35 +184,28 @@ public class InstructionsDisplay extends Activity {
 			}
 		}
 		Dialog dialog = null;
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 		if(id == EDIT_INSTRUCTION_DIALOG) {
 			final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
 
 			Log.d("Recipebox", "Edit dialog position: " + bundle.getInt("position", -1) + " instruction: " + instruction.getId());
 
-			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View v = li.inflate(R.layout.enter_text_dialog, null);
-			final EditText input = (EditText) v.findViewById(R.id.text_edit);
-			builder.setView(v);
-			input.setText(instruction.getText());
-			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-			input.setSingleLine(false);
+			EnterTextDialog etd = new EnterTextDialog(this);
 
-			builder.setTitle("Edit Instruction");
-			builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					instruction.setText(input.getText().toString());
+			etd.setEditText(instruction.getText());
 
-					adapter.notifyDataSetChanged();
-				}
-			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			etd.getEditView().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+			etd.getEditView().setSingleLine(false);
 
-				}
-			});
+			etd.setTitle("Edit Instruction");
+
+			etd.setOkButtonText("Done");
+
+			dialog = etd;
+
 		} else if(id == DELETE_INSTRUCTION_DIALOG) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
 			final int position = bundle.getInt("position", -1);
 			final Instruction instruction = adapter.getItem(position);
 			builder.setTitle("Delete Instruction");
@@ -228,11 +222,11 @@ public class InstructionsDisplay extends Activity {
 
 				}
 			});
+
+			builder.setCancelable(true);
+
+			dialog = builder.create();
 		}
-
-		builder.setCancelable(true);
-
-		dialog = builder.create();
 
 		return dialog;
 	}
@@ -274,8 +268,10 @@ public class InstructionsDisplay extends Activity {
 
 				TextView tv = (TextView) convert.findViewById(R.id.instruction_number);
 				tv.setText((position + 1) + ".");
+				AppData.getSingleton().useHeadingFont(tv);
 
 				tv = (TextView) convert.findViewById(R.id.instruction_text);
+				AppData.getSingleton().useTextFont(tv);
 
 				Button be = (Button) convert.findViewById(R.id.edit_button);
 				Button bd = (Button) convert.findViewById(R.id.delete_button);

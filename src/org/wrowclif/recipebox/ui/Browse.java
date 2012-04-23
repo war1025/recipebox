@@ -58,6 +58,8 @@ public class Browse extends Activity {
 
 		ListView lv = (ListView) findViewById(R.id.browse_recipes);
 
+		AppData.getSingleton().useHeadingFont((TextView) findViewById(R.id.browse_label));
+
 		createDynamicLoadAdapter();
 
 		recentAdapter.setUpList(lv);
@@ -78,6 +80,7 @@ public class Browse extends Activity {
 				}
 
 				TextView tv = (TextView) v.findViewById(R.id.name_box);
+				tv.setTypeface(AppData.getSingleton().getTextFont());
 
 				if(r == null) {
 					tv.setText("Loading...");

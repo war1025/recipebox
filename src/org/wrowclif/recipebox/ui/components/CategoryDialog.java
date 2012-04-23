@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui.components;
 
+import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.R;
@@ -31,10 +32,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 
 public class CategoryDialog extends Dialog {
 
+	private AppData appData;
+
+	private TextView titleView;
 	private AutoCompleteTextView categoryInput;
 	private TextView messageView;
 	private Button okButton;
@@ -55,7 +60,10 @@ public class CategoryDialog extends Dialog {
 
 	public CategoryDialog(Context context, Recipe recipe, CategoryListWidget adapter) {
 		super(context);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.category_add_dialog);
+
+		this.appData = AppData.getSingleton();
 
 		this.recipe = recipe;
 		this.adapter = adapter;
@@ -65,10 +73,17 @@ public class CategoryDialog extends Dialog {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 		setCancelable(true);
 
+		titleView = (TextView) findViewById(R.id.title);
 		categoryInput = (AutoCompleteTextView) findViewById(R.id.category_name);
 		messageView = (TextView) findViewById(R.id.message_box);
 		okButton = (Button) findViewById(R.id.ok_button);
 		cancelButton = (Button) findViewById(R.id.cancel_button);
+
+		appData.useHeadingFont(titleView);
+		appData.useTextFont(categoryInput);
+		appData.useTextFont(messageView);
+		appData.useHeadingFont(okButton);
+		appData.useHeadingFont(cancelButton);
 
 		connectAutoComplete();
 
@@ -83,6 +98,10 @@ public class CategoryDialog extends Dialog {
 		confirmCancelOnClick = new CancelReturnToEditOnClick();
 
 		inUseOkOnClick = confirmCancelOnClick;
+	}
+
+	public void setTitle(String title) {
+		titleView.setText(title);
 	}
 
 	public void prepareNew() {
@@ -144,7 +163,7 @@ public class CategoryDialog extends Dialog {
 		cancelButton.setVisibility(View.VISIBLE);
 		messageView.setVisibility(View.VISIBLE);
 
-		messageView.setText("You have never put any recipes in the " + categoryInput.getText() + " category before. " +
+		messageView.setText("You have never put any recipes in the " + categoryInput.getText() + " category before.\n\n" +
 					"Are you sure you want to add " + recipe.getName() + " to the category?");
 
 		okButton.setText("Add");
@@ -163,6 +182,7 @@ public class CategoryDialog extends Dialog {
 				}
 
 				TextView tv = (TextView) v.findViewById(R.id.child_name);
+				appData.useTextFont(tv);
 
 				tv.setText(c.getName());
 

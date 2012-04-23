@@ -9,6 +9,7 @@ import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox.R;
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
+import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 public class BrowseCategories extends Activity {
 
 	private Utility util;
+	private AppData appData;
 	private DynamicLoadAdapter<Category> adapter;
 	private boolean edit;
 
@@ -64,6 +66,9 @@ public class BrowseCategories extends Activity {
 		setContentView(R.layout.categories);
 
 		util = UtilityImpl.singleton;
+		appData = AppData.getSingleton();
+
+		appData.useHeadingFont((TextView) findViewById(R.id.category_label));
 
 		ListView lv = (ListView) findViewById(R.id.category_list);
 
@@ -114,20 +119,18 @@ public class BrowseCategories extends Activity {
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
 		if(id == CREATE_CATEGORY_DIALOG) {
-			AlertDialog dialog = (AlertDialog) d;
-			final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
-			input.setText("");
+			EnterTextDialog dialog = (EnterTextDialog) d;
+			dialog.setEditText("");
 		} else if(id == EDIT_CATEGORY_NAME_DIALOG) {
-			AlertDialog dialog = (AlertDialog) d;
+			final EnterTextDialog dialog = (EnterTextDialog) d;
 			final int position = bundle.getInt("position", -1);
 			final Category category = adapter.getItem(position);
-			final EditText input = (EditText) dialog.findViewById(R.id.text_edit);
 
-			input.setText(category.getName());
+			dialog.setEditText(category.getName());
 
-			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Done", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					category.setName(input.getText().toString());
+			dialog.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
+					category.setName(dialog.getEditText());
 					adapter.notifyDataSetChanged();
 				}
 			});
@@ -148,56 +151,50 @@ public class BrowseCategories extends Activity {
 
 	protected Dialog onCreateDialog(int id, Bundle bundle) {
 		Dialog dialog = null;
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		if(id == CREATE_CATEGORY_DIALOG) {
-			View v = li.inflate(R.layout.enter_text_dialog, null);
-			final EditText input = (EditText) v.findViewById(R.id.text_edit);
-			builder.setView(v);
+			final EnterTextDialog etd = new EnterTextDialog(this);
 
-			input.setHint("Category Name");
-			input.setText("");
-			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-			input.setSingleLine(true);
+			etd.getEditView().setHint("Category Name");
+			etd.setEditText("");
+			etd.getEditView().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			etd.getEditView().setSingleLine(true);
 
-			builder.setTitle("Create Category");
-			builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					util.createOrRetrieveCategory(input.getText().toString());
+			etd.setTitle("Create Category");
+
+			etd.setOkButtonText("Create");
+			etd.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
+					util.createOrRetrieveCategory(etd.getEditText());
 					adapter.clear();
 				}
 			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
 
-				}
-			});
+			dialog = etd;
+
 		} else if(id == EDIT_CATEGORY_NAME_DIALOG) {
+			final EnterTextDialog etd = new EnterTextDialog(this);
 			final int position = bundle.getInt("position", -1);
 			final Category category = adapter.getItem(position);
 
-			View v = li.inflate(R.layout.enter_text_dialog, null);
-			final EditText input = (EditText) v.findViewById(R.id.text_edit);
-			builder.setView(v);
+			etd.setEditText(category.getName());
+			etd.getEditView().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			etd.getEditView().setSingleLine(true);
 
-			input.setText(category.getName());
-			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-			input.setSingleLine(true);
+			etd.setTitle("Edit Category Name");
 
-			builder.setTitle("Edit Category Name");
-			builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					category.setName(input.getText().toString());
+			etd.setOkButtonText("Done");
+			etd.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
+					category.setName(etd.getEditText());
 					adapter.notifyDataSetChanged();
 				}
 			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
 
-				}
-			});
+			dialog = etd;
 		} else if(id == DELETE_CATEGORY_DIALOG) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
 			final int position = bundle.getInt("position", -1);
 			final Category category = adapter.getItem(position);
 
@@ -214,11 +211,12 @@ public class BrowseCategories extends Activity {
 
 				}
 			});
+
+			builder.setCancelable(true);
+
+			dialog = builder.create();
 		}
 
-		builder.setCancelable(true);
-
-		dialog = builder.create();
 
 		return dialog;
 	}
@@ -255,6 +253,7 @@ public class BrowseCategories extends Activity {
 				}
 
 				TextView tv = (TextView) v.findViewById(R.id.name_box);
+				appData.useTextFont((TextView) v.findViewById(R.id.name_box));
 
 				if(c == null) {
 					tv.setText("Loading...");

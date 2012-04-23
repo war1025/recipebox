@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui.components;
 
+import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.RecipeIngredient;
@@ -30,10 +31,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 
 public class IngredientDialog extends Dialog {
 
+	private AppData appData;
+
+	private TextView titleView;
 	private EditText amountInput;
 	private AutoCompleteTextView ingredientInput;
 	private TextView messageView;
@@ -57,17 +62,28 @@ public class IngredientDialog extends Dialog {
 
 	public IngredientDialog(Context context) {
 		super(context);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.ingredient_edit_dialog);
 
 		getWindow().setLayout(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 		setCancelable(true);
 
+		appData = AppData.getSingleton();
+
+		titleView = (TextView) findViewById(R.id.title);
 		amountInput = (EditText) findViewById(R.id.amount_edit);
 		ingredientInput = (AutoCompleteTextView) findViewById(R.id.ingredient_edit);
 		messageView = (TextView) findViewById(R.id.message_box);
 		okButton = (Button) findViewById(R.id.ok_button);
 		cancelButton = (Button) findViewById(R.id.cancel_button);
+
+		appData.useHeadingFont(titleView);
+		appData.useTextFont(amountInput);
+		appData.useTextFont(ingredientInput);
+		appData.useTextFont(messageView);
+		appData.useHeadingFont(okButton);
+		appData.useHeadingFont(cancelButton);
 
 		connectAutoComplete();
 
@@ -83,6 +99,10 @@ public class IngredientDialog extends Dialog {
 		confirmCancelOnClick = new CancelReturnToEditOnClick();
 
 		inUseOkOnClick = confirmCancelOnClick;
+	}
+
+	public void setTitle(String text) {
+		titleView.setText(text);
 	}
 
 	public void prepareNew(Recipe recipe, DynamicLoadAdapter<RecipeIngredient> adapter) {
@@ -166,7 +186,7 @@ public class IngredientDialog extends Dialog {
 		cancelButton.setVisibility(View.VISIBLE);
 		messageView.setVisibility(View.VISIBLE);
 
-		messageView.setText("You have never used " + ingredientInput.getText() + " before. " +
+		messageView.setText("You have never used " + ingredientInput.getText() + " before.\n\n" +
 					"Are you sure you want to add it to this recipe?");
 
 		okButton.setText("Add");
@@ -185,7 +205,7 @@ public class IngredientDialog extends Dialog {
 		cancelButton.setVisibility(View.GONE);
 		messageView.setVisibility(View.VISIBLE);
 
-		messageView.setText("Sorry! " + ingredientInput.getText() + " is already used in this recipe. " +
+		messageView.setText("Sorry! " + ingredientInput.getText() + " is already used in this recipe.\n\n" +
 									"Ingredients can only be added once per recipe");
 
 		okButton.setText("Ok");
@@ -201,6 +221,7 @@ public class IngredientDialog extends Dialog {
 				}
 
 				TextView tv = (TextView) v.findViewById(R.id.child_name);
+				appData.useTextFont(tv);
 
 				tv.setText(i.getName());
 

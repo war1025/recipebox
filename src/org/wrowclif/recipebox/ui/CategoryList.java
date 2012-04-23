@@ -10,6 +10,7 @@ import org.wrowclif.recipebox.R;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
+import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
@@ -79,10 +80,9 @@ public class CategoryList extends Activity {
 
 		TextView label = (TextView) findViewById(R.id.category_label);
 		label.setText(category.getName());
+		AppData.getSingleton().useHeadingFont(label);
 
 		TextView addButton = (TextView) findViewById(R.id.add_button);
-
-		addButton.setText("Add Recipe");
 
 		addButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -127,9 +127,8 @@ public class CategoryList extends Activity {
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
 		if(id == ADD_RECIPE_DIALOG) {
-			AlertDialog dialog = (AlertDialog) d;
-			TextView tv = (TextView) dialog.findViewById(R.id.text_edit);
-			tv.setText("");
+			EnterTextDialog dialog = (EnterTextDialog) d;
+			dialog.setEditText("");
 		} else if(id == DELETE_RECIPE_DIALOG) {
 			AlertDialog dialog = (AlertDialog) d;
 			final int position = bundle.getInt("position", -1);
@@ -147,20 +146,17 @@ public class CategoryList extends Activity {
 
 	protected Dialog onCreateDialog(int id, Bundle bundle) {
 		Dialog dialog = null;
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 		if(id == ADD_RECIPE_DIALOG) {
+			final EnterTextDialog etd = new EnterTextDialog(this, R.layout.enter_recipe_dialog);
 
-			LayoutInflater li = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View v = li.inflate(R.layout.enter_recipe_dialog, null);
-			final AutoCompleteTextView input = (AutoCompleteTextView) v.findViewById(R.id.text_edit);
 			final long[] idHolder = new long[1];
-			builder.setView(v);
+			idHolder[0] = -1;
 
-			input.setHint("Recipe Name");
-			input.setText("");
-			input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-			input.setSingleLine(true);
+			etd.getEditView().setHint("Recipe Name");
+			etd.setEditText("");
+			etd.getEditView().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			etd.getEditView().setSingleLine(true);
 
 			ListAutoCompleteAdapter.Specifics<Recipe> sp = new ListAutoCompleteAdapter.Specifics<Recipe>() {
 
@@ -170,6 +166,7 @@ public class CategoryList extends Activity {
 					}
 
 					TextView tv = (TextView) v.findViewById(R.id.child_name);
+					AppData.getSingleton().useTextFont(tv);
 
 					tv.setText(r.getName());
 
@@ -201,13 +198,15 @@ public class CategoryList extends Activity {
 			final ListAutoCompleteAdapter<Recipe> acAdapter = new ListAutoCompleteAdapter<Recipe>(sp);
 
 
-			input.setAdapter(acAdapter);
+			((AutoCompleteTextView) etd.getEditView()).setAdapter(acAdapter);
 
-			input.setOnItemClickListener(acAdapter.onClick);
+			((AutoCompleteTextView) etd.getEditView()).setOnItemClickListener(acAdapter.onClick);
 
-			builder.setTitle("Add Recipe To Category");
-			builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			etd.setTitle("Add Recipe To Category");
+
+			etd.setOkButtonText("Add");
+			etd.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
 					if(idHolder[0] >= 0) {
 						Recipe r = util.getRecipeById(idHolder[0]);
 
@@ -221,12 +220,12 @@ public class CategoryList extends Activity {
 					}
 				}
 			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
 
-				}
-			});
+			dialog = etd;
+
 		} else if(id == DELETE_RECIPE_DIALOG) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
 			final int position = bundle.getInt("position", -1);
 			final Recipe recipe = adapter.getItem(position);
 
@@ -243,11 +242,13 @@ public class CategoryList extends Activity {
 
 				}
 			});
+
+			builder.setCancelable(true);
+
+			dialog = builder.create();
+
 		}
 
-		builder.setCancelable(true);
-
-		dialog = builder.create();
 
 		return dialog;
 	}
@@ -282,6 +283,7 @@ public class CategoryList extends Activity {
 				}
 
 				TextView tv = (TextView) v.findViewById(R.id.name_box);
+				AppData.getSingleton().useTextFont(tv);
 
 				if(r == null) {
 					tv.setText("Loading...");

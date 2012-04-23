@@ -1,6 +1,8 @@
 package org.wrowclif.recipebox.ui;
 
 import org.wrowclif.recipebox.R;
+
+import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
@@ -74,6 +76,7 @@ public class RecipeTabs extends TabActivity {
 		for(int i = 0; i < 3; i++) {
 			tabView = host.getTabWidget().getChildAt(i);
 			TextView tabText = (TextView) tabView.findViewById(android.R.id.title);
+			AppData.getSingleton().useHeadingFont(tabText);
 			tabText.setTextSize(18);
 			tabText.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT,
 																	RelativeLayout.LayoutParams.FILL_PARENT));
