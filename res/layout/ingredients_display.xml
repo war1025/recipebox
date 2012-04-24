@@ -5,8 +5,7 @@
 		android:layout_height="fill_parent"
 		android:background="@color/background_light">
 	<include
-			layout="@id/add_done_buttons"
-			android:layout_alignParentBottom="true" />
+			layout="@layout/add_done_buttons" />
 	<ListView
 			android:id="@+id/ingredient_list"
 			android:layout_width="fill_parent"

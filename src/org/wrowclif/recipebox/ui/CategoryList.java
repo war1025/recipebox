@@ -291,6 +291,8 @@ public class CategoryList extends Activity {
 					tv.setText(r.getName());
 				}
 
+				v.findViewById(R.id.edit_button).setVisibility(View.GONE);
+
 				View deleteButton = v.findViewById(R.id.delete_button);
 
 				if(edit) {

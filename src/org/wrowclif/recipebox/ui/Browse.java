@@ -79,6 +79,8 @@ public class Browse extends Activity {
 					v = inflate(R.layout.category_item);
 				}
 
+				v.findViewById(R.id.edit_group).setVisibility(View.GONE);
+
 				TextView tv = (TextView) v.findViewById(R.id.name_box);
 				tv.setTypeface(AppData.getSingleton().getTextFont());
 

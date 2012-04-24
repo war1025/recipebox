@@ -4,8 +4,7 @@
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent">
 	<include
-			layout="@layout/add_done_buttons"
-			android:layout_alignParentBottom="true" />
+			layout="@layout/add_done_buttons" />
 	<ListView
 			android:id="@+id/instruction_list"
 			android:layout_width="fill_parent"

@@ -5,8 +5,7 @@
 		android:layout_height="fill_parent"
 		android:background="@color/background_light" >
 	<include
-			layout="@layout/add_done_buttons"
-			android:layout_alignParentBottom="true" />
+			layout="@layout/add_done_buttons" />
 	<TextView
 			android:id="@+id/category_label"
 			style="@style/Heading"

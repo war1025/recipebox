@@ -79,6 +79,7 @@ public class CategoryListWidget {
 
 		TextView idBox = (TextView) v.findViewById(R.id.edit_button);
 		idBox.setText(c.getId() + "");
+		idBox.setVisibility(View.GONE);
 
 		v.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {

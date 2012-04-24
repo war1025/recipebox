@@ -49,6 +49,7 @@ public class EnterTextDialog extends Dialog {
 		appData.useHeadingFont(okButton);
 		appData.useHeadingFont(cancelButton);
 
+		okButton.setText("Ok");
 		okButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if(okClick != null) {
@@ -58,6 +59,7 @@ public class EnterTextDialog extends Dialog {
 			}
 		});
 
+		cancelButton.setText("Cancel");
 		cancelButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if(cancelClick != null) {

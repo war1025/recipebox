@@ -173,6 +173,8 @@ public class Main extends Activity {
 					v = inflate(R.layout.category_item);
 				}
 
+				v.findViewById(R.id.edit_group).setVisibility(View.GONE);
+
 				TextView tv = (TextView) v.findViewById(R.id.name_box);
 				AppData.getSingleton().useTextFont(tv);
 
