@@ -6,18 +6,18 @@ import org.wrowclif.recipebox.AppData;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.EditText;
 import android.widget.Button;
 
 public class EnterTextDialog extends Dialog {
 
 	private TextView titleView;
-	private EditText textView;
+	private TextView textView;
 	private Button okButton;
 	private Button cancelButton;
 
@@ -40,7 +40,7 @@ public class EnterTextDialog extends Dialog {
 		AppData appData = AppData.getSingleton();
 
 		titleView = (TextView) findViewById(R.id.title);
-		textView = (EditText) findViewById(R.id.text_edit);
+		textView = (TextView) findViewById(R.id.text_edit);
 		okButton = (Button) findViewById(R.id.ok_button);
 		cancelButton = (Button) findViewById(R.id.cancel_button);
 
@@ -79,7 +79,11 @@ public class EnterTextDialog extends Dialog {
 		textView.setText(text);
 	}
 
-	public EditText getEditView() {
+	public void setEditHtml(String text) {
+		textView.setText(Html.fromHtml(text));
+	}
+
+	public TextView getEditView() {
 		return textView;
 	}
 

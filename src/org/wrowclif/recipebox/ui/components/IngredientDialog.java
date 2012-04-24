@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.text.Html;
 import android.content.Context;
 import android.widget.Button;
 import android.widget.AdapterView;
@@ -186,8 +187,9 @@ public class IngredientDialog extends Dialog {
 		cancelButton.setVisibility(View.VISIBLE);
 		messageView.setVisibility(View.VISIBLE);
 
-		messageView.setText("You have never used " + ingredientInput.getText() + " before.\n\n" +
-					"Are you sure you want to add it to this recipe?");
+		messageView.setText(Html.fromHtml("You have never used <b>" + ingredientInput.getText() + "</b> before." +
+					"<br><br>" +
+					"Are you sure you want to add it to this recipe?"));
 
 		okButton.setText("Add");
 		okButton.setOnClickListener(confirmOkOnClick);
@@ -205,8 +207,9 @@ public class IngredientDialog extends Dialog {
 		cancelButton.setVisibility(View.GONE);
 		messageView.setVisibility(View.VISIBLE);
 
-		messageView.setText("Sorry! " + ingredientInput.getText() + " is already used in this recipe.\n\n" +
-									"Ingredients can only be added once per recipe");
+		messageView.setText(Html.fromHtml("Sorry! <b>" + ingredientInput.getText() + "</b> is already used in this recipe." +
+									"<br><br>" +
+									"Ingredients can only be added once per recipe"));
 
 		okButton.setText("Ok");
 		okButton.setOnClickListener(inUseOkOnClick);

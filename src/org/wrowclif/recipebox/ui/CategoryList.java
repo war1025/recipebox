@@ -130,13 +130,14 @@ public class CategoryList extends Activity {
 			EnterTextDialog dialog = (EnterTextDialog) d;
 			dialog.setEditText("");
 		} else if(id == DELETE_RECIPE_DIALOG) {
-			AlertDialog dialog = (AlertDialog) d;
+			EnterTextDialog dialog = (EnterTextDialog) d;
+
 			final int position = bundle.getInt("position", -1);
 			final Recipe recipe = adapter.getItem(position);
 
-			dialog.setMessage("Are you sure you want to remove " + recipe.getName() + " from this category?");
-			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Remove", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			dialog.setEditHtml("Are you sure you want to remove <b>" + recipe.getName() + "</b> from this category?");
+			dialog.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
 					category.removeRecipe(recipe);
 					adapter.remove(position);
 				}
@@ -224,29 +225,13 @@ public class CategoryList extends Activity {
 			dialog = etd;
 
 		} else if(id == DELETE_RECIPE_DIALOG) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
 
-			final int position = bundle.getInt("position", -1);
-			final Recipe recipe = adapter.getItem(position);
+			etd.setTitle("Remove Recipe");
 
-			builder.setTitle("Remove Recipe");
-			builder.setMessage("Are you sure you want to remove " + recipe.getName() + " from this category?");
-			builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					category.removeRecipe(recipe);
-					adapter.remove(position);
-				}
-			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			etd.setOkButtonText("Remove");
 
-				}
-			});
-
-			builder.setCancelable(true);
-
-			dialog = builder.create();
-
+			dialog = etd;
 		}
 
 

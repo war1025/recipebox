@@ -322,24 +322,6 @@ public class RecipeDisplay extends Activity {
 		return dialog;
 	}
 
-	protected Dialog showConfirmDialog(int id) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Remove Category");
-		builder.setMessage("");
-		builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-
-			}
-		});
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-
-			}
-		});
-		builder.setCancelable(true);
-		return builder.create();
-	}
-
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
 		if(categories.prepareDialog(id, d, bundle)) {

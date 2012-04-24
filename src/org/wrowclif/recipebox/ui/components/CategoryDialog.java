@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.text.Html;
 import android.widget.Button;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -122,8 +123,8 @@ public class CategoryDialog extends Dialog {
 		cancelButton.setVisibility(View.VISIBLE);
 		messageView.setVisibility(View.VISIBLE);
 
-		messageView.setText("Are you sure you want to remove " + recipe.getName() +
-							" from the " + category.getName() + " category?");
+		messageView.setText(Html.fromHtml("Are you sure you want to remove <b>" + recipe.getName() + "</b>" +
+							" from the <b>" + category.getName() + "</b> category?"));
 
 		okButton.setText("Delete");
 		okButton.setOnClickListener(deleteOkOnClick);
@@ -163,8 +164,9 @@ public class CategoryDialog extends Dialog {
 		cancelButton.setVisibility(View.VISIBLE);
 		messageView.setVisibility(View.VISIBLE);
 
-		messageView.setText("You have never put any recipes in the " + categoryInput.getText() + " category before.\n\n" +
-					"Are you sure you want to add " + recipe.getName() + " to the category?");
+		messageView.setText(Html.fromHtml("You have never put any recipes in the <b>" + categoryInput.getText() + "</b> " +
+					"category before.<br><br>" +
+					"Are you sure you want to add <b>" + recipe.getName() + "</b> to the category?"));
 
 		okButton.setText("Add");
 		okButton.setOnClickListener(confirmOkOnClick);

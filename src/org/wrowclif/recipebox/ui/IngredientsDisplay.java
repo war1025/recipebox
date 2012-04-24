@@ -6,6 +6,7 @@ import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.RecipeIngredient;
 import org.wrowclif.recipebox.R;
 
+import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.IngredientDialog;
 import org.wrowclif.recipebox.ui.components.RecipeMenus;
 import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
@@ -148,11 +149,15 @@ public class IngredientsDisplay extends Activity {
 				iDialog.prepareExisiting(r, adapter, adapter.getItem(position), position);
 			}
 		} else if(id == DELETE_INGREDIENT_DIALOG) {
-			AlertDialog dialog = (AlertDialog) d;
+			EnterTextDialog dialog = (EnterTextDialog) d;
+
 			final int position = bundle.getInt("position", -1);
 			final RecipeIngredient ri = adapter.getItem(position);
-			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+
+			dialog.setEditHtml("Are you sure you want to remove <b>" + ri.getName() + "</b> from this recipe?");
+
+			dialog.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
 					r.removeIngredient(ri);
 
 					adapter.remove(position);
@@ -169,32 +174,21 @@ public class IngredientsDisplay extends Activity {
 			}
 		}
 		Dialog dialog = null;
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 		if(id == NEW_INGREDIENT_DIALOG) {
 			return new IngredientDialog(this);
 		} else if(id == DELETE_INGREDIENT_DIALOG) {
+			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
+
 			final int position = bundle.getInt("position", -1);
 			final RecipeIngredient ri = adapter.getItem(position);
-			builder.setTitle("Delete Ingredient");
-			builder.setMessage("Are you sure you want to delete this ingredient?");
-			builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					r.removeIngredient(ri);
 
-					adapter.remove(position);
-				}
-			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			etd.setTitle("Delete Ingredient");
 
-				}
-			});
+			etd.setOkButtonText("Delete");
+
+			dialog = etd;
 		}
-
-		builder.setCancelable(true);
-
-		dialog = builder.create();
 
 		return dialog;
 	}

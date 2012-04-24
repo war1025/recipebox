@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.text.Html;
 import android.widget.Button;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -118,8 +119,8 @@ public class RelatedRecipeDialog extends Dialog {
 		cancelButton.setVisibility(View.VISIBLE);
 		messageView.setVisibility(View.VISIBLE);
 
-		messageView.setText("Are you sure you want to remove the relation between " + recipe.getName() +
-							" and " + suggestion.getName() + "?");
+		messageView.setText(Html.fromHtml("Are you sure you want to remove the relation between <b>" + recipe.getName() + "</b>" +
+							" and <b>" + suggestion.getName() + "</b>?"));
 
 		okButton.setText("Remove");
 		okButton.setOnClickListener(deleteOkOnClick);

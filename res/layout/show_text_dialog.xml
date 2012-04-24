@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:background="@color/background_light" >
+	<TextView
+			android:id="@+id/title"
+			android:text="Edit Text"
+			style="@style/Heading.Dialog" />
+	<TextView
+			android:id="@+id/text_edit"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:paddingLeft="10dip"
+			android:paddingRight="10dip"
+			android:textColor="@color/text_color"
+			android:textSize="18sp" />
+	<include
+			layout="@layout/dialog_buttons" />
+</LinearLayout>

@@ -12,10 +12,11 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
 
 public class RecipeMenus {
 
@@ -107,22 +108,21 @@ public class RecipeMenus {
 	}
 
 	private Dialog deleteRecipeDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle("Delete Recipe");
-		builder.setMessage("Are you sure you want to delete the recipe?");
-		builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
+		EnterTextDialog etd = new EnterTextDialog(activity, R.layout.show_text_dialog);
+
+		etd.setTitle("Delete Recipe");
+
+		etd.setEditText("Are you sure you want to delete the recipe?");
+
+		etd.setOkButtonText("Delete");
+		etd.setOkListener(new OnClickListener() {
+			public void onClick(View v) {
 				recipe.delete();
 				activity.finish();
 			}
 		});
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
 
-			}
-		});
-		builder.setCancelable(true);
-		return builder.create();
+		return etd;
 	}
 
 	public interface EditSwitcher {

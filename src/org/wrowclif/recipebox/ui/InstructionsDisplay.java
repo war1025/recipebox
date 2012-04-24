@@ -163,11 +163,13 @@ public class InstructionsDisplay extends Activity {
 				}
 			});
 		} else if(id == DELETE_INSTRUCTION_DIALOG) {
-			AlertDialog dialog = (AlertDialog) d;
+			EnterTextDialog dialog = (EnterTextDialog) d;
+
 			final int position = bundle.getInt("position", -1);
 			final Instruction instruction = adapter.getItem(position);
-			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+
+			dialog.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
 					r.removeInstruction(instruction);
 
 					adapter.remove(position);
@@ -204,28 +206,14 @@ public class InstructionsDisplay extends Activity {
 			dialog = etd;
 
 		} else if(id == DELETE_INSTRUCTION_DIALOG) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
 
-			final int position = bundle.getInt("position", -1);
-			final Instruction instruction = adapter.getItem(position);
-			builder.setTitle("Delete Instruction");
-			builder.setMessage("Are you sure you want to delete this instruction?");
-			builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					r.removeInstruction(instruction);
+			etd.setTitle("Delete Instruction");
+			etd.setEditText("Are you sure you want to delete this instruction?");
 
-					adapter.remove(position);
-				}
-			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			etd.setOkButtonText("Delete");
 
-				}
-			});
-
-			builder.setCancelable(true);
-
-			dialog = builder.create();
+			dialog = etd;
 		}
 
 		return dialog;

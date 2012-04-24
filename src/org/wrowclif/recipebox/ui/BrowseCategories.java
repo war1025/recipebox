@@ -136,12 +136,15 @@ public class BrowseCategories extends Activity {
 			});
 
 		} else if(id == DELETE_CATEGORY_DIALOG) {
-			AlertDialog dialog = (AlertDialog) d;
+			EnterTextDialog dialog = (EnterTextDialog) d;
+
 			final int position = bundle.getInt("position", -1);
 			final Category category = adapter.getItem(position);
 
-			dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Delete", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			dialog.setEditHtml("Are you sure you want to delete the <b>" + category.getName() + "</b> category?");
+
+			dialog.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
 					category.delete();
 					adapter.remove(position);
 				}
@@ -193,28 +196,13 @@ public class BrowseCategories extends Activity {
 
 			dialog = etd;
 		} else if(id == DELETE_CATEGORY_DIALOG) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
 
-			final int position = bundle.getInt("position", -1);
-			final Category category = adapter.getItem(position);
+			etd.setTitle("Delete Category");
 
-			builder.setTitle("Delete Category");
-			builder.setMessage("Are you sure you want to delete this category?");
-			builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					category.delete();
-					adapter.remove(position);
-				}
-			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			etd.setOkButtonText("Delete");
 
-				}
-			});
-
-			builder.setCancelable(true);
-
-			dialog = builder.create();
+			dialog = etd;
 		}
 
 

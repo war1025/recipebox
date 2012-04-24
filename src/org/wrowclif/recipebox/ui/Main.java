@@ -8,6 +8,7 @@ import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox.R;
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
+import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
@@ -228,13 +229,17 @@ public class Main extends Activity {
 
     protected Dialog onCreateDialog(int id) {
 		Dialog dialog = null;
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 		if(id == CREATE_RECIPE_DIALOG) {
-			builder.setTitle("Create New Recipe");
-			builder.setMessage("There are no recipes by that name. Would you like to create a new recipe?");
-			builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
+			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
+
+			etd.setTitle("Create New Recipe");
+			etd.setEditText("There are no recipes by that name.\n\n" +
+								"Would you like to create a new recipe?");
+
+			etd.setOkButtonText("Create");
+			etd.setOkListener(new OnClickListener() {
+				public void onClick(View v) {
 					TextView tv = (TextView) findViewById(R.id.recipesearch);
 
 					String name = tv.getText().toString();
@@ -247,16 +252,9 @@ public class Main extends Activity {
 					startActivity(intent);
 				}
 			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
 
-				}
-			});
+			dialog = etd;
 		}
-
-		builder.setCancelable(true);
-
-		dialog = builder.create();
 
 		return dialog;
 	}
