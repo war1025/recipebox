@@ -219,6 +219,7 @@ public class Main extends Activity {
 		recentAdapter = new DynamicLoadAdapter<Recipe>(sp2);
 
 		recentAdapter.setUpList(lv);
+		lv.requestFocus();
 
     }
 
