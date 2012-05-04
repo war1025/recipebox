@@ -29,7 +29,9 @@ public class ShareUtil {
 		Intent intent = new Intent(Intent.ACTION_SEND);
 
 		try {
-			temp = File.createTempFile(r.getName().replaceAll(" ", ""), ".rcpb");
+			temp = File.createTempFile(r.getName().replaceAll(" ", ""), ".rcpb", ctx.getCacheDir());
+			temp.setReadable(true, false);
+
 			out = new PrintWriter(temp);
 
 			out.println(JsonUtil.toJson(r));
