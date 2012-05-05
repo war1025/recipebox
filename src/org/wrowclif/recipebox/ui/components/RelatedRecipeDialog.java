@@ -167,7 +167,7 @@ public class RelatedRecipeDialog extends Dialog {
 		messageView.setVisibility(View.VISIBLE);
 
 		if(suggestion == null) {
-			messageView.setText("No recipes named " + recipeInput.getText() + " exist");
+			messageView.setText(Html.fromHtml("No recipes named <b>" + recipeInput.getText() + "</b> exist"));
 		} else {
 			messageView.setText("A recipe cannot be related to itself");
 		}
