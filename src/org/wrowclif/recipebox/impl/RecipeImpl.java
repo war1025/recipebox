@@ -49,9 +49,9 @@ public class RecipeImpl implements Recipe {
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		this.name = name.trim();
 		ContentValues values = new ContentValues();
-		values.put("name", name);
+		values.put("name", this.name);
 		itemUpdate(values, "setName");
 	}
 

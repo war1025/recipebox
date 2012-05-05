@@ -45,6 +45,8 @@ public class RelatedRecipeDialog extends Dialog {
 	private Button okButton;
 	private Button cancelButton;
 
+	private long selectedId;
+
 	private Recipe recipe;
 	private RelatedRecipeListWidget adapter;
 	private Recipe suggestion;
@@ -132,6 +134,7 @@ public class RelatedRecipeDialog extends Dialog {
 	public void showNew() {
 		reshowNew();
 
+		selectedId = -1;
 		recipeInput.setText("");
 	}
 
@@ -199,7 +202,7 @@ public class RelatedRecipeDialog extends Dialog {
 			}
 
 			public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
-
+				selectedId = item.getId();
 			}
 
 			private View inflate(int layoutId) {
@@ -215,9 +218,24 @@ public class RelatedRecipeDialog extends Dialog {
 
 	protected class NewOkOnClick implements View.OnClickListener {
 		public void onClick(View v) {
-			List<Recipe> r = UtilityImpl.singleton.searchRecipes(recipeInput.getText().toString(), 1);
+			String inputText = recipeInput.getText().toString().trim();
+			if(selectedId >= 0) {
+				Recipe r = UtilityImpl.singleton.getRecipeById(selectedId);
+				if(inputText.equalsIgnoreCase(r.getName().trim())) {
+					suggestion = r;
+				}
+			}
 
-			suggestion = (r.size() > 0) ? r.get(0) : null;
+			if(suggestion == null) {
+				List<Recipe> recipesList = UtilityImpl.singleton.searchRecipes(recipeInput.getText().toString(), 10);
+
+				for(Recipe r : recipesList) {
+					if(inputText.equalsIgnoreCase(r.getName().trim())) {
+						suggestion = r;
+						break;
+					}
+				}
+			}
 
 			if(suggestion == null) {
 				showInvalidRelation();
