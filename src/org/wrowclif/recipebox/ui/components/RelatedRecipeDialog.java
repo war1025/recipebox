@@ -136,6 +136,7 @@ public class RelatedRecipeDialog extends Dialog {
 	public void showNew() {
 		reshowNew();
 
+		suggestion = null;
 		selectedId = -1;
 		recipeInput.setText("");
 	}
