@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.text.Html;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -36,6 +37,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class RelatedRecipeDialog extends Dialog {
+	private static final String LOG_TAG = "RecipeBox RelatedRecipeDialog";
 
 	private AppData appData;
 
