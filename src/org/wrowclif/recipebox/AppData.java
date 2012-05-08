@@ -83,7 +83,7 @@ public class AppData {
 		SQLiteDatabase db = helper.getWritableDatabase();
 		int ret = db.update(table, cv, where, values);
 		if(ret != 1) {
-			throw new IllegalStateException(table + " " + op + " setComments should have affected only one row" +
+			throw new IllegalStateException(table + " " + op + " should have affected only one row" +
 												" but affected " + ret + " rows");
 		}
 	}
