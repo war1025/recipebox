@@ -14,4 +14,6 @@ public interface Ingredient {
 
 	public void removeSimilarIngredient(Ingredient other);
 
+	public boolean delete();
+
 }

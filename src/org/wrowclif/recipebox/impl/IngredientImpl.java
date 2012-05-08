@@ -3,6 +3,7 @@ package org.wrowclif.recipebox.impl;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
+import android.util.Log;
 
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.AppData.Transaction;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class IngredientImpl implements Ingredient {
+	private static final String LOG_TAG = "Recipebox IngredientImpl";
 
 	protected static final IngredientFactory factory;
 
@@ -105,6 +107,51 @@ public class IngredientImpl implements Ingredient {
 			public Void exec(SQLiteDatabase db) {
 				db.execSQL(stmt, new Object[] {lowId, hiId});
 				return null;
+			}
+		});
+	}
+
+	public boolean delete() {
+		final String useCountStmt =
+			"SELECT Count(*) " +
+			"FROM RecipeIngredients ri " +
+			"WHERE iid = ?; ";
+
+		final String useCountCorrectionStmt =
+			"UPDATE Ingredient " +
+			"SET usecount = ? " +
+			"WHERE iid = ?;";
+
+		final String deleteInstructionIngredients =
+			"DELETE FROM InstructionIngredients " +
+			"WHERE ingrid = ?; ";
+
+		final String deleteStmt =
+			"DELETE FROM Ingredient " +
+			"WHERE iid = ?; ";
+
+		return factory.data.sqlTransaction(new Transaction<Boolean>() {
+			public Boolean exec(SQLiteDatabase db) {
+				Cursor c = db.rawQuery(useCountStmt, new String[] {id + ""});
+				try {
+					if(c.moveToNext() && (c.getInt(0) != 0)) {
+						db.execSQL(useCountCorrectionStmt, new Object[] {c.getInt(0), id});
+						Log.e(LOG_TAG, "Attempted to remove an ingredient that was still in use: " + name);
+						return false;
+					}
+				} finally {
+					c.close();
+				}
+
+				for(Ingredient i : IngredientImpl.this.getSimilarIngredients()) {
+					IngredientImpl.this.removeSimilarIngredient(i);
+				}
+
+				db.execSQL(deleteInstructionIngredients, new Object[] {id});
+
+				db.execSQL(deleteStmt, new Object[] {id});
+
+				return true;
 			}
 		});
 	}
