@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeImpl implements Recipe {
+	private static final String LOG_TAG = "Recipebox RecipeImpl";
 
 	protected static final RecipeFactory factory;
 
@@ -371,11 +372,38 @@ public class RecipeImpl implements Recipe {
 			"DELETE FROM Recipe " +
 				"WHERE rid = ?;";
 
+		final String useCountStmt =
+			"SELECT i.iid " +
+			"FROM Ingredient i, RecipeIngredients ri " +
+			"WHERE i.iid = ri.iid " +
+				"and ri.rid = ? " +
+				"and i.usecount = 1;";
+
 		factory.data.sqlTransaction(new Transaction<Void>() {
 			public Void exec(SQLiteDatabase db) {
+				// Get list of ingredients to remove
+				Cursor c = db.rawQuery(useCountStmt, new String[] {id + ""});
+				long[] iids = new long[c.getCount()];
+				int cur = 0;
+				while(c.moveToNext()) {
+					iids[cur] = c.getLong(0);
+					cur++;
+				}
+				c.close();
+
+				// Delete recipe
 				String[] stmts = stmt.replaceAll("\\?", id + "").split(";");
 				for(String s : stmts) {
 					db.execSQL(s);
+				}
+
+				// Delete any ingredients that aren't used anymore
+				ContentValues cv = new ContentValues();
+				for(long iid : iids) {
+					cv.put("name", "");
+					cv.put("iid", iid);
+					Ingredient toRemove = IngredientImpl.factory.createFromData(cv);
+					toRemove.delete();
 				}
 				return null;
 			}

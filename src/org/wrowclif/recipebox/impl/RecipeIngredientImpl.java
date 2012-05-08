@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class RecipeIngredientImpl implements RecipeIngredient {
+	private static final String LOG_TAG = "Recipebox RecipeIngredientImpl";
 
 	protected static final RecipeIngredientFactory factory;
 
@@ -86,6 +87,11 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 			"SET usecount = usecount + 1 " +
 			"WHERE iid = ?;";
 
+		final String getIngredientCount =
+			"SELECT i.usecount " +
+			"FROM Ingredient i " +
+			"WHERE i.iid = ?; ";
+
 		if(other.getId() == ingredient.getId()) {
 			return true;
 		}
@@ -102,6 +108,11 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				db.execSQL(deleteStmt, new Object[] {recipe.getId(), ingredient.getId()});
 				db.execSQL(decreaseIngredientCount, new Object[] {ingredient.getId()});
 				db.execSQL(increaseIngredientCount, new Object[] {other.getId()});
+				c = db.rawQuery(getIngredientCount, new String[] {ingredient.getId() + ""});
+				if(c.moveToNext() && (c.getInt(0) == 0)) {
+					ingredient.delete();
+				}
+				c.close();
 				ingredient = other;
 				return true;
 			}
@@ -218,6 +229,11 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				"SET usecount = usecount - 1 " +
 				"WHERE iid = ?; ";
 
+			final String deleteQueryStmt =
+				"SELECT i.usecount " +
+				"FROM Ingredient i " +
+				"WHERE i.iid = ?; ";
+
 			final long iid = toRemove.getIngredient().getId();
 			final long rid = toRemove.getRecipe().getId();
 
@@ -225,6 +241,11 @@ public class RecipeIngredientImpl implements RecipeIngredient {
 				public Void exec(SQLiteDatabase db) {
 					db.execSQL(stmt, new Object[] {iid, rid});
 					db.execSQL(useCountStmt, new Object[] {iid});
+					Cursor c = db.rawQuery(deleteQueryStmt, new String[] {iid + ""});
+					if(c.moveToNext() && (c.getInt(0) == 0)) {
+						toRemove.getIngredient().delete();
+					}
+					c.close();
 					return null;
 				}
 			});
