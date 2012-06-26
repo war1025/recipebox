@@ -4,6 +4,7 @@ import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.RecipeIngredient;
 import org.wrowclif.recipebox.Instruction;
+import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
@@ -54,6 +55,14 @@ public class JsonUtil {
 
 			recipeJson.put("instructions", instructions);
 
+			JSONArray categories = new JSONArray();
+
+			for(Category cat : recipe.getCategories()) {
+				categories.put(cat.getName());
+			}
+
+			recipeJson.put("categories", categories);
+
 			if(indent < 1) {
 				ret = recipeJson.toString();
 			} else {
@@ -80,6 +89,7 @@ public class JsonUtil {
 			int cookTime = jsonRecipe.getInt("cookTime");
 			JSONArray ingredients = jsonRecipe.getJSONArray("ingredients");
 			JSONArray instruction = jsonRecipe.getJSONArray("instructions");
+			JSONArray categories = jsonRecipe.optJSONArray("categories");
 
 			List<String> amounts = new ArrayList<String>();
 			List<String> inNames = new ArrayList<String>();
@@ -115,6 +125,14 @@ public class JsonUtil {
 			for(String step : steps) {
 				Instruction i = ret.addInstruction();
 				i.setText(step);
+			}
+
+			if(categories != null) {
+				for(int i = 0; i < categories.length(); i++) {
+					String category = categories.getString(i);
+					Category c = util.createOrRetrieveCategory(category);
+					c.addRecipe(ret);
+				}
 			}
 
 		} catch(Exception e) {
