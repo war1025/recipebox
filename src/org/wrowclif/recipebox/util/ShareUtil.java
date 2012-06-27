@@ -58,7 +58,7 @@ public class ShareUtil {
 	}
 
 	public static void loadRecipe(Context ctx, Uri uri) {
-		Recipe recipe = null;
+		Recipe[] recipes = null;
 		InputStream temp = null;
 
 		try {
@@ -68,7 +68,7 @@ public class ShareUtil {
 
 			in.useDelimiter("\\A");
 
-			recipe = JsonUtil.fromJson(in.next());
+			recipes = JsonUtil.fromJson(in.next());
 		} catch(IOException e) {
 			Log.e(LOG_TAG, "Error loading recipe: " + e, e);
 		} finally {
@@ -80,9 +80,9 @@ public class ShareUtil {
 			}
 		}
 
-		if(recipe != null) {
+		if(recipes != null && recipes.length > 0) {
 			Intent intent = new Intent(ctx, RecipeTabs.class);
-			intent.putExtra("id", recipe.getId());
+			intent.putExtra("id", recipes[0].getId());
 			ctx.startActivity(intent);
 		}
 	}
