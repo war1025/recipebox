@@ -4,8 +4,15 @@ import android.content.Context;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Scanner;
+import java.io.InputStream;
+import java.io.IOException;
+import org.wrowclif.recipebox.util.JsonUtil;
 
 import org.wrowclif.recipebox.db.RecipeBoxOpenHelper;
 
@@ -33,6 +40,8 @@ public class AppData {
 
 	public static AppData initialSingleton(Context context) {
 		AppData.appContext = context.getApplicationContext();
+		Inner.singleton.tryLoadDefaults();
+
 		return Inner.singleton;
 	}
 
@@ -66,7 +75,6 @@ public class AppData {
 
 	public <E> E sqlTransaction(Transaction<E> t) {
 		E ret = null;
-		Log.d("Recipebox", "Context: " + appContext + " Helper: " + helper);
 		SQLiteDatabase db = helper.getWritableDatabase();
 		db.beginTransaction();
 		try {
@@ -91,6 +99,49 @@ public class AppData {
 	public interface Transaction<T> {
 
 		public T exec(SQLiteDatabase db);
+
+	}
+
+	private void tryLoadDefaults() {
+		helper.getWritableDatabase();
+		if(helper.needsDefaultRecipes) {
+			new LoadDefaultsTask().execute();
+			helper.needsDefaultRecipes = false;
+		}
+	}
+
+	private class LoadDefaultsTask extends AsyncTask<String, String, String> {
+		protected void onPreExecute() {
+			Toast.makeText(appContext, "Loading Initial Data. Please Wait...", Toast.LENGTH_LONG).show();
+		}
+
+		protected String doInBackground(String... nothing) {
+			InputStream temp = null;
+
+			try {
+				temp = appContext.getAssets().open("defaultRecipes.json");
+
+				Scanner in = new Scanner(temp);
+
+				in.useDelimiter("\\A");
+
+				JsonUtil.fromJson(in.next());
+			} catch(IOException e) {
+				Log.e("Recipebox AppData", "Error loading recipe: " + e, e);
+			} finally {
+				if(temp != null) {
+					try {
+						temp.close();
+					} catch(IOException e) {
+					}
+				}
+			}
+			return "";
+		}
+
+		protected void onPostExecute(String result) {
+			Toast.makeText(appContext, "Recipes Loaded. Click 'Browse' to view.", Toast.LENGTH_LONG).show();
+		}
 
 	}
 }

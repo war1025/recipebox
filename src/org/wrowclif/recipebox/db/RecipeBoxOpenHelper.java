@@ -82,8 +82,11 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			"PRIMARY KEY(iid1, iid2)," +
 			"CHECK(iid1 < iid2));";
 
+	public boolean needsDefaultRecipes;
+
 	public RecipeBoxOpenHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		this.needsDefaultRecipes = false;
 	}
 
 	public void onCreate(SQLiteDatabase db) {
@@ -91,6 +94,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 		for(String stmt : statements) {
 			db.execSQL(stmt);
 		}
+		this.needsDefaultRecipes = true;
 	}
 
 	public void onUpgrade(SQLiteDatabase db, int oldv, int newv) {
