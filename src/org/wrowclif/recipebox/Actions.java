@@ -34,12 +34,12 @@ public enum Actions {
 					"Tap the 'Check' icon to leave edit mode"),
 
 	RECIPE_SHARE("Easily email your favorite recipes to friends and family!",
-					"The email contains a recipe attachment that can be loaded into Recipebox",
-					"The recipe is also written into the body of the email for easy viewing"),
+					"The email contains a recipe attachment that can be loaded into Recipebox.",
+					"The recipe is also written into the body of the email for easy viewing."),
 
 	RECIPE_EDIT_DIALOG("There are two ways to edit recipes",
-				"Tap 'Edit This Recipe' to update the current recipe",
-				"Tap 'Create Variant' to create a new recipe using this recipe as the base"),
+					"Tap 'Edit This Recipe' to update the current recipe",
+					"Tap 'Create Variant' to create a new recipe using this recipe as the base"),
 
 	RECIPE_EDIT("'Pencil' icons let you edit items",
 				"'Plus' icons let you add items",
