@@ -2,6 +2,7 @@ package org.wrowclif.recipebox.ui.components;
 
 import org.wrowclif.recipebox.R;
 
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Category;
@@ -53,6 +54,7 @@ public class CategoryListWidget {
 
 		addButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
+				Actions.RECIPE_ADD_CATEGORY.showNotifications();
 				CategoryListWidget.this.context.showDialog(ADD_CATEGORY_DIALOG);
 			}
 		});
