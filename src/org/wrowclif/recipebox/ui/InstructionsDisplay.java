@@ -76,6 +76,7 @@ public class InstructionsDisplay extends Activity {
 
 		ItemSwap swapper = new ItemSwap() {
 			public void swapItems(int a, int b) {
+				Actions.RECIPE_INSTRUCTIONS_REORDER.showNotifications();
 				r.swapInstructionPositions(adapter.getItem(a), adapter.getItem(b));
 			}
 		};
@@ -126,7 +127,9 @@ public class InstructionsDisplay extends Activity {
 		Button done = (Button) findViewById(R.id.done_button);
 		if(editing) {
 			Actions.RECIPE_EDIT.showNotifications();
-			Actions.RECIPE_INSTRUCTIONS_EDIT.showNotifications();
+			if(adapter.getCount() >= 2) {
+				Actions.RECIPE_INSTRUCTIONS_PRE_REORDER.showNotifications();
+			}
 			add.setVisibility(View.VISIBLE);
 			done.setVisibility(View.VISIBLE);
 		} else {
@@ -155,6 +158,9 @@ public class InstructionsDisplay extends Activity {
 					instruction.setText(dialog.getEditText());
 
 					adapter.notifyDataSetChanged();
+					if(adapter.getCount() >= 2) {
+						Actions.RECIPE_INSTRUCTIONS_PRE_REORDER.showNotifications();
+					}
 				}
 			});
 

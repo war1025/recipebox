@@ -63,7 +63,7 @@ public enum Actions {
 
 	RECIPE_INSTRUCTIONS("Steps to make a recipe are listed under Instructions"),
 
-	RECIPE_INSTRUCTIONS_EDIT("Press down on an instruction's text to show reorder arrows"),
+	RECIPE_INSTRUCTIONS_PRE_REORDER("Press down on an instruction's text to show reorder arrows"),
 
 	RECIPE_INSTRUCTIONS_REORDER("Press the instruction's text again to hide the arrows");
 
