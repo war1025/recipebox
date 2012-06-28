@@ -67,9 +67,11 @@ public enum Actions {
 
 	RECIPE_INSTRUCTIONS_REORDER("Press the instruction's text again to hide the arrows");
 
+	private boolean alreadyShown;
 	private String[] msgs;
 
 	Actions(String... msgs) {
+		this.alreadyShown = false;
 		this.msgs = msgs;
 	}
 
@@ -82,6 +84,11 @@ public enum Actions {
 		final String insert =
 			"INSERT INTO Notifications(action) " +
 				"VALUES(?);";
+
+		// Short circuit so we don't have to call the database needlessly
+		if(alreadyShown) {
+			return;
+		}
 
 		AppData data = AppData.getSingleton();
 
@@ -103,5 +110,7 @@ public enum Actions {
 				Toast.makeText(data.getContext(), msg, Toast.LENGTH_LONG).show();
 			}
 		}
+
+		this.alreadyShown = true;
 	}
 }
