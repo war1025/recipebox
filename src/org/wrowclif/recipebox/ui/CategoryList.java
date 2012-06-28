@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Recipe;
@@ -66,6 +67,8 @@ public class CategoryList extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.categories);
 
+		Actions.CATEGORY.showNotifications();
+
 		util = UtilityImpl.singleton;
 	}
 
@@ -111,6 +114,7 @@ public class CategoryList extends Activity {
 		View[] views = {findViewById(R.id.add_button), findViewById(R.id.done_button)};
 
 		if(editing) {
+			Actions.CATEGORY_EDIT.showNotifications();
 			for(View v : views) {
 				v.setVisibility(View.VISIBLE);
 			}

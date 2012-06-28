@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui.components;
 
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.R;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.impl.UtilityImpl;
@@ -39,6 +40,7 @@ public class RecipeMenus {
 	public boolean onItemSelect(int id) {
 		switch(id) {
 			case R.id.share : {
+				Actions.RECIPE_SHARE.showNotifications();
 				ShareUtil.share(activity, recipe);
 				return true;
 			}
@@ -47,6 +49,7 @@ public class RecipeMenus {
 				if(switcher.getEditing()) {
 					switcher.setEditing(false);
 				} else {
+					Actions.RECIPE_EDIT_DIALOG.showNotifications();
 					activity.showDialog(EDIT_RECIPE_DIALOG);
 				}
 				return true;

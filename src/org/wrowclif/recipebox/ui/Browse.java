@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.RecipeIngredient;
@@ -53,6 +54,7 @@ public class Browse extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.browse);
+		Actions.BROWSE.showNotifications();
 
 		util = UtilityImpl.singleton;
 

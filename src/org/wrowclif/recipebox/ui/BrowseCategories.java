@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Recipe;
@@ -64,6 +65,7 @@ public class BrowseCategories extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.categories);
+		Actions.CATEGORIES.showNotifications();
 
 		util = UtilityImpl.singleton;
 		appData = AppData.getSingleton();
@@ -103,6 +105,7 @@ public class BrowseCategories extends Activity {
 		View[] views = {findViewById(R.id.add_button), findViewById(R.id.done_button)};
 
 		if(editing) {
+			Actions.CATEGORIES_EDIT.showNotifications();
 			for(View v : views) {
 				v.setVisibility(View.VISIBLE);
 			}

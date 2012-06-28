@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Recipe;
@@ -74,6 +75,7 @@ public class RecipeDisplay extends Activity {
 	public void onCreate(Bundle savedInstanceState)	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.recipe_display);
+		Actions.RECIPE_INFO.showNotifications();
 
 		Intent intent = getIntent();
 		util = UtilityImpl.singleton;
@@ -173,6 +175,8 @@ public class RecipeDisplay extends Activity {
 							(Button) findViewById(R.id.prep_button), (Button) findViewById(R.id.cook_button),
 							(Button) findViewById(R.id.done_editing)};
 		if(editing) {
+			Actions.RECIPE_EDIT.showNotifications();
+			Actions.RECIPE_INFO_EDIT.showNotifications();
 			for(Button b : btns) {
 				b.setVisibility(View.VISIBLE);
 			}

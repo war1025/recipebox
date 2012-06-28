@@ -1,5 +1,7 @@
 package org.wrowclif.recipebox;
 
+import org.wrowclif.recipebox.Actions;
+
 import android.content.Context;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
@@ -116,12 +118,7 @@ public class AppData {
 
 	private class LoadDefaultsTask extends AsyncTask<String, String, String> {
 		protected void onPreExecute() {
-			String[] msgs = {"Welcome to Recipebox!",
-							"We've entered some of our favorite recipes to help you get started.",
-							"Tap 'Create' to make a new recipe."};
-			for(String msg : msgs) {
-				Toast.makeText(appContext, msg, Toast.LENGTH_LONG).show();
-			}
+			Actions.INITIAL_LOAD_START.showNotifications();
 		}
 
 		protected String doInBackground(String... nothing) {
@@ -149,12 +146,7 @@ public class AppData {
 		}
 
 		protected void onPostExecute(String result) {
-			String[] msgs = {"Tap 'Browse' to view all recipes sorted by name.",
-								"Tap 'Categories' to view recipes by category."};
-
-			for(String msg : msgs) {
-				Toast.makeText(appContext, msg, Toast.LENGTH_LONG).show();
-			}
+			Actions.INITIAL_LOAD_COMPLETE.showNotifications();
 		}
 
 	}

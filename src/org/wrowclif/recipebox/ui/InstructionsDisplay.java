@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Instruction;
@@ -64,6 +65,7 @@ public class InstructionsDisplay extends Activity {
 	public void onCreate(Bundle savedInstanceState)	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.instructions_display);
+		Actions.RECIPE_INSTRUCTIONS.showNotifications();
 
 		Intent intent = getIntent();
 
@@ -123,6 +125,8 @@ public class InstructionsDisplay extends Activity {
 		Button add = (Button) findViewById(R.id.add_button);
 		Button done = (Button) findViewById(R.id.done_button);
 		if(editing) {
+			Actions.RECIPE_EDIT.showNotifications();
+			Actions.RECIPE_INSTRUCTIONS_EDIT.showNotifications();
 			add.setVisibility(View.VISIBLE);
 			done.setVisibility(View.VISIBLE);
 		} else {

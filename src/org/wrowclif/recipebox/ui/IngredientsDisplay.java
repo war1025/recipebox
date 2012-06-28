@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.Recipe;
@@ -71,6 +72,7 @@ public class IngredientsDisplay extends Activity {
 	public void onCreate(Bundle savedInstanceState)	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.ingredients_display);
+		Actions.RECIPE_INGREDIENTS.showNotifications();
 
 		Intent intent = getIntent();
 
@@ -124,6 +126,8 @@ public class IngredientsDisplay extends Activity {
 		Button add = (Button) findViewById(R.id.add_button);
 		Button done = (Button) findViewById(R.id.done_button);
 		if(editing) {
+			Actions.RECIPE_EDIT.showNotifications();
+			Actions.RECIPE_INGREDIENTS_EDIT.showNotifications();
 			add.setVisibility(View.VISIBLE);
 			done.setVisibility(View.VISIBLE);
 		} else {
@@ -176,6 +180,7 @@ public class IngredientsDisplay extends Activity {
 		Dialog dialog = null;
 
 		if(id == NEW_INGREDIENT_DIALOG) {
+			Actions.ADD_RECIPE_INGREDIENT.showNotifications();
 			return new IngredientDialog(this);
 		} else if(id == DELETE_INGREDIENT_DIALOG) {
 			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
