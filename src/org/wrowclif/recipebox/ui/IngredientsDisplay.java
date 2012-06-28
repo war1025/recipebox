@@ -83,6 +83,7 @@ public class IngredientsDisplay extends Activity {
 
 		ItemSwap swapper = new ItemSwap() {
 			public void swapItems(int a, int b) {
+				Actions.RECIPE_INGREDIENTS_REORDER.showNotifications();
 				r.swapIngredientPositions(adapter.getItem(a), adapter.getItem(b));
 			}
 		};
@@ -127,7 +128,9 @@ public class IngredientsDisplay extends Activity {
 		Button done = (Button) findViewById(R.id.done_button);
 		if(editing) {
 			Actions.RECIPE_EDIT.showNotifications();
-			Actions.RECIPE_INGREDIENTS_EDIT.showNotifications();
+			if(adapter.getCount() >= 2) {
+				Actions.RECIPE_INGREDIENTS_PRE_REORDER.showNotifications();
+			}
 			add.setVisibility(View.VISIBLE);
 			done.setVisibility(View.VISIBLE);
 		} else {

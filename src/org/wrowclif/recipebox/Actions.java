@@ -54,7 +54,7 @@ public enum Actions {
 
 	RECIPE_INGREDIENTS("All of the ingredients you need for the recipe are listed here"),
 
-	RECIPE_INGREDIENTS_EDIT("Press down on an ingredient's name to show reorder arrows"),
+	RECIPE_INGREDIENTS_PRE_REORDER("Press down on an ingredient's name to show reorder arrows"),
 
 	RECIPE_INGREDIENTS_REORDER("Press the ingredient's name again to hide the arrows"),
 

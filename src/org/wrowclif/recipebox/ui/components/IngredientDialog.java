@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.ui.components;
 
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.Recipe;
@@ -274,6 +275,9 @@ public class IngredientDialog extends Dialog {
 					ri.setAmount(amountText);
 					adapter.add(adapter.getCount(), ri);
 					IngredientDialog.this.dismiss();
+					if(adapter.getCount() >= 2) {
+						Actions.RECIPE_INGREDIENTS_PRE_REORDER.showNotifications();
+					}
 				}
 			}
 		}
