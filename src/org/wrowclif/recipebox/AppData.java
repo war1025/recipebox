@@ -112,7 +112,12 @@ public class AppData {
 
 	private class LoadDefaultsTask extends AsyncTask<String, String, String> {
 		protected void onPreExecute() {
-			Toast.makeText(appContext, "Loading Initial Data. Please Wait...", Toast.LENGTH_LONG).show();
+			String[] msgs = {"Welcome to Recipebox!",
+							"We've entered some of our favorite recipes to help you get started.",
+							"Tap 'Create' to make a new recipe."};
+			for(String msg : msgs) {
+				Toast.makeText(appContext, msg, Toast.LENGTH_LONG).show();
+			}
 		}
 
 		protected String doInBackground(String... nothing) {
@@ -140,7 +145,12 @@ public class AppData {
 		}
 
 		protected void onPostExecute(String result) {
-			Toast.makeText(appContext, "Recipes Loaded. Click 'Browse' to view.", Toast.LENGTH_LONG).show();
+			String[] msgs = {"Tap 'Browse' to view all recipes sorted by name.",
+								"Tap 'Categories' to view recipes by category."};
+
+			for(String msg : msgs) {
+				Toast.makeText(appContext, msg, Toast.LENGTH_LONG).show();
+			}
 		}
 
 	}
