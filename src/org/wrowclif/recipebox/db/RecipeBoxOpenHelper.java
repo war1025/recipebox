@@ -9,7 +9,7 @@ import android.util.Log;
 
 public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	private static final String DATABASE_NAME = "RECIPEBOX";
 	private static final String CREATE_STATEMENT =
 		"CREATE TABLE VariantGroup(" +
@@ -80,7 +80,10 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			"iid1 INTEGER REFERENCES Ingredient(iid)," +
 			"iid2 INTEGER REFERENCES Ingredient(iid)," +
 			"PRIMARY KEY(iid1, iid2)," +
-			"CHECK(iid1 < iid2));";
+			"CHECK(iid1 < iid2));" +
+
+		"CREATE TABLE Notifications(" +
+			"action TEXT PRIMARY KEY NOT NULL);";
 
 	public boolean needsDefaultRecipes;
 
@@ -98,7 +101,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 	}
 
 	public void onUpgrade(SQLiteDatabase db, int oldv, int newv) {
-		if((oldv == 1) && (newv == 2)) {
+		if((oldv == 1) && (newv >= 2)) {
 			String upgradeStmt =
 				"ALTER TABLE Recipe " +
 					"ADD COLUMN createtime INTEGER NOT NULL DEFAULT 0;" +
@@ -113,6 +116,16 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 				db.execSQL(stmt);
 			}
 			Log.d("Recipebox", "Database upgraded to v2");
+			onUpgrade(db, 2, newv);
+		} else if((oldv == 2) && (newv >= 3)) {
+			String upgradeStmt =
+				"CREATE TABLE Notifications(" +
+					"action TEXT PRIMARY KEY NOT NULL);";
+			for(String stmt : upgradeStmt.split(";")) {
+				db.execSQL(stmt);
+			}
+			Log.d("Recipebox", "Database upgraded to v3");
+			onUpgrade(db, 3, newv);
 		}
 	}
 

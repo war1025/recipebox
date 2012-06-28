@@ -49,6 +49,10 @@ public class AppData {
 		return Inner.singleton;
 	}
 
+	public Context getContext() {
+		return appContext;
+	}
+
 	public Typeface getHeadingFont() {
 		return headingFont;
 	}
