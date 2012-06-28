@@ -52,6 +52,11 @@ public enum Actions {
 
 	RECIPE_INFO_EDIT("Edit Prep and Cook times by tapping the times under the label"),
 
+	RECIPE_ADD_CATEGORY("Recipes can be in as many categories as you like"),
+
+	RECIPE_ADD_RELATED("Relating two recipes allows you to quickly reference one from the other",
+						"Make relations between recipes that go well together"),
+
 	RECIPE_INGREDIENTS("All of the ingredients you need for the recipe are listed here"),
 
 	RECIPE_INGREDIENTS_PRE_REORDER("Press down on an ingredient's name to show reorder arrows"),
