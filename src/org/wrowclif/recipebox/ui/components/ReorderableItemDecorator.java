@@ -35,6 +35,7 @@ public class ReorderableItemDecorator<T> {
 	}
 
 	private void decorateForEditing(View item, final int position) {
+		item.setBackgroundResource(R.drawable.list_item);
 		item.setOnLongClickListener(new OnLongClickListener() {
 			public boolean onLongClick(View v) {
 				if(position == moveableItem) {
@@ -87,6 +88,7 @@ public class ReorderableItemDecorator<T> {
 	}
 
 	private void decorateForViewing(View item, int position) {
+		item.setBackgroundResource(R.color.background_light);
 		item.setOnLongClickListener(null);
 
 		Button mu = (Button) item.findViewById(R.id.up_button);
