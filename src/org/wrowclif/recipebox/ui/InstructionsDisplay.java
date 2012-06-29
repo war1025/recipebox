@@ -285,6 +285,7 @@ public class InstructionsDisplay extends Activity {
 
 
 				if(edit) {
+					convert.setBackgroundResource(R.drawable.list_item);
 					be.setVisibility(View.VISIBLE);
 					bd.setVisibility(View.VISIBLE);
 
@@ -305,6 +306,7 @@ public class InstructionsDisplay extends Activity {
 						}
 					});
 				} else {
+					convert.setBackgroundResource(R.color.background_light);
 					be.setVisibility(View.GONE);
 					bd.setVisibility(View.GONE);
 				}
