@@ -210,7 +210,24 @@ public class IngredientDialog extends Dialog {
 
 		messageView.setText(Html.fromHtml("Sorry! <b>" + ingredientInput.getText() + "</b> is already used in this recipe." +
 									"<br><br>" +
-									"Ingredients can only be added once per recipe"));
+									"Ingredients can only be added once per recipe."));
+
+		okButton.setText("Ok");
+		okButton.setOnClickListener(inUseOkOnClick);
+	}
+
+	public void showEmptyIngredientField() {
+		setTitle("No Ingredient Specified");
+
+		amountInput.setVisibility(View.GONE);
+		ingredientInput.setVisibility(View.GONE);
+		okButton.setVisibility(View.VISIBLE);
+		cancelButton.setVisibility(View.GONE);
+		messageView.setVisibility(View.VISIBLE);
+
+		messageView.setText(Html.fromHtml("You must specify what ingredient you are adding." +
+									"<br><br>" +
+									"Currently the ingredient field is empty."));
 
 		okButton.setText("Ok");
 		okButton.setOnClickListener(inUseOkOnClick);
@@ -261,7 +278,13 @@ public class IngredientDialog extends Dialog {
 
 	protected class NewOkOnClick implements View.OnClickListener {
 		public void onClick(View v) {
-			Ingredient i = UtilityImpl.singleton.getIngredientByName(ingredientInput.getText().toString());
+			String ingredientName = ingredientInput.getText().toString().trim();
+			if(ingredientName.isEmpty()) {
+				showEmptyIngredientField();
+				return;
+			}
+
+			Ingredient i = UtilityImpl.singleton.getIngredientByName(ingredientName);
 			String amountText = amountInput.getText().toString();
 
 			if(i == null) {
@@ -301,7 +324,13 @@ public class IngredientDialog extends Dialog {
 
 	protected class EditOkOnClick implements View.OnClickListener {
 		public void onClick(View v) {
-			Ingredient currentIngredient = UtilityImpl.singleton.getIngredientByName(ingredientInput.getText().toString());
+			String currentName = ingredientInput.getText().toString().trim();
+			if(currentName.isEmpty()) {
+				showEmptyIngredientField();
+				return;
+			}
+
+			Ingredient currentIngredient = UtilityImpl.singleton.getIngredientByName(currentName);
 
 			boolean sameIngredient = (currentIngredient != null) &&
 										(currentIngredient.getId() == ingredient.getIngredient().getId());
