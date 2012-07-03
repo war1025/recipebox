@@ -1,5 +1,6 @@
 package org.wrowclif.recipebox.util;
 
+import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Ingredient;
 import org.wrowclif.recipebox.RecipeIngredient;
@@ -11,6 +12,7 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 import java.util.List;
 import java.util.ArrayList;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -121,6 +123,8 @@ public class JsonUtil {
 		Utility util = UtilityImpl.singleton;
 		List<Recipe> ret = new ArrayList<Recipe>();
 
+		SQLiteDatabase db = AppData.getSingleton().getOpenHelper().getWritableDatabase();
+		db.beginTransaction();
 		try {
 			if(json.charAt(0) == '{') {
 				recipes = new JSONArray();
@@ -184,6 +188,7 @@ public class JsonUtil {
 					}
 				}
 			}
+			db.setTransactionSuccessful();
 
 		} catch(Exception e) {
 			Log.e(LOG_TAG, "Error converting json text to recipe: " + e, e);
@@ -191,6 +196,8 @@ public class JsonUtil {
 				r.delete();
 			}
 			ret = null;
+		} finally {
+			db.endTransaction();
 		}
 
 		return ret.toArray(new Recipe[0]);
