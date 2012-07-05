@@ -24,6 +24,10 @@ public interface Recipe {
 
 	public void setCost(int cost);
 
+	public String getImageUri();
+
+	public void setImageUri(String uri);
+
 	public long getId();
 
 	public List<RecipeIngredient> getIngredients();
