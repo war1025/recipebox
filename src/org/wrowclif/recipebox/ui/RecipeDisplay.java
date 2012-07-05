@@ -12,6 +12,7 @@ import org.wrowclif.recipebox.ui.components.RecipeMenus;
 import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
 import org.wrowclif.recipebox.ui.components.CategoryListWidget;
 import org.wrowclif.recipebox.ui.components.RelatedRecipeListWidget;
+import org.wrowclif.recipebox.ui.components.ImageWidget;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
@@ -45,6 +46,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.text.TextWatcher;
 import android.text.Editable;
 import android.text.method.DigitsKeyListener;
@@ -61,6 +63,7 @@ public class RecipeDisplay extends Activity {
 	private RecipeMenus menus;
 	private CategoryListWidget categories;
 	private RelatedRecipeListWidget related;
+	private ImageWidget image;
 
 	private static final int NAME_DIALOG = assignId();
 	private static final int DESCRIPTION_DIALOG = assignId();
@@ -150,6 +153,9 @@ public class RecipeDisplay extends Activity {
 
 			info.addView(related.getView(), params);
 
+			image = new ImageWidget(r, this, (ViewStub) info.findViewById(R.id.image_stub));
+			image.refreshImage();
+
 			setEditing(edit);
 		}
 	}
@@ -198,6 +204,7 @@ public class RecipeDisplay extends Activity {
 
 		categories.setEditing(editing);
 		related.setEditing(editing);
+		image.setEditing(editing);
 		edit = editing;
 
 		((RecipeTabs) getParent()).editing = editing;
@@ -230,6 +237,11 @@ public class RecipeDisplay extends Activity {
 		}
 
 		d = related.createDialog(id);
+		if(d != null) {
+			return d;
+		}
+
+		d = image.createDialog(id);
 		if(d != null) {
 			return d;
 		}
@@ -354,6 +366,12 @@ public class RecipeDisplay extends Activity {
 		return true;
 	}
 
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(image.onActivityResult(requestCode, resultCode, data)) {
+			return;
+		}
+	}
+
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean menuHandled = menus.onItemSelect(item.getItemId());
 
@@ -369,6 +387,16 @@ public class RecipeDisplay extends Activity {
 		int min = minutes % 60;
 
 		return String.format("%02d:%02d", hours, min);
+	}
+
+	protected void onSaveInstanceState(Bundle bundle) {
+		super.onSaveInstanceState(bundle);
+		image.saveInstanceState(bundle);
+	}
+
+	protected void onRestoreInstanceState(Bundle bundle) {
+		super.onRestoreInstanceState(bundle);
+		image.restoreInstanceState(bundle);
 	}
 
 }
