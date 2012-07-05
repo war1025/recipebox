@@ -153,13 +153,19 @@
 						android:layout_margin="5dip"
 						android:background="@drawable/edit" />
 			</LinearLayout>
-
+			<ViewStub
+					android:id="@+id/image_stub"
+					android:inflatedId="@id/image_stub"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:layout_below="@id/name_group"
+					android:layout_alignRight="@id/name_group" />
 			<LinearLayout
 					android:id="@+id/description_group"
 					android:orientation="horizontal"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:layout_below="@id/name_group"
+					android:layout_below="@id/image_stub"
 					android:layout_alignLeft="@id/name_group"
 					android:gravity="center_vertical" >
 				<TextView
