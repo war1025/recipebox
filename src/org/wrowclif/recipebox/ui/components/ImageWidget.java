@@ -3,6 +3,8 @@ package org.wrowclif.recipebox.ui.components;
 import org.wrowclif.recipebox.R;
 import org.wrowclif.recipebox.Recipe;
 
+import org.wrowclif.recipebox.util.ImageUtil;
+
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
 import android.os.AsyncTask;
@@ -102,7 +104,7 @@ public class ImageWidget {
 	public void refreshImage() {
 		String uri = recipe.getImageUri();
 		if(uri.length() > 0) {
-			new LoadImageTask().execute(recipe.getImageUri());
+			new LoadImageTask().execute(recipe);
 		} else {
 			image.setImageBitmap(null);
 			image.setVisibility(View.GONE);
@@ -122,6 +124,10 @@ public class ImageWidget {
 
 			etd.setOkListener(new OnClickListener() {
 				public void onClick(View v) {
+					File toDelete = ImageUtil.getImageFile(recipe);
+					if(toDelete != null && toDelete.exists()) {
+						toDelete.delete();
+					}
 					recipe.setImageUri("");
 					refreshImage();
 				}
@@ -147,12 +153,9 @@ public class ImageWidget {
 		return handled;
 	}
 
-	private class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
-		protected Bitmap doInBackground(String... imagePath) {
-			File f = new File(Uri.parse(imagePath[0]).getSchemeSpecificPart());
-			Log.d(LOG_TAG, "File: " + f.getPath() + " Exists: " + f.exists());
-			Log.d(LOG_TAG, "Image uri: " + imagePath[0]);
-			return BitmapFactory.decodeFile(f.getPath());
+	private class LoadImageTask extends AsyncTask<Recipe, Void, Bitmap> {
+		protected Bitmap doInBackground(Recipe... recipe) {
+			return ImageUtil.loadImageAtWidth(recipe[0], context.getWindowManager().getDefaultDisplay().getWidth());
 		}
 
 		protected void onPostExecute(Bitmap result) {
@@ -170,19 +173,12 @@ public class ImageWidget {
 	}
 
 	private Uri getImageOutputUri() {
-		File imageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-																										"org.wrowclif.recipebox");
-		if(!imageDir.exists()){
-			if(!imageDir.mkdirs()){
-				Log.d(LOG_TAG, "Could not access image storage directory: " + imageDir);
-				Log.d(LOG_TAG, "External Storage State: " + Environment.getExternalStorageState());
-				return null;
-			}
+		File imageFile = ImageUtil.getImageSaveFile(recipe);
+		Uri uri = null;
+		if(imageFile != null) {
+			uri = Uri.fromFile(imageFile);
 		}
-
-		File imageFile = new File(imageDir.getPath() + File.separator + "IMG_" + recipe.getId() + ".jpg");
-
-		return Uri.fromFile(imageFile);
+		return uri;
 	}
 
 	public void saveInstanceState(Bundle bundle) {
