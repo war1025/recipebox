@@ -1,6 +1,7 @@
 package org.wrowclif.recipebox.ui.components;
 
 import org.wrowclif.recipebox.R;
+import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 
 import org.wrowclif.recipebox.util.ImageUtil;
@@ -26,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import android.util.Log;
@@ -45,6 +47,7 @@ public class ImageWidget {
 	private Activity context;
 	private View view;
 	private ImageView image;
+	private TextView noImageLabel;
 	private Button editButton;
 	private Button deleteButton;
 	private boolean editing;
@@ -60,6 +63,10 @@ public class ImageWidget {
 		this.view = stub.inflate();
 		this.editButton = (Button) view.findViewById(R.id.edit_button);
 		this.deleteButton = (Button) view.findViewById(R.id.delete_button);
+
+		this.noImageLabel = (TextView) view.findViewById(R.id.image_label);
+		AppData.getSingleton().useTextFont(this.noImageLabel);
+
 		this.image = (ImageView) view.findViewById(R.id.recipe_image);
 		this.image.setVisibility(View.GONE);
 
@@ -87,12 +94,15 @@ public class ImageWidget {
 			editButton.setVisibility(View.VISIBLE);
 			if(recipe.getImageUri().length() > 0) {
 				deleteButton.setVisibility(View.VISIBLE);
+				noImageLabel.setVisibility(View.GONE);
 			} else {
 				deleteButton.setVisibility(View.GONE);
+				noImageLabel.setVisibility(View.VISIBLE);
 			}
 		} else {
 			editButton.setVisibility(View.GONE);
 			deleteButton.setVisibility(View.GONE);
+			noImageLabel.setVisibility(View.GONE);
 		}
 	}
 
