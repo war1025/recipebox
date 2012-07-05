@@ -34,7 +34,7 @@ public class UtilityImpl implements Utility {
 
 	public List<Recipe> searchRecipes(final String search, final int maxResults) {
 		final String stmt =
-			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid " +
 			"FROM Recipe r " +
 			"WHERE r.name LIKE ? " +
 			"ORDER BY r.lastviewtime DESC " +
@@ -52,7 +52,7 @@ public class UtilityImpl implements Utility {
 
 	public List<Recipe> getRecentlyViewedRecipes(final int offset, final int maxResults) {
 		final String stmt =
-			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid " +
 			"FROM Recipe r " +
 			"ORDER BY r.lastviewtime DESC " +
 			"LIMIT ? OFFSET ?;";
@@ -69,7 +69,7 @@ public class UtilityImpl implements Utility {
 
 	public List<Recipe> getRecipesByName(final int offset, final int maxResults) {
 		final String stmt =
-			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid " +
 			"FROM Recipe r " +
 			"ORDER BY r.name ASC " +
 			"LIMIT ? OFFSET ?;";

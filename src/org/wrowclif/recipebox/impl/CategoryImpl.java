@@ -61,7 +61,7 @@ public class CategoryImpl implements Category {
 
 	public List<Recipe> getRecipes() {
 		final String stmt =
-			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid " +
 			"FROM Recipe r, RecipeCategory rc " +
 			"WHERE rc.cid = ? " +
 				"and rc.rid = r.rid " +

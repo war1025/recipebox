@@ -69,7 +69,7 @@ public class SuggestionImpl implements Suggestion {
 		}
 
 		protected List<Suggestion> createListFromCursor(Recipe r, Cursor c) {
-			// r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid
+			// r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid
 			List<Suggestion> list = new ArrayList<Suggestion>(c.getCount());
 			ContentValues values = new ContentValues();
 			while(c.moveToNext()) {
@@ -80,7 +80,8 @@ public class SuggestionImpl implements Suggestion {
 				values.put("preptime", c.getInt(4));
 				values.put("cooktime", c.getInt(5));
 				values.put("cost", c.getInt(6));
-				values.put("vid", c.getLong(7));
+				values.put("imageuri", c.getString(7));
+				values.put("vid", c.getLong(8));
 				Recipe r2 = RecipeImpl.factory.createRecipeFromData(values);
 				SuggestionImpl si = new SuggestionImpl(r, r2);
 				si.comments = c.getString(1);
@@ -93,12 +94,12 @@ public class SuggestionImpl implements Suggestion {
 
 		protected List<Suggestion> getSuggestedWith(final Recipe r) {
 			final String stmt =
-				"SELECT r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+				"SELECT r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid " +
 				"FROM Recipe r, SuggestedWith sw " +
 				"WHERE sw.rid1 = ? " +
 					"and sw.rid2 = r.rid " +
 				"UNION " +
-				"SELECT r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+				"SELECT r.rid, sw.comments, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid " +
 				"FROM Recipe r, SuggestedWith sw " +
 				"WHERE sw.rid1 = r.rid " +
 					"and sw.rid2 = ?; ";

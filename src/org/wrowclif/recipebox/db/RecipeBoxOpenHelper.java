@@ -9,7 +9,7 @@ import android.util.Log;
 
 public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	private static final String DATABASE_NAME = "RECIPEBOX";
 	private static final String CREATE_STATEMENT =
 		"CREATE TABLE VariantGroup(" +
@@ -22,6 +22,7 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			"cost INTEGER NOT NULL DEFAULT 0," +
 			"preptime INTEGER NOT NULL DEFAULT 0," +
 			"cooktime INTEGER NOT NULL DEFAULT 0," +
+			"imageuri TEXT NOT NULL DEFAULT ''," +
 			"maxinstruction INTEGER DEFAULT 0," +
 			"maxingredient INTEGER DEFAULT 0," +
 			"createtime INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP," +
@@ -126,6 +127,15 @@ public class RecipeBoxOpenHelper extends SQLiteOpenHelper {
 			}
 			Log.d("Recipebox", "Database upgraded to v3");
 			onUpgrade(db, 3, newv);
+		} else if((oldv == 3) && (newv >= 4)) {
+			String upgradeStmt =
+				"ALTER TABLE Recipe " +
+					"ADD COLUMN imageuri TEXT NOT NULL DEFAULT '';";
+			for(String stmt : upgradeStmt.split(";")) {
+				db.execSQL(stmt);
+			}
+			Log.d("Recipebox", "Database upgraded to v4");
+			onUpgrade(db, 4, newv);
 		}
 	}
 

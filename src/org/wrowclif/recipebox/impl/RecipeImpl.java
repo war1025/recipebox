@@ -33,6 +33,7 @@ public class RecipeImpl implements Recipe {
 	protected int cost;
 	protected int prepTime;
 	protected int cookTime;
+	protected String imageUri;
 	protected long vid;
 
 	private RecipeImpl(long id) {
@@ -42,6 +43,7 @@ public class RecipeImpl implements Recipe {
 		this.cost = 0;
 		this.prepTime = 0;
 		this.cookTime = 0;
+		this.imageUri = "";
 		this.vid = id;
 	}
 
@@ -98,6 +100,17 @@ public class RecipeImpl implements Recipe {
 		ContentValues values = new ContentValues();
 		values.put("cost", cost);
 		itemUpdate(values, "setCost");
+	}
+
+	public String getImageUri() {
+		return imageUri;
+	}
+
+	public void setImageUri(String uri) {
+		this.imageUri = uri;
+		ContentValues values = new ContentValues();
+		values.put("imageuri", uri);
+		itemUpdate(values, "setImageUri");
 	}
 
 	public long getId() {
@@ -182,7 +195,7 @@ public class RecipeImpl implements Recipe {
 
 	public List<Recipe> getVariants() {
 		final String stmt =
-			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+			"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid " +
 			"FROM Recipe r " +
 			"WHERE r.vid = %s " +
 				"and r.rid != %s; ";
@@ -232,7 +245,7 @@ public class RecipeImpl implements Recipe {
 		final String stmt =
 			"SELECT r.createtime " +
 			"FROM Recipe r " +
-			"WHERE r.ride = ?;";
+			"WHERE r.rid = ?;";
 
 		return factory.data.sqlTransaction(new Transaction<Long>() {
 			public Long exec(SQLiteDatabase db) {
@@ -316,6 +329,7 @@ public class RecipeImpl implements Recipe {
 		values.put("cost", cost);
 		values.put("cooktime", cookTime);
 		values.put("preptime", prepTime);
+		values.put("imageuri", imageUri);
 		values.put("vid", vid);
 
 		return factory.data.sqlTransaction(new Transaction<Recipe>() {
@@ -445,7 +459,7 @@ public class RecipeImpl implements Recipe {
 		}
 
 		protected List<Recipe> createListFromCursor(Cursor c) {
-			//  r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid
+			//  r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid
 			List<Recipe> list = new ArrayList<Recipe>(c.getCount());
 			while(c.moveToNext()) {
 				RecipeImpl r = new RecipeImpl(c.getLong(0));
@@ -454,7 +468,8 @@ public class RecipeImpl implements Recipe {
 				r.prepTime = c.getInt(3);
 				r.cookTime = c.getInt(4);
 				r.cost = c.getInt(5);
-				r.vid = c.getLong(6);
+				r.imageUri = c.getString(6);
+				r.vid = c.getLong(7);
 				list.add(r);
 			}
 			return list;
@@ -468,13 +483,14 @@ public class RecipeImpl implements Recipe {
 			r.prepTime = values.getAsInteger("preptime");
 			r.cookTime = values.getAsInteger("cooktime");
 			r.cost = values.getAsInteger("cost");
+			r.imageUri = values.getAsString("imageuri");
 
 			return r;
 		}
 
 		protected Recipe getRecipeById(final long id) {
 			final String stmt =
-				"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.vid " +
+				"SELECT r.rid, r.name, r.description, r.preptime, r.cooktime, r.cost, r.imageuri, r.vid " +
 				"FROM Recipe r " +
 				"WHERE r.rid = ?;";
 
