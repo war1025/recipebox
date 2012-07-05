@@ -15,6 +15,8 @@ import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Review;
 import org.wrowclif.recipebox.Suggestion;
 
+import org.wrowclif.recipebox.util.ImageUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -340,7 +342,10 @@ public class RecipeImpl implements Recipe {
 					db.execSQL(s);
 				}
 				values.put("rid", newId);
-				return factory.createRecipeFromData(values);
+				Recipe branched = factory.createRecipeFromData(values);
+				String imageUri = ImageUtil.copyImage(RecipeImpl.this, branched);
+				branched.setImageUri(imageUri);
+				return branched;
 			}
 		});
 	}
@@ -393,6 +398,7 @@ public class RecipeImpl implements Recipe {
 				"and ri.rid = ? " +
 				"and i.usecount = 1;";
 
+		ImageUtil.deleteImage(this);
 		factory.data.sqlTransaction(new Transaction<Void>() {
 			public Void exec(SQLiteDatabase db) {
 				// Get list of ingredients to remove
