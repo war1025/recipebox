@@ -23,34 +23,17 @@ public class ShareUtil {
 	private static final String LOG_TAG = "Recipebox Share Util";
 
 	public static void share(Context ctx, Recipe r) {
-		File temp = null;
-		PrintWriter out = null;
 
 		Intent intent = new Intent(Intent.ACTION_SEND);
 
-		try {
-			temp = File.createTempFile(r.getName().replaceAll(" ", ""), ".rcpb", ctx.getCacheDir());
-			temp.setReadable(true, false);
+		Uri zipUri = ZipUtil.zipRecipes(ctx, r);
 
-			out = new PrintWriter(temp);
+		String recipeText = toHumanReadable(r);
 
-			out.println(JsonUtil.toJson(r));
-
-			String recipeText = toHumanReadable(r);
-
-			intent.putExtra(Intent.EXTRA_SUBJECT, "Recipebox Recipe: " + r.getName());
-			intent.putExtra(Intent.EXTRA_TEXT, "A recipe for making " + r.getName() + " is attached.\n\n" + recipeText);
-			intent.setType("text/rcpb");
-			intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(temp.toURI().toString()));
-		} catch(IOException e) {
-			Log.e(LOG_TAG, "Error writing recipe to file: " + e, e);
-			intent = null;
-		} finally {
-			if(out != null) {
-				out.flush();
-				out.close();
-			}
-		}
+		intent.putExtra(Intent.EXTRA_SUBJECT, "Recipebox Recipe: " + r.getName());
+		intent.putExtra(Intent.EXTRA_TEXT, "A recipe for making " + r.getName() + " is attached.\n\n" + recipeText);
+		intent.setType("application/zip");
+		intent.putExtra(Intent.EXTRA_STREAM, zipUri);
 
 		if(intent != null) {
 			ctx.startActivity(Intent.createChooser(intent, "Share Recipe"));
@@ -79,6 +62,16 @@ public class ShareUtil {
 				}
 			}
 		}
+
+		if(recipes != null && recipes.length > 0) {
+			Intent intent = new Intent(ctx, RecipeTabs.class);
+			intent.putExtra("id", recipes[0].getId());
+			ctx.startActivity(intent);
+		}
+	}
+
+	public static void loadZipRecipe(Context ctx, Uri uri) {
+		Recipe[] recipes = ZipUtil.unzipRecipes(ctx, uri);
 
 		if(recipes != null && recipes.length > 0) {
 			Intent intent = new Intent(ctx, RecipeTabs.class);
