@@ -63,7 +63,11 @@ public class Main extends Activity {
 
 		if(intent.getData() != null) {
 			Log.d("Recipebox", "Intent data not null!");
-			ShareUtil.loadRecipe(this, intent.getData());
+			if("text/rcpb".equals(intent.getType())) {
+				ShareUtil.loadRecipe(this, intent.getData());
+			} else if("application/zip".equals(intent.getType())) {
+				ShareUtil.loadZipRecipe(this, intent.getData());
+			}
 		}
 
 		AppData.getSingleton().useHeadingFont((TextView) findViewById(R.id.recipe_label));
