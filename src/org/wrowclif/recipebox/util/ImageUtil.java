@@ -18,7 +18,9 @@ public class ImageUtil {
 
 	public static void deleteImage(Recipe r) {
 		File f = getImageFile(r);
-		f.delete();
+		if(f != null) {
+			f.delete();
+		}
 	}
 
 	public static String copyImage(Recipe from, Recipe to) {
