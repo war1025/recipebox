@@ -86,6 +86,16 @@ public class ImageWidget {
 			}
 		});
 
+		this.image.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				if(!ImageWidget.this.editing) {
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.setDataAndType(Uri.parse(ImageWidget.this.recipe.getImageUri()), "image/*");
+					ImageWidget.this.context.startActivity(intent);
+				}
+			}
+		});
+
 	}
 
 	public void setEditing(boolean editing) {
