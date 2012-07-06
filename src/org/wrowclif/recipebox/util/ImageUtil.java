@@ -110,5 +110,29 @@ public class ImageUtil {
 		return BitmapFactory.decodeFile(imageFile.getPath(), options);
 	}
 
+	public static void saveDownsampledImage(Recipe recipe, int maxWidth) {
+		Bitmap downsampledImage = loadImageAtWidth(recipe, maxWidth);
+
+		if(downsampledImage != null) {
+			File saveAs = getImageFile(recipe);
+			FileOutputStream out = null;
+
+			try {
+				out = new FileOutputStream(saveAs);
+
+				downsampledImage.compress(Bitmap.CompressFormat.JPEG, 90, out);
+
+			} catch(Exception e) {
+				Log.e(LOG_TAG, "Exception Downsampling image: " + e, e);
+			} finally {
+				if(out != null) {
+					try {
+						out.close();
+					} catch(Exception ex) {
+					}
+				}
+			}
+		}
+	}
 
 }

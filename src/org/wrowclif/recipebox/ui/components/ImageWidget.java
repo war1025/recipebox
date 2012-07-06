@@ -165,6 +165,7 @@ public class ImageWidget {
 			if(resultCode == Activity.RESULT_OK) {
 				if(imageSaveUri != null) {
 					recipe.setImageUri(imageSaveUri.toString());
+					ImageUtil.saveDownsampledImage(recipe, 1024);
 					refreshImage();
 					imageSaveUri = null;
 				}
