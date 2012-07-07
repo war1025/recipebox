@@ -40,6 +40,10 @@ public class RecipeTabs extends TabActivity {
 		boolean edit = intent.getBooleanExtra("edit", false);
 		int tab = intent.getIntExtra("tab", 0);
 
+		if(savedInstance != null) {
+			edit = savedInstance.getBoolean("editing", edit);
+		}
+
 		this.curRecipe = UtilityImpl.singleton.getRecipeById(id);
 		this.editing = edit;
 
@@ -107,6 +111,10 @@ public class RecipeTabs extends TabActivity {
 				}
 			}
 		});
+	}
+
+	public void onSaveInstanceState(Bundle bundle) {
+		bundle.putBoolean("editing", this.editing);
 	}
 
 }
