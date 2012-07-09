@@ -9,7 +9,7 @@ import org.wrowclif.recipebox.AppData.Transaction;
 
 public enum Actions {
 	INITIAL_LOAD_START("Welcome to Recipebox!",
-						"We're entering some of our favorite recipes to help you get started."),
+						"We've entered some of our favorite recipes to help you get started."),
 
 	INITIAL_LOAD_COMPLETE(),
 
