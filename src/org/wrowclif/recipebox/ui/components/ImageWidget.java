@@ -1,6 +1,7 @@
 package org.wrowclif.recipebox.ui.components;
 
 import org.wrowclif.recipebox.R;
+import org.wrowclif.recipebox.Actions;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 
@@ -185,6 +186,7 @@ public class ImageWidget {
 			} else {
 				image.setImageBitmap(result);
 				image.setVisibility(View.VISIBLE);
+				Actions.IMAGE_SHOWN.showNotifications();
 			}
 		}
 	}

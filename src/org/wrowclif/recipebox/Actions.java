@@ -56,7 +56,9 @@ public enum Actions {
 
 	RECIPE_INSTRUCTIONS_PRE_REORDER("Press down on an instruction's text to show reorder arrows"),
 
-	RECIPE_INSTRUCTIONS_REORDER("Press the instruction's text again to hide the arrows");
+	RECIPE_INSTRUCTIONS_REORDER("Press the instruction's text again to hide the arrows"),
+
+	IMAGE_SHOWN("Tap the image to view it full size");
 
 	private boolean alreadyShown;
 	private String[] msgs;
