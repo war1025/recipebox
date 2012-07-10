@@ -114,6 +114,7 @@ public class RecipeTabs extends TabActivity {
 	}
 
 	public void onSaveInstanceState(Bundle bundle) {
+		super.onSaveInstanceState(bundle);
 		bundle.putBoolean("editing", this.editing);
 	}
 
