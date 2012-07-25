@@ -26,6 +26,7 @@ public class ImageUtil {
 	public static String copyImage(Recipe from, Recipe to) {
 		File fromFile = getImageFile(from);
 		File toFile = getImageSaveFile(to);
+		String fileString = null;
 		if(fromFile != null && fromFile.exists()) {
 			FileInputStream fromStream = null;
 			FileOutputStream toStream = null;
@@ -39,6 +40,7 @@ public class ImageUtil {
 				while((numRead = fromStream.read(buffer, 0, bufferSize)) != -1) {
 					toStream.write(buffer, 0, numRead);
 				}
+				fileString = Uri.fromFile(toFile).toString();
 			} catch(Exception e) {
 				Log.e(LOG_TAG, "Exception: " + e, e);
 			} finally {
@@ -56,7 +58,7 @@ public class ImageUtil {
 				}
 			}
 		}
-		return Uri.fromFile(toFile).toString();
+		return fileString;
 	}
 
 	public static File getImageFile(Recipe r) {

@@ -344,7 +344,9 @@ public class RecipeImpl implements Recipe {
 				values.put("rid", newId);
 				Recipe branched = factory.createRecipeFromData(values);
 				String imageUri = ImageUtil.copyImage(RecipeImpl.this, branched);
-				branched.setImageUri(imageUri);
+				if(imageUri != null) {
+					branched.setImageUri(imageUri);
+				}
 				return branched;
 			}
 		});
