@@ -320,6 +320,11 @@ public class Main extends Activity {
 				startActivity(intent);
 			}
 
+			/**
+			 * Creates a view for the given Id
+			 *
+			 * @param layoutId The id of the view to create
+			 **/
 			private View inflate(int layoutId) {
 				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				return vi.inflate(layoutId, null);
@@ -334,14 +339,24 @@ public class Main extends Activity {
 
     }
 
+	/**
+	 * Called when this activity is about to resume execution
+	 **/
     public void onResume() {
 		super.onResume();
+		// Reload the recently viewed recipes
 		recentAdapter.clear();
 	}
 
+	/**
+	 * Called when a dialog for a given id is being constructed.
+	 *
+	 * @param id The Id of the dialog to construct
+	 **/
     protected Dialog onCreateDialog(int id) {
 		Dialog dialog = null;
 
+		// Shown when we type a name into the search bar that doesn't exist in the recipes database.
 		if(id == CREATE_RECIPE_DIALOG) {
 			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
 
@@ -349,6 +364,7 @@ public class Main extends Activity {
 			etd.setEditText("There are no recipes by that name.\n\n" +
 								"Would you like to create a new recipe?");
 
+			// If the user accepts, we take the text in the search bar and create a recipe with that name.
 			etd.setOkButtonText("Create");
 			etd.setOkListener(new OnClickListener() {
 				public void onClick(View v) {

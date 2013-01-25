@@ -51,6 +51,17 @@ import android.text.InputType;
 
 import java.util.ArrayList;
 
+/**
+ * Shows all recipes in a given category and allows the user to add / remove recipes to the category.
+ *
+ * @param util     Reference to the Utility singleton for making queries
+ * @param category The category that we are listing
+ * @param adapter  The load adapter that we use to get recipes to put in the list
+ * @param edit     Whether or not we are in edit mode
+ *
+ * @param ADD_RECIPE_DIALOG    Dialog ID to create a dialog for adding a recipe to this category
+ * @param DELETE_RECIPE_DIALOG Dialog ID to create a dialog for removing a recipe from this category
+ **/
 public class CategoryList extends Activity {
 
 	private Utility util;
@@ -72,19 +83,28 @@ public class CategoryList extends Activity {
 		util = UtilityImpl.singleton;
 	}
 
+	/**
+	 * Called when this activity is resuming with a new intent
+	 *
+	 * @param intent The new intent to use for setting up the activity
+	 **/
 	public void onNewIntent(Intent intent) {
 		category = util.getCategoryById(intent.getLongExtra("id", -1));
 
+		//{ Setup the recipe list
 		ListView lv = (ListView) findViewById(R.id.category_list);
 
 		createDynamicLoadAdapter();
 
 		adapter.setUpList(lv);
+		//}
 
+		// Setup the header
 		TextView label = (TextView) findViewById(R.id.category_label);
 		label.setText(category.getName());
 		AppData.getSingleton().useHeadingFont(label);
 
+		//{ Add recipe button
 		TextView addButton = (TextView) findViewById(R.id.add_button);
 
 		addButton.setOnClickListener(new OnClickListener() {
@@ -92,7 +112,9 @@ public class CategoryList extends Activity {
 				showDialog(ADD_RECIPE_DIALOG);
 			}
 		});
+		//}
 
+		//{ Done editing button
 		View doneButton = findViewById(R.id.done_button);
 
 		doneButton.setOnClickListener(new OnClickListener() {
@@ -100,17 +122,28 @@ public class CategoryList extends Activity {
 				setEditing(false);
 			}
 		});
+		//}
 
 		setEditing(false);
 	}
 
+	/**
+	 * Called when this activity is resuming execution.
+	 **/
     public void onResume() {
 		super.onResume();
 
+		// Ensure that we setup the view with the proper intent
 		onNewIntent(getIntent());
 	}
 
+	/**
+	 * Set the view to be in the proper edit mode
+	 *
+	 * @param editing Whether or not the view should be in edit mode
+	 **/
 	protected void setEditing(boolean editing) {
+		// The views that change when editing
 		View[] views = {findViewById(R.id.add_button), findViewById(R.id.done_button)};
 
 		if(editing) {
@@ -125,9 +158,17 @@ public class CategoryList extends Activity {
 		}
 
 		this.edit = editing;
+		// Notify so we refresh the UI
 		adapter.notifyDataSetChanged();
 	}
 
+	/**
+	 * Called when an existing dialog is about to be re-shown with new data
+	 *
+	 * @param id     The dialog id
+	 * @param dialog The dialog that is created for the given id
+	 * @param bundle Any data that is needed to set up the dialog before showing it
+	 **/
 	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
 
 		if(id == ADD_RECIPE_DIALOG) {
@@ -139,6 +180,7 @@ public class CategoryList extends Activity {
 			final int position = bundle.getInt("position", -1);
 			final Recipe recipe = adapter.getItem(position);
 
+			// The button listener has to be redone every time so that we can hook it up to the proper recipe
 			dialog.setEditHtml("Are you sure you want to remove <b>" + recipe.getName() + "</b> from this category?");
 			dialog.setOkListener(new OnClickListener() {
 				public void onClick(View v) {
@@ -149,22 +191,41 @@ public class CategoryList extends Activity {
 		}
 	}
 
+	/**
+	 * Called to create a dialog for the given dialog id
+	 *
+	 * @param id     The id for the dialog to create
+	 * @param bundle Any data required to set up the dialog
+	 **/
 	protected Dialog onCreateDialog(int id, Bundle bundle) {
 		Dialog dialog = null;
 
 		if(id == ADD_RECIPE_DIALOG) {
 			final EnterTextDialog etd = new EnterTextDialog(this, R.layout.enter_recipe_dialog);
 
+			// Holder for the id of a recipe selected from the autocomplete list.
+			// This is required because you cannot modify data from outside a closure from within the closure.
+			// You can, however, add a level of indirection and modify the value within an array.
 			final long[] idHolder = new long[1];
 			idHolder[0] = -1;
 
+			// Setup the properties for the recipe name field
 			etd.getEditView().setHint("Recipe Name");
 			etd.setEditText("");
 			etd.getEditView().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 			etd.getEditView().setSingleLine(true);
 
+			//{ Set up the name field autocomplete
 			ListAutoCompleteAdapter.Specifics<Recipe> sp = new ListAutoCompleteAdapter.Specifics<Recipe>() {
 
+				/**
+				 * Gets a row view for the given recipe.
+				 *
+				 * @param id The id of the recipe
+				 * @param r  The recipe that is being shown
+				 * @param v  The view to reuse if it isn't null
+				 * @param vg The group that the view is in
+				 **/
 				public View getView(int id, Recipe r, View v, ViewGroup vg) {
 					if(v == null) {
 						v = inflate(R.layout.autoitem);
@@ -173,45 +234,84 @@ public class CategoryList extends Activity {
 					TextView tv = (TextView) v.findViewById(R.id.child_name);
 					AppData.getSingleton().useTextFont(tv);
 
+					// Just show the recipe's name
 					tv.setText(r.getName());
 
 					return v;
 				}
 
+				/**
+				 * Returns the id for the given recipe
+				 *
+				 * @param item The recipe to get the id from
+				 **/
 				public long getItemId(Recipe item) {
 					return item.getId();
 				}
 
+				/**
+				 * Loads the top 5 recipe matches for the given text
+				 *
+				 * @param seq The text to search with
+				 **/
 				public List<Recipe> filter(CharSequence seq) {
 					return util.searchRecipes(seq.toString(), 5);
 				}
 
+				/**
+				 * Get a string representation of the given recipe.
+				 *
+				 * @param result The recipe to stringify
+				 *
+				 * @return The recipe's name
+				 **/
 				public String convertResultToString(Recipe result) {
 					return result.getName();
 				}
 
+				/**
+				 * Called when an item is clicked in the autocomplete list
+				 *
+				 * @param av       The adapter
+				 * @param v        The view that was clicked
+				 * @param position The position of the selected item in the list
+				 * @param id       The id of the selected recipe
+				 * @param item     The selected recipe
+				 **/
 				public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
+					// Set the selected id into the id holder so we can get at it from outside this closure.
 					idHolder[0] = id;
 				}
 
+				/**
+				 * Create a view from the given layoutId
+				 *
+				 * @param layoutId The id of the view to create
+				 **/
 				private View inflate(int layoutId) {
 					LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 					return vi.inflate(layoutId, null);
 				}
 			};
 
+			// Create an autocomplete adapter
 			final ListAutoCompleteAdapter<Recipe> acAdapter = new ListAutoCompleteAdapter<Recipe>(sp);
 
-
+			// Get the edit view out of the dialog and set the auto complete adapter that we just made
 			((AutoCompleteTextView) etd.getEditView()).setAdapter(acAdapter);
 
+			// Setup the onclick listener
 			((AutoCompleteTextView) etd.getEditView()).setOnItemClickListener(acAdapter.onClick);
+			//}
 
 			etd.setTitle("Add Recipe To Category");
 
+			//{ Setup the add button handler.
 			etd.setOkButtonText("Add");
 			etd.setOkListener(new OnClickListener() {
 				public void onClick(View v) {
+					// If an id has been set, attempt to retrieve a recipe with that id
+					// then add that recipe to the category and clear the adapter to reload it.
 					if(idHolder[0] >= 0) {
 						Recipe r = util.getRecipeById(idHolder[0]);
 
@@ -225,12 +325,14 @@ public class CategoryList extends Activity {
 					}
 				}
 			});
+			//}
 
 			dialog = etd;
 
 		} else if(id == DELETE_RECIPE_DIALOG) {
 			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
 
+			// Set the basic fields. The signal handlers are set up in the prepareDialog() method
 			etd.setTitle("Remove Recipe");
 
 			etd.setOkButtonText("Remove");
@@ -242,6 +344,13 @@ public class CategoryList extends Activity {
 		return dialog;
 	}
 
+	/**
+	 * Called to create the options menu for this activity
+	 *
+	 * @param menu The menu to add items to
+	 *
+	 * @return Whether the menu was created
+	 **/
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater mi = getMenuInflater();
 
@@ -250,22 +359,42 @@ public class CategoryList extends Activity {
 		return true;
 	}
 
+	/**
+	 * Called when an item in the options menu is selected
+	 *
+	 * @param item The item that was selected
+	 *
+	 * @return Whether the item selection was handled
+	 **/
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 
 		switch(id) {
+			// Toggle the edit state of this activity
 			case R.id.edit : {
 				setEditing(!edit);
 				return true;
 			}
 		}
 
+		// See if the super class can handle the item
 		return super.onOptionsItemSelected(item);
 	}
 
+	/**
+	 * Creates the dynamic loader for the recipe list
+	 **/
 	private void createDynamicLoadAdapter() {
 
 		DynamicLoadAdapter.Specifics<Recipe> sp = new DynamicLoadAdapter.Specifics<Recipe>() {
+			/**
+			 * Creates a row view for the given recipe
+			 *
+			 * @param position The position of the item in the list
+			 * @param r        The recipe to create a view for
+			 * @param v        The view to reuse or null
+			 * @param vg       The group that the view is a part of
+			 **/
 			public View getView(final int position, Recipe r, View v, ViewGroup vg) {
 				if(v == null) {
 					v = inflate(R.layout.category_item);
@@ -274,17 +403,24 @@ public class CategoryList extends Activity {
 				TextView tv = (TextView) v.findViewById(R.id.name_box);
 				AppData.getSingleton().useTextFont(tv);
 
+				// If the recipe is null, then we are at the end of the list and need to load more items.
 				if(r == null) {
 					tv.setText("Loading...");
+				// Otherwise list the recipe's name
 				} else {
 					tv.setText(r.getName());
 				}
 
+				// The edit button is not needed in this activity
 				v.findViewById(R.id.edit_button).setVisibility(View.GONE);
 
+				//{ Setup the delete button, used for removing the recipe from this category
 				View deleteButton = v.findViewById(R.id.delete_button);
 
 				if(edit) {
+					/**
+					 * When the delete button is clicked, show the delete recipe dialog.
+					 **/
 					deleteButton.setOnClickListener(new OnClickListener() {
 						public void onClick(View v) {
 							Bundle b = new Bundle();
@@ -299,19 +435,38 @@ public class CategoryList extends Activity {
 				} else {
 					deleteButton.setVisibility(View.GONE);
 				}
+				//}
 
 				return v;
 			}
 
+			/**
+			 * Get the id for the given recipe
+			 *
+			 * @param item The recipe to get the id for
+			 **/
 			public long getItemId(Recipe item) {
 				return item.getId();
 			}
 
+			/**
+			 * Retrieve all recipes in the category.
+			 *
+			 * @param offset ignored
+			 * @param max    ignored
+			 **/
 			public List<Recipe> filter(int offset, int max) {
 				List<Recipe> nextRecipes = category.getRecipes();
 				return nextRecipes;
 			}
 
+			/**
+			 * Stringify the given recipe
+			 *
+			 * @param result The recipe to get a string for
+			 *
+			 * @return The name of the recipe
+			 **/
 			public String convertResultToString(Recipe result) {
 				if(result == null) {
 					return "Null";
@@ -320,18 +475,34 @@ public class CategoryList extends Activity {
 				}
 			}
 
+			/**
+			 * Called when a recipe is clicked in the list.
+			 * Load the recipe that was clicked.
+			 *
+			 * @param av The adapter view
+			 * @param v  The view that was clicked
+			 * @param position The position of the item in the list
+			 * @param id       The id of the selected recipe
+			 * @param item     The selected recipe
+			 **/
 			public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
 				Intent intent = new Intent(CategoryList.this, RecipeTabs.class);
 				intent.putExtra("id", id);
 				startActivity(intent);
 			}
 
+			/**
+			 * Create a view for the given id
+			 *
+			 * @param layoutId The id of the view to create
+			 **/
 			private View inflate(int layoutId) {
 				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				return vi.inflate(layoutId, null);
 			}
 		};
 
-		adapter = new DynamicLoadAdapter<Recipe>(sp);
+		// Set the adapter for the class
+		this.adapter = new DynamicLoadAdapter<Recipe>(sp);
 	}
 }
