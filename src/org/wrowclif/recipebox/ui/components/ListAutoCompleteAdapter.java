@@ -17,10 +17,10 @@ public class ListAutoCompleteAdapter<T> extends BaseAdapter implements Filterabl
 
 	private List<T> data;
 	private ListFilter filter;
-	private Specifics specifics;
+	private Specifics<T> specifics;
 	public final OnItemClickListener onClick;
 
-	public ListAutoCompleteAdapter(Specifics sp) {
+	public ListAutoCompleteAdapter(Specifics<T> sp) {
 		super();
 		this.specifics = sp;
 		this.filter = new ListFilter();
@@ -93,16 +93,16 @@ public class ListAutoCompleteAdapter<T> extends BaseAdapter implements Filterabl
 		}
 	}
 
-	public interface Specifics<T> {
+	public interface Specifics<E> {
 
-		public View getView(int id, T item, View v, ViewGroup vg);
+		public View getView(int id, E item, View v, ViewGroup vg);
 
-		public long getItemId(T item);
+		public long getItemId(E item);
 
-		public List<T> filter(CharSequence seq);
+		public List<E> filter(CharSequence seq);
 
-		public String convertResultToString(T result);
+		public String convertResultToString(E result);
 
-		public void onItemClick(AdapterView<?> av, View v, int position, long id, T item);
+		public void onItemClick(AdapterView<?> av, View v, int position, long id, E item);
 	}
 }

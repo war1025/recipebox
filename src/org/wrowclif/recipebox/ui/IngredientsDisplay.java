@@ -70,7 +70,7 @@ public class IngredientsDisplay extends Activity {
 	private boolean edit;
 	private Recipe r;
 	private DynamicLoadAdapter<RecipeIngredient> adapter;
-	private ReorderableItemDecorator reorderDecorator;
+	private ReorderableItemDecorator<RecipeIngredient> reorderDecorator;
 	private RecipeMenus menus;
 
 	private static final int NEW_INGREDIENT_DIALOG = assignId();
@@ -100,7 +100,7 @@ public class IngredientsDisplay extends Activity {
 			}
 		};
 
-		reorderDecorator = new ReorderableItemDecorator(adapter, swapper);
+		reorderDecorator = new ReorderableItemDecorator<RecipeIngredient>(adapter, swapper);
 		//}
 
 		ListView lv = (ListView) findViewById(R.id.ingredient_list);

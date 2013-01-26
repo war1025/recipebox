@@ -81,7 +81,7 @@ public class InstructionsDisplay extends Activity {
 			}
 		};
 
-		reorderDecorator = new ReorderableItemDecorator(adapter, swapper);
+		reorderDecorator = new ReorderableItemDecorator<Instruction>(adapter, swapper);
 
 		ListView lv = (ListView) findViewById(R.id.instruction_list);
 		lv.setAdapter(adapter);
