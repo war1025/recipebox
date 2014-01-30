@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="org.wrowclif.recipebox"
-      android:versionCode="5"
-      android:versionName="1.11">
-    <uses-sdk android:minSdkVersion="10"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <application android:label="@string/app_name" android:icon="@drawable/recipe_box">
-        <activity android:name=".ui.Main"
-                  android:label="@string/app_name"
-                  android:icon="@drawable/recipe_box" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/rcpb" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="application/zip" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".ui.RecipeDisplay"/>
-        <activity android:name=".ui.IngredientsDisplay"/>
-        <activity android:name=".ui.InstructionsDisplay"/>
-        <activity android:name=".ui.RecipeTabs"
-					android:windowSoftInputMode="adjustPan" />
-		<activity android:name=".ui.Browse" />
-		<activity android:name=".ui.BrowseCategories" />
-		<activity android:name=".ui.CategoryList" />
-    </application>
+     package="org.wrowclif.recipebox2"
+     android:versionCode="6"
+     android:versionName="1.11">
+   <uses-sdk android:minSdkVersion="10"/>
+   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+   <application android:label="@string/app_name" android:icon="@drawable/recipe_box">
+      <activity android:name="org.wrowclif.recipebox.ui.Main"
+                android:label="@string/app_name"
+                android:icon="@drawable/recipe_box" >
+         <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+         </intent-filter>
+         <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:mimeType="text/rcpb" />
+         </intent-filter>
+         <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <data android:mimeType="application/zip" />
+         </intent-filter>
+      </activity>
+      <activity android:name="org.wrowclif.recipebox.ui.RecipeDisplay"/>
+      <activity android:name="org.wrowclif.recipebox.ui.IngredientsDisplay"/>
+      <activity android:name="org.wrowclif.recipebox.ui.InstructionsDisplay"/>
+      <activity android:name="org.wrowclif.recipebox.ui.RecipeTabs"
+                android:windowSoftInputMode="adjustPan" />
+      <activity android:name="org.wrowclif.recipebox.ui.Browse" />
+      <activity android:name="org.wrowclif.recipebox.ui.BrowseCategories" />
+      <activity android:name="org.wrowclif.recipebox.ui.CategoryList" />
+   </application>
 </manifest>

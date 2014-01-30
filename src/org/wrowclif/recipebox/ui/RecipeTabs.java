@@ -1,6 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
-import org.wrowclif.recipebox.R;
+import org.wrowclif.recipebox2.R;
 
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;

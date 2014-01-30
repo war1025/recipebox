@@ -3,7 +3,7 @@ package org.wrowclif.recipebox.ui.components;
 import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Recipe;
-import org.wrowclif.recipebox.R;
+import org.wrowclif.recipebox2.R;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 

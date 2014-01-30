@@ -1,6 +1,6 @@
 package org.wrowclif.recipebox.ui.components;
 
-import org.wrowclif.recipebox.R;
+import org.wrowclif.recipebox2.R;
 
 import android.view.View;
 import android.view.View.OnClickListener;
