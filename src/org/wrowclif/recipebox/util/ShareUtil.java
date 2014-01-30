@@ -20,93 +20,114 @@ import java.util.Scanner;
 
 public class ShareUtil {
 
-	private static final String LOG_TAG = "Recipebox Share Util";
+   private static final String LOG_TAG = "Recipebox Share Util";
 
-	public static void share(Context ctx, Recipe r) {
+   public static void share(Context ctx, Recipe r) {
 
-		Intent intent = new Intent(Intent.ACTION_SEND);
+      Intent intent = new Intent(Intent.ACTION_SEND);
 
-		Uri zipUri = ZipUtil.zipRecipes(ctx, r);
+      Uri zipUri = ZipUtil.zipRecipes(ctx, r);
 
-		String recipeText = toHumanReadable(r);
+      String recipeText = toHumanReadable(r);
 
-		intent.putExtra(Intent.EXTRA_SUBJECT, "Recipebox Recipe: " + r.getName());
-		intent.putExtra(Intent.EXTRA_TEXT, "A recipe for making " + r.getName() + " is attached.\n\n" + recipeText);
-		intent.setType("application/zip");
-		intent.putExtra(Intent.EXTRA_STREAM, zipUri);
+      intent.putExtra(Intent.EXTRA_SUBJECT, "Recipebox Recipe: " + r.getName());
+      intent.putExtra(Intent.EXTRA_TEXT, "A recipe for making " + r.getName() + " is attached.\n\n" + recipeText);
+      intent.setType("application/zip");
+      intent.putExtra(Intent.EXTRA_STREAM, zipUri);
 
-		if(intent != null) {
-			ctx.startActivity(Intent.createChooser(intent, "Share Recipe"));
-		}
-	}
+      if(intent != null) {
+         ctx.startActivity(Intent.createChooser(intent, "Share Recipe"));
+      }
+   }
 
-	public static void loadRecipe(Context ctx, Uri uri) {
-		Recipe[] recipes = null;
-		InputStream temp = null;
+   public static void export(Context ctx, Recipe... recipes) {
+      Intent intent = new Intent(Intent.ACTION_SEND);
 
-		try {
-			temp = ctx.getContentResolver().openInputStream(uri);
+      Uri zip_uri = ZipUtil.zipRecipes(ctx, recipes);
 
-			Scanner in = new Scanner(temp);
+      StringBuilder recipe_list_text = new StringBuilder();
+      for(Recipe recipe : recipes) {
+         recipe_list_text.append(toHumanReadable(recipe));
+         recipe_list_text.append("\n====================\n");
+      }
 
-			in.useDelimiter("\\A");
+      intent.putExtra(Intent.EXTRA_SUBJECT, "Recipebox Recipe Pack");
+      intent.putExtra(Intent.EXTRA_TEXT, recipe_list_text.toString());
+      intent.setType("application/zip");
+      intent.putExtra(Intent.EXTRA_STREAM, zip_uri);
 
-			recipes = JsonUtil.fromJson(in.next());
-		} catch(IOException e) {
-			Log.e(LOG_TAG, "Error loading recipe: " + e, e);
-		} finally {
-			if(temp != null) {
-				try {
-					temp.close();
-				} catch(IOException e) {
-				}
-			}
-		}
+      if(intent != null) {
+         ctx.startActivity(Intent.createChooser(intent, "Share Exported Recipes"));
+      }
+   }
 
-		if(recipes != null && recipes.length > 0) {
-			Intent intent = new Intent(ctx, RecipeTabs.class);
-			intent.putExtra("id", recipes[0].getId());
-			ctx.startActivity(intent);
-		}
-	}
+   public static void loadRecipe(Context ctx, Uri uri) {
+      Recipe[] recipes = null;
+      InputStream temp = null;
 
-	public static void loadZipRecipe(Context ctx, Uri uri) {
-		Recipe[] recipes = ZipUtil.unzipRecipes(ctx, uri);
+      try {
+         temp = ctx.getContentResolver().openInputStream(uri);
 
-		if(recipes != null && recipes.length > 0) {
-			Intent intent = new Intent(ctx, RecipeTabs.class);
-			intent.putExtra("id", recipes[0].getId());
-			ctx.startActivity(intent);
-		}
-	}
+         Scanner in = new Scanner(temp);
 
-	public static String toHumanReadable(Recipe r) {
-		StringBuilder out = new StringBuilder();
+         in.useDelimiter("\\A");
 
-		println(out, r.getName());
+         recipes = JsonUtil.fromJson(in.next());
+      } catch(IOException e) {
+         Log.e(LOG_TAG, "Error loading recipe: " + e, e);
+      } finally {
+         if(temp != null) {
+            try {
+               temp.close();
+            } catch(IOException e) {
+            }
+         }
+      }
 
-		println(out, "\n\n");
+      if(recipes != null && recipes.length > 0) {
+         Intent intent = new Intent(ctx, RecipeTabs.class);
+         intent.putExtra("id", recipes[0].getId());
+         ctx.startActivity(intent);
+      }
+   }
 
-		println(out, "Ingredients:");
+   public static void loadZipRecipe(Context ctx, Uri uri) {
+      Recipe[] recipes = ZipUtil.unzipRecipes(ctx, uri);
 
-		for(RecipeIngredient ri : r.getIngredients()) {
-			println(out, ri.getAmount() + " " + ri.getName());
-		}
+      if(recipes != null && recipes.length > 0) {
+         Intent intent = new Intent(ctx, RecipeTabs.class);
+         intent.putExtra("id", recipes[0].getId());
+         ctx.startActivity(intent);
+      }
+   }
 
-		println(out, "\n\n");
+   public static String toHumanReadable(Recipe r) {
+      StringBuilder out = new StringBuilder();
 
-		int i = 1;
-		for(Instruction in : r.getInstructions()) {
-			println(out, i + ". " + in.getText());
-			i++;
-		}
+      println(out, r.getName());
 
-		return out.toString();
+      println(out, "\n\n");
 
-	}
+      println(out, "Ingredients:");
 
-	private static void println(StringBuilder out, String str) {
-		out.append(str).append("\n");
-	}
+      for(RecipeIngredient ri : r.getIngredients()) {
+         println(out, ri.getAmount() + " " + ri.getName());
+      }
+
+      println(out, "\n\n");
+
+      int i = 1;
+      for(Instruction in : r.getInstructions()) {
+         println(out, i + ". " + in.getText());
+         i++;
+      }
+
+      return out.toString();
+
+   }
+
+   private static void println(StringBuilder out, String str) {
+      out.append(str).append("\n");
+   }
 
 }

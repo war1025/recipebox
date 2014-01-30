@@ -4,30 +4,32 @@ import java.util.List;
 
 public interface Utility {
 
-	public Recipe newRecipe(String name);
+   public Recipe newRecipe(String name);
 
-	public List<Recipe> searchRecipes(String search, int maxResults);
+   public List<Recipe> searchRecipes(String search, int maxResults);
 
-	public List<Recipe> getRecentlyViewedRecipes(int offset, int maxResults);
+   public List<Recipe> getRecentlyViewedRecipes(int offset, int maxResults);
 
-	public List<Recipe> getRecipesByName(int offset, int maxResults);
+   public List<Recipe> getRecipesByName(int offset, int maxResults);
 
-	public Recipe getRecipeById(long id);
+   public List<Recipe> getRecipesForIds(List<Long> recipeIds);
 
-	public Ingredient getIngredientByName(String name);
+   public Recipe getRecipeById(long id);
 
-	public Ingredient createOrRetrieveIngredient(String name);
+   public Ingredient getIngredientByName(String name);
 
-	public List<Ingredient> searchIngredients(String search, int maxResults);
+   public Ingredient createOrRetrieveIngredient(String name);
 
-	public List<Category> searchCategories(String search, int maxResults);
+   public List<Ingredient> searchIngredients(String search, int maxResults);
 
-	public List<Category> getCategoriesByName(int offset, int maxResults);
+   public List<Category> searchCategories(String search, int maxResults);
 
-	public Category getCategoryByName(String category);
+   public List<Category> getCategoriesByName(int offset, int maxResults);
 
-	public Category createOrRetrieveCategory(String category);
+   public Category getCategoryByName(String category);
 
-	public Category getCategoryById(long id);
+   public Category createOrRetrieveCategory(String category);
+
+   public Category getCategoryById(long id);
 
 }
