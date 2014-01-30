@@ -5,7 +5,7 @@ import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.RecipeIngredient;
 import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox.Instruction;
-import org.wrowclif.recipebox.R;
+import org.wrowclif.recipebox2.R;
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
 import org.wrowclif.recipebox.ui.components.EnterTextDialog;
