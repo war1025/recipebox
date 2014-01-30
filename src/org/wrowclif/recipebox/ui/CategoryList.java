@@ -11,6 +11,9 @@ import org.wrowclif.recipebox2.R;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
+import org.wrowclif.recipebox.ui.components.BaseActivity;
+import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
+import org.wrowclif.recipebox.ui.components.MenuManager.MenuHandler;
 import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.RecipePickDialog;
 import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
@@ -19,41 +22,25 @@ import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
 import java.util.List;
+import java.util.ArrayList;
 
-import android.app.Activity;
 import android.app.Dialog;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
-import android.widget.Filter;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.View.OnClickListener;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.text.TextWatcher;
-import android.text.Editable;
-import android.text.InputType;
-
-import java.util.ArrayList;
+import android.widget.TextView;
 
 /**
- * Shows all recipes in a given category and allows the user to add / remove recipes to the category.
+ * Shows all recipes in a given category and allows the user to add / remove
+ * recipes to the category.
  *
  * @param util     Reference to the Utility singleton for making queries
  * @param category The category that we are listing
@@ -63,7 +50,9 @@ import java.util.ArrayList;
  * @param ADD_RECIPE_DIALOG    Dialog ID to create a dialog for adding a recipe to this category
  * @param DELETE_RECIPE_DIALOG Dialog ID to create a dialog for removing a recipe from this category
  **/
-public class CategoryList extends Activity {
+public class CategoryList extends BaseActivity {
+
+   private static final String LOG_TAG = "Recipebox CategoryList";
 
    private Utility util;
    private Category category;
@@ -73,15 +62,25 @@ public class CategoryList extends Activity {
    private static final int ADD_RECIPE_DIALOG = assignId();
    private static final int DELETE_RECIPE_DIALOG = assignId();
 
+   public int getViewId() {
+      return R.layout.categories;
+   }
+
+   public int getMenuId() {
+      return R.menu.category_menu;
+   }
+
    /** Called when the activity is first created. */
    @Override
    public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
-      setContentView(R.layout.categories);
 
       Actions.CATEGORY.showNotifications();
 
       util = UtilityImpl.singleton;
+
+      this.setupDialogHandlers();
+      this.setupMenuHandlers();
    }
 
    /**
@@ -161,128 +160,6 @@ public class CategoryList extends Activity {
       this.edit = editing;
       // Notify so we refresh the UI
       adapter.notifyDataSetChanged();
-   }
-
-   /**
-    * Called when an existing dialog is about to be re-shown with new data
-    *
-    * @param id     The dialog id
-    * @param dialog The dialog that is created for the given id
-    * @param bundle Any data that is needed to set up the dialog before showing it
-    **/
-   protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
-
-      if(id == ADD_RECIPE_DIALOG) {
-         EnterTextDialog dialog = (EnterTextDialog) d;
-         dialog.setEditText("");
-      } else if(id == DELETE_RECIPE_DIALOG) {
-         EnterTextDialog dialog = (EnterTextDialog) d;
-
-         final int position = bundle.getInt("position", -1);
-         final Recipe recipe = adapter.getItem(position);
-
-         // The button listener has to be redone every time so that we can hook it up to the proper recipe
-         dialog.setEditHtml("Are you sure you want to remove <b>" + recipe.getName() + "</b> from this category?");
-         dialog.setOkListener(new OnClickListener() {
-            public void onClick(View v) {
-               category.removeRecipe(recipe);
-               adapter.remove(position);
-            }
-         });
-      }
-   }
-
-   /**
-    * Called to create a dialog for the given dialog id
-    *
-    * @param id     The id for the dialog to create
-    * @param bundle Any data required to set up the dialog
-    **/
-   protected Dialog onCreateDialog(int id, Bundle bundle) {
-      Dialog dialog = null;
-
-      if(id == ADD_RECIPE_DIALOG) {
-         final RecipePickDialog pickDialog = new RecipePickDialog(this);
-
-         pickDialog.setTitle("Add Recipe To Category");
-
-         //{ Setup the add button handler.
-         pickDialog.setOkListener(new OnClickListener() {
-            public void onClick(View v) {
-               // If an id has been set, attempt to retrieve a recipe with that id
-               // then add that recipe to the category and clear the adapter to reload it.
-               long recipeId = pickDialog.getSelectedRecipeId();
-               if(recipeId >= 0) {
-                  Recipe r = util.getRecipeById(recipeId);
-
-                  if(r != null) {
-                     category.addRecipe(r);
-
-                     pickDialog.clearSelectedRecipeId();
-
-                     adapter.clear();
-                  }
-               }
-            }
-         });
-         //}
-
-         dialog = pickDialog;
-
-      } else if(id == DELETE_RECIPE_DIALOG) {
-         EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
-
-         // Set the basic fields. The signal handlers are set up in the prepareDialog() method
-         etd.setTitle("Remove Recipe");
-
-         etd.setOkButtonText("Remove");
-
-         dialog = etd;
-      }
-
-
-      return dialog;
-   }
-
-   /**
-    * Called to create the options menu for this activity
-    *
-    * @param menu The menu to add items to
-    *
-    * @return Whether the menu was created
-    **/
-   public boolean onCreateOptionsMenu(Menu menu) {
-      MenuInflater mi = getMenuInflater();
-
-      mi.inflate(R.menu.category_menu, menu);
-
-      return true;
-   }
-
-   /**
-    * Called when an item in the options menu is selected
-    *
-    * @param item The item that was selected
-    *
-    * @return Whether the item selection was handled
-    **/
-   public boolean onOptionsItemSelected(MenuItem item) {
-      int id = item.getItemId();
-
-      switch(id) {
-         // Toggle the edit state of this activity
-         case R.id.edit : {
-            setEditing(!edit);
-            return true;
-         }
-         case R.id.export : {
-            Intent intent = new Intent(CategoryList.this, Export.class);
-            startActivity(intent);
-         }
-      }
-
-      // See if the super class can handle the item
-      return super.onOptionsItemSelected(item);
    }
 
    /**
@@ -408,5 +285,113 @@ public class CategoryList extends Activity {
 
       // Set the adapter for the class
       this.adapter = new DynamicLoadAdapter<Recipe>(sp);
+   }
+
+   private void setupDialogHandlers() {
+
+      //{ Add handler
+      DialogHandler add_handler = new DialogHandler() {
+         public Dialog createDialog(Bundle bundle) {
+            final RecipePickDialog pick_dialog = new RecipePickDialog(CategoryList.this);
+
+            pick_dialog.setTitle("Add Recipe To Category");
+
+            //{ Setup the add button handler.
+            pick_dialog.setOkListener(new OnClickListener() {
+               public void onClick(View v) {
+                  // If an id has been set, attempt to retrieve a recipe with that id
+                  // then add that recipe to the category and clear the adapter to reload it.
+                  long recipe_id = pick_dialog.getSelectedRecipeId();
+                  if(recipe_id >= 0) {
+                     Recipe r = util.getRecipeById(recipe_id);
+
+                     if(r != null) {
+                        category.addRecipe(r);
+
+                        pick_dialog.clearSelectedRecipeId();
+
+                        adapter.clear();
+                     }
+                  }
+               }
+            });
+            //}
+
+            return pick_dialog;
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            EnterTextDialog dialog = (EnterTextDialog) d;
+            dialog.setEditText("");
+         }
+      };
+      this.dialogManager.registerHandler(ADD_RECIPE_DIALOG, add_handler);
+      //}
+
+      //{ Remove handler
+      DialogHandler remove_handler = new DialogHandler() {
+         public Dialog createDialog(Bundle bundle) {
+            EnterTextDialog etd = new EnterTextDialog(CategoryList.this,
+                                                      R.layout.show_text_dialog);
+
+            // Set the basic fields.
+            // The signal handlers are set up in the prepareDialog() method
+            etd.setTitle("Remove Recipe");
+
+            etd.setOkButtonText("Remove");
+
+            return etd;
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            EnterTextDialog dialog = (EnterTextDialog) d;
+
+            final int position = bundle.getInt("position", -1);
+            final Recipe recipe = adapter.getItem(position);
+
+            // The button listener has to be redone every time so that
+            // we can hook it up to the proper recipe
+            dialog.setEditHtml("Are you sure you want to remove <b>" +
+                               recipe.getName() + "</b> from this category?");
+            dialog.setOkListener(new OnClickListener() {
+               public void onClick(View v) {
+                  category.removeRecipe(recipe);
+                  adapter.remove(position);
+               }
+            });
+         }
+      };
+      this.dialogManager.registerHandler(DELETE_RECIPE_DIALOG, remove_handler);
+      //}
+   }
+
+   public void setupMenuHandlers() {
+
+      MenuHandler edit_handler = new MenuHandler() {
+         public void itemSelected(MenuItem item) {
+            setEditing(!edit);
+         }
+      };
+      this.menuManager.registerHandler(R.id.edit, edit_handler);
+
+      MenuHandler export_handler = new MenuHandler() {
+         public void itemSelected(MenuItem item) {
+            // Create the Export intent
+            Intent intent = new Intent(CategoryList.this, Export.class);
+
+            //{ Add all items in the category to the initial export list
+            List<Recipe> recipes = category.getRecipes();
+            long[] recipe_ids = new long[recipes.size()];
+            for(int i = 0; i < recipe_ids.length; i++) {
+               recipe_ids[i] = recipes.get(i).getId();
+            }
+            intent.putExtra("recipeIds", recipe_ids);
+            //}
+
+            startActivity(intent);
+         }
+      };
+      this.menuManager.registerHandler(R.id.export, export_handler);
+
    }
 }

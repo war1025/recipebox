@@ -13,6 +13,8 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 
 import org.wrowclif.recipebox.util.ShareUtil;
 
+import org.wrowclif.recipebox.ui.components.BaseActivity;
+import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
 import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.RecipePickDialog;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
@@ -22,6 +24,7 @@ import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,7 +38,7 @@ import android.widget.TextView;
 /**
  * Builds a list of recipies to export as a single bundle.
  **/
-public class Export extends Activity {
+public class Export extends BaseActivity {
 
    private static final String LOG_TAG = "Recipebox Export";
 
@@ -44,13 +47,16 @@ public class Export extends Activity {
    private List<Long> recipeIds;
 
    private static final int ADD_RECIPE_DIALOG = assignId();
-   private static final int DELETE_RECIPE_DIALOG = assignId();
+   private static final int REMOVE_RECIPE_DIALOG = assignId();
+
+   protected int getViewId() {
+      return R.layout.categories;
+   }
 
    @Override
    public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
 
-      setContentView(R.layout.categories);
       Actions.EXPORT.showNotifications();
 
       util = UtilityImpl.singleton;
@@ -90,6 +96,17 @@ public class Export extends Activity {
       //}
 
       recipeIds = new ArrayList<Long>();
+
+      Intent intent = this.getIntent();
+      long[] starting_ids = intent.getLongArrayExtra("recipeIds");
+
+      if(starting_ids != null) {
+         for(long recipe_id : starting_ids) {
+            recipeIds.add(recipe_id);
+         }
+      }
+
+      this.setupDialogHandlers();
     }
 
    /**
@@ -99,88 +116,6 @@ public class Export extends Activity {
       super.onResume();
       // Clear the recipe list so it refreshes
       recipeListAdapter.clear();
-   }
-
-   /**
-    * Called to create a dialog for the given dialog id
-    *
-    * @param id     The id for the dialog to create
-    * @param bundle Any data required to set up the dialog
-    **/
-   protected Dialog onCreateDialog(int id, Bundle bundle) {
-      Dialog dialog = null;
-
-      if(id == ADD_RECIPE_DIALOG) {
-         final RecipePickDialog pickDialog = new RecipePickDialog(this);
-
-         pickDialog.setTitle("Add Recipe To Export");
-
-         //{ Setup the add button handler.
-         pickDialog.setOkListener(new OnClickListener() {
-            public void onClick(View v) {
-               // If an id has been set, attempt to retrieve a recipe with that id
-               // then add that recipe to the category and clear the adapter to reload it.
-               long recipeId = pickDialog.getSelectedRecipeId();
-               if(recipeId >= 0) {
-                  Recipe r = util.getRecipeById(recipeId);
-
-                  if(r != null) {
-                     Export.this.recipeIds.add(recipeId);
-
-                     pickDialog.clearSelectedRecipeId();
-
-                     Export.this.recipeListAdapter.clear();
-                  }
-               }
-            }
-         });
-         //}
-
-         dialog = pickDialog;
-
-      } else if(id == DELETE_RECIPE_DIALOG) {
-         EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
-
-         // Set the basic fields. The signal handlers are set up in the prepareDialog() method
-         etd.setTitle("Remove Recipe");
-
-         etd.setOkButtonText("Remove");
-
-         dialog = etd;
-      }
-
-
-      return dialog;
-   }
-
-   /**
-    * Called when an existing dialog is about to be re-shown with new data
-    *
-    * @param id     The dialog id
-    * @param dialog The dialog that is created for the given id
-    * @param bundle Any data that is needed to set up the dialog before showing it
-    **/
-   protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
-
-      if(id == ADD_RECIPE_DIALOG) {
-         EnterTextDialog dialog = (EnterTextDialog) d;
-         dialog.setEditText("");
-      } else if(id == DELETE_RECIPE_DIALOG) {
-         EnterTextDialog dialog = (EnterTextDialog) d;
-
-         final int position = bundle.getInt("position", -1);
-         final Recipe recipe = Export.this.recipeListAdapter.getItem(position);
-
-         // The button listener has to be redone every time so that we can hook it up to the proper recipe
-         dialog.setEditHtml("Are you sure you want to remove <b>" +
-                            recipe.getName() + "</b> from the recipes being exported?");
-         dialog.setOkListener(new OnClickListener() {
-            public void onClick(View v) {
-               Export.this.recipeIds.remove(recipe.getId());
-               Export.this.recipeListAdapter.remove(position);
-            }
-         });
-      }
    }
 
    /**
@@ -229,7 +164,7 @@ public class Export extends Activity {
 
                   b.putInt("position", position);
 
-                  showDialog(DELETE_RECIPE_DIALOG, b);
+                  showDialog(REMOVE_RECIPE_DIALOG, b);
                }
             });
             //}
@@ -297,5 +232,81 @@ public class Export extends Activity {
       };
 
       recipeListAdapter = new DynamicLoadAdapter<Recipe>(sp);
+   }
+
+   private void setupDialogHandlers() {
+
+      //{ Add handler
+      DialogHandler add_handler = new DialogHandler() {
+         public Dialog createDialog(Bundle bundle) {
+            final RecipePickDialog pick_dialog = new RecipePickDialog(Export.this);
+
+            pick_dialog.setTitle("Add Recipe To Export");
+
+            //{ Setup the add button handler.
+            pick_dialog.setOkListener(new OnClickListener() {
+               public void onClick(View v) {
+                  // If an id has been set, attempt to retrieve a recipe with that id
+                  // then add that recipe to the category and clear the adapter to reload it.
+                  long recipe_id = pick_dialog.getSelectedRecipeId();
+                  if(recipe_id >= 0) {
+                     Recipe r = util.getRecipeById(recipe_id);
+
+                     if(r != null) {
+                        Export.this.recipeIds.add(recipe_id);
+
+                        pick_dialog.clearSelectedRecipeId();
+
+                        Export.this.recipeListAdapter.clear();
+                     }
+                  }
+               }
+            });
+            //}
+
+            return pick_dialog;
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            EnterTextDialog dialog = (EnterTextDialog) d;
+            dialog.setEditText("");
+         }
+      };
+      this.dialogManager.registerHandler(ADD_RECIPE_DIALOG, add_handler);
+      //}
+
+      //{ Remove handler
+      DialogHandler remove_handler = new DialogHandler() {
+         public Dialog createDialog(Bundle bundle) {
+            EnterTextDialog etd = new EnterTextDialog(Export.this, R.layout.show_text_dialog);
+
+            // Set the basic fields. The signal handlers are set up in the prepareDialog() method
+            etd.setTitle("Remove Recipe");
+
+            etd.setOkButtonText("Remove");
+
+            return etd;
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            EnterTextDialog dialog = (EnterTextDialog) d;
+
+            final int position = bundle.getInt("position", -1);
+            final Recipe recipe = Export.this.recipeListAdapter.getItem(position);
+
+            // The button listener has to be redone every time so that
+            // we can hook it up to the proper recipe
+            dialog.setEditHtml("Are you sure you want to remove <b>" +
+                               recipe.getName() + "</b> from the recipes being exported?");
+            dialog.setOkListener(new OnClickListener() {
+               public void onClick(View v) {
+                  Export.this.recipeIds.remove(recipe.getId());
+                  Export.this.recipeListAdapter.remove(position);
+               }
+            });
+         }
+      };
+      this.dialogManager.registerHandler(REMOVE_RECIPE_DIALOG, remove_handler);
+      //}
    }
 }
