@@ -10,6 +10,7 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 
 import org.wrowclif.recipebox.ui.components.BaseActivity;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
+import org.wrowclif.recipebox.ui.components.MenuManager.MenuHandler;
 
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
@@ -20,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -41,6 +43,10 @@ public class Browse extends BaseActivity {
       return R.layout.browse;
    }
 
+   public int getMenuId() {
+      return R.menu.browse_menu;
+   }
+
    /** Called when the activity is first created. */
    @Override
    public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +63,8 @@ public class Browse extends BaseActivity {
       createDynamicLoadAdapter();
 
       recipeListAdapter.setUpList(lv);
+
+      setupMenuHandlers();
     }
 
    /**
@@ -171,5 +179,16 @@ public class Browse extends BaseActivity {
       };
 
       recipeListAdapter = new DynamicLoadAdapter<Recipe>(sp);
+   }
+
+   private void setupMenuHandlers() {
+      MenuHandler export_handler = new MenuHandler() {
+         public void itemSelected(MenuItem item) {
+            // Create the Export intent
+            Intent intent = new Intent(Browse.this, Export.class);
+            startActivity(intent);
+         }
+      };
+      this.menuManager.registerHandler(R.id.export, export_handler);
    }
 }
