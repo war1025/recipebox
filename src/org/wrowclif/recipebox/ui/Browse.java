@@ -7,26 +7,32 @@ import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox2.R;
 
 import org.wrowclif.recipebox.impl.UtilityImpl;
+import org.wrowclif.recipebox.util.BackupUtil;
 
 import org.wrowclif.recipebox.ui.components.BaseActivity;
-import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
+import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
 import org.wrowclif.recipebox.ui.components.MenuManager.MenuHandler;
+import org.wrowclif.recipebox.ui.components.EnterTextDialog;
+import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
 import java.util.List;
 import java.util.ArrayList;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Allows the user to browse through all recipes in the system, sorted alphabetically
@@ -38,6 +44,8 @@ public class Browse extends BaseActivity {
 
    private Utility util;
    private DynamicLoadAdapter<Recipe> recipeListAdapter;
+
+   private static final int BACKUP_DB_DIALOG = assignId();
 
    public int getViewId() {
       return R.layout.browse;
@@ -64,6 +72,7 @@ public class Browse extends BaseActivity {
 
       recipeListAdapter.setUpList(lv);
 
+      setupDialogHandlers();
       setupMenuHandlers();
     }
 
@@ -181,6 +190,44 @@ public class Browse extends BaseActivity {
       recipeListAdapter = new DynamicLoadAdapter<Recipe>(sp);
    }
 
+   private void setupDialogHandlers() {
+
+      //{ Add handler
+      DialogHandler backup_handler = new DialogHandler() {
+         public Dialog createDialog(Bundle bundle) {
+            final EnterTextDialog backup_dialog = new EnterTextDialog(Browse.this);
+
+            backup_dialog.setTitle("Create Backup");
+            backup_dialog.setOkButtonText("Backup");
+
+            //{ Setup the add button handler.
+            backup_dialog.setOkListener(new OnClickListener() {
+               public void onClick(View v) {
+                  String backup_name = backup_dialog.getEditText();
+                  boolean success = BackupUtil.createBackup(backup_name);
+                  String msg = "";
+                  if(success) {
+                     msg = "Backup saved to external storage";
+                  } else {
+                     msg = "Could not create backup";
+                  }
+                  Toast.makeText(Browse.this, msg, Toast.LENGTH_LONG).show();
+               }
+            });
+            //}
+
+            return backup_dialog;
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            EnterTextDialog dialog = (EnterTextDialog) d;
+            dialog.setEditText("");
+         }
+      };
+      this.dialogManager.registerHandler(BACKUP_DB_DIALOG, backup_handler);
+      //}
+   }
+
    private void setupMenuHandlers() {
       MenuHandler export_handler = new MenuHandler() {
          public void itemSelected(MenuItem item) {
@@ -190,5 +237,12 @@ public class Browse extends BaseActivity {
          }
       };
       this.menuManager.registerHandler(R.id.export, export_handler);
+
+      MenuHandler backup_handler = new MenuHandler() {
+         public void itemSelected(MenuItem item) {
+            showDialog(BACKUP_DB_DIALOG);
+         }
+      };
+      this.menuManager.registerHandler(R.id.backup, backup_handler);
    }
 }
