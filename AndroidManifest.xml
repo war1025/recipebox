@@ -33,5 +33,6 @@
       <activity android:name="org.wrowclif.recipebox.ui.BrowseCategories" />
       <activity android:name="org.wrowclif.recipebox.ui.CategoryList" />
       <activity android:name="org.wrowclif.recipebox.ui.Export" />
+      <activity android:name="org.wrowclif.recipebox.ui.Backup" />
    </application>
 </manifest>
