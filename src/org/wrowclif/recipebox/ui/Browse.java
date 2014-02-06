@@ -190,5 +190,14 @@ public class Browse extends BaseActivity {
          }
       };
       this.menuManager.registerHandler(R.id.export, export_handler);
+
+      MenuHandler backup_handler = new MenuHandler() {
+         public void itemSelected(MenuItem item) {
+            // Create the Export intent
+            Intent intent = new Intent(Browse.this, Backup.class);
+            startActivity(intent);
+         }
+      };
+      this.menuManager.registerHandler(R.id.backup, backup_handler);
    }
 }

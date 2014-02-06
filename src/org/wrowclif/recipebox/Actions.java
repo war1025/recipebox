@@ -60,7 +60,9 @@ public enum Actions {
 
    IMAGE_SHOWN("Tap the image to view it full size"),
 
-   EXPORT("Add recipes to export in a single bundle");
+   EXPORT("Add recipes to export in a single bundle"),
+
+   BACKUP("Create and manage restore points which are saved on your SD card.");
 
    private boolean alreadyShown;
    private String[] msgs;
