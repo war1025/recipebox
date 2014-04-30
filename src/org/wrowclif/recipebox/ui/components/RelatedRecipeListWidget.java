@@ -12,6 +12,8 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 
 import org.wrowclif.recipebox.ui.RecipeTabs;
 
+import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
+
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
 import android.app.Activity;
@@ -28,130 +30,132 @@ import android.widget.TextView;
 
 public class RelatedRecipeListWidget {
 
-	private static final int REMOVE_RELATED_RECIPE_DIALOG = assignId();
-	private static final int ADD_RELATED_RECIPE_DIALOG = assignId();
+   private static final int REMOVE_RELATED_RECIPE_DIALOG = assignId();
+   private static final int ADD_RELATED_RECIPE_DIALOG    = assignId();
 
-	private Recipe recipe;
-	private Utility util;
-	private Activity context;
-	private View listWidget;
-	private Button addButton;
-	private ViewGroup recipes;
-	private RelatedRecipeDialog relatedDialog;
-	private boolean editing;
+   private Recipe recipe;
+   private Utility util;
+   private Activity context;
+   private View listWidget;
+   private Button addButton;
+   private ViewGroup recipes;
+   private RelatedRecipeDialog relatedDialog;
+   private boolean editing;
 
-	public RelatedRecipeListWidget(Recipe recipe, Activity context) {
-		this.recipe = recipe;
-		this.context = context;
-		this.listWidget = getLayoutInflater().inflate(R.layout.list_widget, null);
-		this.recipes = (ViewGroup) listWidget.findViewById(R.id.category_list);
-		this.editing = false;
-		this.util = UtilityImpl.singleton;
+   public RelatedRecipeListWidget(Recipe recipe, Activity context) {
+      this.recipe = recipe;
+      this.context = context;
+      this.listWidget = getLayoutInflater().inflate(R.layout.list_widget, null);
+      this.recipes = (ViewGroup) listWidget.findViewById(R.id.category_list);
+      this.editing = false;
+      this.util = UtilityImpl.singleton;
 
-		TextView title = (TextView) listWidget.findViewById(R.id.category_label);
-		title.setText("Related Recipes");
-		AppData.getSingleton().useHeadingFont(title);
+      TextView title = (TextView) listWidget.findViewById(R.id.category_label);
+      title.setText("Related Recipes");
+      AppData.getSingleton().useHeadingFont(title);
 
-		this.addButton = (Button) listWidget.findViewById(R.id.category_button);
+      this.addButton = (Button) listWidget.findViewById(R.id.category_button);
 
-		addButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Actions.RECIPE_ADD_RELATED.showNotifications();
-				RelatedRecipeListWidget.this.context.showDialog(ADD_RELATED_RECIPE_DIALOG);
-			}
-		});
-	}
+      addButton.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Actions.RECIPE_ADD_RELATED.showNotifications();
+            RelatedRecipeListWidget.this.context.showDialog(ADD_RELATED_RECIPE_DIALOG);
+         }
+      });
+   }
 
-	public View getView() {
-		refresh();
-		return listWidget;
-	}
+   public View getView() {
+      refresh();
+      return listWidget;
+   }
 
-	public void refresh() {
-		recipes.removeAllViews();
-		for(Suggestion s : recipe.getSuggestedWith()) {
-			recipes.addView(createRecipeEntry(s));
-		}
-		recipes.invalidate();
-	}
+   public void refresh() {
+      recipes.removeAllViews();
+      for(Suggestion s : recipe.getSuggestedWith()) {
+         recipes.addView(createRecipeEntry(s));
+      }
+      recipes.invalidate();
+   }
 
-	protected View createRecipeEntry(Suggestion s) {
+   protected View createRecipeEntry(Suggestion s) {
 
-		final Recipe suggested = s.getSuggestedRecipe();
-		final long id = suggested.getId();
+      final Recipe suggested = s.getSuggestedRecipe();
+      final long id = suggested.getId();
 
-		View v = getLayoutInflater().inflate(R.layout.list_widget_item, null);
-		TextView ctv = (TextView) v.findViewById(R.id.name_box);
-		AppData.getSingleton().useTextFont(ctv);
-		ctv.setText(suggested.getName());
+      View v = getLayoutInflater().inflate(R.layout.list_widget_item, null);
+      TextView ctv = (TextView) v.findViewById(R.id.name_box);
+      AppData.getSingleton().useTextFont(ctv);
+      ctv.setText(suggested.getName());
 
-		TextView idBox = (TextView) v.findViewById(R.id.edit_button);
-		idBox.setText(id + "");
-		idBox.setVisibility(View.GONE);
+      TextView idBox = (TextView) v.findViewById(R.id.edit_button);
+      idBox.setText(id + "");
+      idBox.setVisibility(View.GONE);
 
-		v.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Intent i = new Intent(context, RecipeTabs.class);
-				i.putExtra("id", id);
-				context.startActivity(i);
-			}
-		});
+      v.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Intent i = new Intent(context, RecipeTabs.class);
+            i.putExtra("id", id);
+            context.startActivity(i);
+         }
+      });
 
-		View deleteButton = v.findViewById(R.id.delete_button);
-		deleteButton.setVisibility(View.VISIBLE);
+      View deleteButton = v.findViewById(R.id.delete_button);
+      deleteButton.setVisibility(View.VISIBLE);
 
-		deleteButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Bundle bundle = new Bundle();
+      deleteButton.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Bundle bundle = new Bundle();
 
-				bundle.putLong("id", id);
-				context.showDialog(REMOVE_RELATED_RECIPE_DIALOG, bundle);
-			}
-		});
+            bundle.putLong("id", id);
+            context.showDialog(REMOVE_RELATED_RECIPE_DIALOG, bundle);
+         }
+      });
 
-		return v;
-	}
+      return v;
+   }
 
-	public void setEditing(boolean editing) {
-		this.editing = editing;
-		if(editing) {
-			listWidget.setVisibility(View.VISIBLE);
-		} else if(recipes.getChildCount() == 0) {
-			listWidget.setVisibility(View.GONE);
-		}
-		for(int i = 0; i < recipes.getChildCount(); i++) {
-			View child = recipes.getChildAt(i);
-			View editGroup = child.findViewById(R.id.edit_group);
-			editGroup.setVisibility((editing) ? View.VISIBLE : View.GONE);
-		}
-		addButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
-	}
+   public void setEditing(boolean editing) {
+      this.editing = editing;
+      if(editing) {
+         listWidget.setVisibility(View.VISIBLE);
+      } else if(recipes.getChildCount() == 0) {
+         listWidget.setVisibility(View.GONE);
+      }
+      for(int i = 0; i < recipes.getChildCount(); i++) {
+         View child = recipes.getChildAt(i);
+         View editGroup = child.findViewById(R.id.edit_group);
+         editGroup.setVisibility((editing) ? View.VISIBLE : View.GONE);
+      }
+      addButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
+   }
 
-	public Dialog createDialog(int id) {
-		Dialog retDialog = null;
-		if((id == ADD_RELATED_RECIPE_DIALOG) || (id == REMOVE_RELATED_RECIPE_DIALOG)) {
-			if(relatedDialog == null) {
-				relatedDialog = new RelatedRecipeDialog(context, recipe, this);
-			}
-			retDialog = relatedDialog;
-		}
-		return retDialog;
-	}
+   public void setupDialogHandlers(DialogManager dialogManager) {
 
-	public boolean prepareDialog(int id, Dialog dialog, Bundle bundle) {
-		boolean handled = false;
-		if(id == ADD_RELATED_RECIPE_DIALOG) {
-			((RelatedRecipeDialog) dialog).prepareNew();
-			handled = true;
-		} else if(id == REMOVE_RELATED_RECIPE_DIALOG) {
-			long rid = bundle.getLong("id", -1);
-			((RelatedRecipeDialog) dialog).prepareDelete(util.getRecipeById(rid));
-			handled = true;
-		}
-		return handled;
-	}
+      dialogManager.registerHandler(ADD_RELATED_RECIPE_DIALOG, new DialogHandler() {
 
-	protected LayoutInflater getLayoutInflater() {
-		return (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	}
+         public Dialog createDialog(Bundle bundle) {
+            return new RelatedRecipeDialog(context, recipe, RelatedRecipeListWidget.this);
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            ((RelatedRecipeDialog) d).prepareNew();
+         }
+      });
+
+      dialogManager.registerHandler(REMOVE_RELATED_RECIPE_DIALOG, new DialogHandler() {
+
+         public Dialog createDialog(Bundle bundle) {
+            return new RelatedRecipeDialog(context, recipe, RelatedRecipeListWidget.this);
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            long rid = bundle.getLong("id", -1);
+            ((RelatedRecipeDialog) d).prepareDelete(util.getRecipeById(rid));
+         }
+      });
+   }
+
+   protected LayoutInflater getLayoutInflater() {
+      return (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+   }
 }

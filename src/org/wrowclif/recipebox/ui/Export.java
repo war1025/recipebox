@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.wrowclif.recipebox.Actions;
-import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox2.R;
@@ -67,8 +66,8 @@ public class Export extends BaseActivity {
 
       recipeListAdapter.setUpList(lv);
 
+      this.useHeadingFont(R.id.category_label);
       TextView label = (TextView) findViewById(R.id.category_label);
-      AppData.getSingleton().useHeadingFont(label);
       label.setText("Export");
 
       //{ Add recipe button
@@ -138,8 +137,8 @@ public class Export extends BaseActivity {
                v = inflate(R.layout.category_item);
             }
 
+            Export.this.useTextFont(v, R.id.name_box);
             TextView tv = (TextView) v.findViewById(R.id.name_box);
-            AppData.getSingleton().useTextFont(tv);
 
             // If the recipe is null, then we are at the end of the list and need to load more items.
             if(r == null) {

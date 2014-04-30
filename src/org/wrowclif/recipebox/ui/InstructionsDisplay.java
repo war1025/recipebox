@@ -1,11 +1,12 @@
 package org.wrowclif.recipebox.ui;
 
 import org.wrowclif.recipebox.Actions;
-import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox2.R;
 
+import org.wrowclif.recipebox.ui.components.BaseActivity;
+import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
 import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.RecipeMenus;
 import org.wrowclif.recipebox.ui.components.RecipeMenus.EditSwitcher;
@@ -13,17 +14,11 @@ import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 import org.wrowclif.recipebox.ui.components.ReorderableItemDecorator;
 import org.wrowclif.recipebox.ui.components.ReorderableItemDecorator.ItemSwap;
 
-import org.wrowclif.recipebox.impl.UtilityImpl;
-
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
 import java.util.List;
 
-import android.app.Activity;
 import android.app.Dialog;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -49,294 +44,290 @@ import android.text.InputType;
 
 import java.util.ArrayList;
 
-public class InstructionsDisplay extends Activity {
+public class InstructionsDisplay extends BaseActivity {
 
-	private boolean edit;
-	private Recipe r;
-	private DynamicLoadAdapter<Instruction> adapter;
-	private ReorderableItemDecorator<Instruction> reorderDecorator;
-	private RecipeMenus menus;
+   private boolean edit;
+   private Recipe r;
+   private DynamicLoadAdapter<Instruction> adapter;
+   private ReorderableItemDecorator<Instruction> reorderDecorator;
+   private RecipeMenus menus;
 
-	private static final int EDIT_INSTRUCTION_DIALOG = assignId();
-	private static final int DELETE_INSTRUCTION_DIALOG = assignId();
+   private static final int EDIT_INSTRUCTION_DIALOG = assignId();
+   private static final int DELETE_INSTRUCTION_DIALOG = assignId();
 
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState)	{
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.instructions_display);
-		Actions.RECIPE_INSTRUCTIONS.showNotifications();
+   protected int getViewId() {
+      return R.layout.instructions_display;
+   }
 
-		Intent intent = getIntent();
+   protected int getMenuId() {
+      return RecipeMenus.getMenuId();
+   }
 
-		r = ((RecipeTabs) getParent()).curRecipe;
-		edit = ((RecipeTabs) getParent()).editing;
+   /** Called when the activity is first created. */
+   @Override
+   public void onCreate(Bundle savedInstanceState)   {
+      super.onCreate(savedInstanceState);
+      Actions.RECIPE_INSTRUCTIONS.showNotifications();
 
-		createDynamicLoadAdapter();
+      Intent intent = getIntent();
 
-		ItemSwap swapper = new ItemSwap() {
-			public void swapItems(int a, int b) {
-				Actions.RECIPE_INSTRUCTIONS_REORDER.showNotifications();
-				r.swapInstructionPositions(adapter.getItem(a), adapter.getItem(b));
-			}
-		};
+      r = ((RecipeTabs) getParent()).curRecipe;
+      edit = ((RecipeTabs) getParent()).editing;
 
-		reorderDecorator = new ReorderableItemDecorator<Instruction>(adapter, swapper);
+      createDynamicLoadAdapter();
 
-		ListView lv = (ListView) findViewById(R.id.instruction_list);
-		lv.setAdapter(adapter);
+      ItemSwap swapper = new ItemSwap() {
+         public void swapItems(int a, int b) {
+            Actions.RECIPE_INSTRUCTIONS_REORDER.showNotifications();
+            r.swapInstructionPositions(adapter.getItem(a), adapter.getItem(b));
+         }
+      };
 
-		Button add = (Button) findViewById(R.id.add_button);
+      reorderDecorator = new ReorderableItemDecorator<Instruction>(adapter, swapper);
 
-		add.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Instruction in = r.addInstruction();
+      ListView lv = (ListView) findViewById(R.id.instruction_list);
+      lv.setAdapter(adapter);
 
-				int position = adapter.getCount();
-				adapter.add(position, in);
+      Button add = (Button) findViewById(R.id.add_button);
 
-				Bundle bundle = new Bundle();
-				bundle.putInt("position", position);
-				bundle.putBoolean("deleteOnCancel", true);
+      add.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Instruction in = r.addInstruction();
 
-				showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
-			}
-		});
+            int position = adapter.getCount();
+            adapter.add(position, in);
 
-		Button done = (Button) findViewById(R.id.done_button);
+            Bundle bundle = new Bundle();
+            bundle.putInt("position", position);
+            bundle.putBoolean("deleteOnCancel", true);
 
-		done.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				setEditing(false);
-			}
-		});
+            showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
+         }
+      });
 
-		setEditing(edit);
+      Button done = (Button) findViewById(R.id.done_button);
+
+      done.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            setEditing(false);
+         }
+      });
+
+      /**
+       * Helper methods to determine / modify the editing state of this view
+       **/
+      EditSwitcher es = new EditSwitcher() {
+         public void setEditing(boolean editing) {
+            InstructionsDisplay.this.setEditing(editing);
+         }
+
+         public boolean getEditing() {
+            return InstructionsDisplay.this.edit;
+         }
+      };
+      this.menus = new RecipeMenus(r, this, 2, es);
+
+      this.setupDialogHandlers();
+      this.menus.setupMenuHandlers(this.menuManager);
+      this.menus.setupDialogHandlers(this.dialogManager);
+
+      setEditing(edit);
     }
 
-	public void onResume() {
-		super.onResume();
-		boolean editing = ((RecipeTabs) getParent()).editing;
-		if(edit != editing) {
-			setEditing(editing);
-		}
-	}
+   public void onResume() {
+      super.onResume();
+      boolean editing = ((RecipeTabs) getParent()).editing;
+      if(edit != editing) {
+         setEditing(editing);
+      }
+   }
 
-    protected void setEditing(boolean editing) {
-		Button add = (Button) findViewById(R.id.add_button);
-		Button done = (Button) findViewById(R.id.done_button);
-		if(editing) {
-			Actions.RECIPE_EDIT.showNotifications();
-			if(adapter.getCount() >= 2) {
-				Actions.RECIPE_INSTRUCTIONS_PRE_REORDER.showNotifications();
-			}
-			add.setVisibility(View.VISIBLE);
-			done.setVisibility(View.VISIBLE);
-		} else {
-			add.setVisibility(View.GONE);
-			done.setVisibility(View.GONE);
-		}
-		edit = editing;
-		reorderDecorator.setEditing(editing);
-		adapter.notifyDataSetChanged();
+   protected void setEditing(boolean editing) {
+      Button add = (Button) findViewById(R.id.add_button);
+      Button done = (Button) findViewById(R.id.done_button);
+      if(editing) {
+         Actions.RECIPE_EDIT.showNotifications();
+         if(adapter.getCount() >= 2) {
+            Actions.RECIPE_INSTRUCTIONS_PRE_REORDER.showNotifications();
+         }
+         add.setVisibility(View.VISIBLE);
+         done.setVisibility(View.VISIBLE);
+      } else {
+         add.setVisibility(View.GONE);
+         done.setVisibility(View.GONE);
+      }
+      edit = editing;
+      reorderDecorator.setEditing(editing);
+      adapter.notifyDataSetChanged();
 
-		((RecipeTabs) getParent()).editing = editing;
-	}
+      ((RecipeTabs) getParent()).editing = editing;
+   }
 
-	protected void onPrepareDialog(int id, Dialog d, Bundle bundle) {
+   private void setupDialogHandlers() {
 
-		if(id == EDIT_INSTRUCTION_DIALOG) {
-			final EnterTextDialog dialog = (EnterTextDialog) d;
-			final int position = bundle.getInt("position", -1);
-			final Instruction instruction = adapter.getItem(position);
-			final boolean deleteOnCancel = bundle.getBoolean("deleteOnCancel", false);
+      this.dialogManager.registerHandler(EDIT_INSTRUCTION_DIALOG, new DialogHandler() {
 
-			dialog.setEditText(instruction.getText());
+         public Dialog createDialog(Bundle bundle) {
+            final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
 
-			dialog.setOkListener(new OnClickListener() {
-				public void onClick(View v) {
-					instruction.setText(dialog.getEditText());
+            Log.d("Recipebox",
+                  "Edit dialog position: " + bundle.getInt("position", -1)
+                                           + " instruction: " + instruction.getId());
 
-					adapter.notifyDataSetChanged();
-					if(adapter.getCount() >= 2) {
-						Actions.RECIPE_INSTRUCTIONS_PRE_REORDER.showNotifications();
-					}
-				}
-			});
+            EnterTextDialog etd = new EnterTextDialog(InstructionsDisplay.this);
 
-			dialog.setCancelListener(new OnClickListener() {
-				public void onClick(View v) {
-					if(deleteOnCancel) {
-						r.removeInstruction(instruction);
-						adapter.remove(position);
-					}
-				}
-			});
-		} else if(id == DELETE_INSTRUCTION_DIALOG) {
-			EnterTextDialog dialog = (EnterTextDialog) d;
+            etd.setEditText(instruction.getText());
 
-			final int position = bundle.getInt("position", -1);
-			final Instruction instruction = adapter.getItem(position);
+            etd.getEditView().setInputType(InputType.TYPE_CLASS_TEXT
+                                           | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+            etd.getEditView().setSingleLine(false);
 
-			dialog.setOkListener(new OnClickListener() {
-				public void onClick(View v) {
-					r.removeInstruction(instruction);
+            etd.setTitle("Edit Instruction");
 
-					adapter.remove(position);
-				}
-			});
-		}
-	}
+            etd.setOkButtonText("Done");
 
-	protected Dialog onCreateDialog(int id, Bundle bundle) {
-		if(menus != null) {
-			Dialog d = menus.createDialog(id);
-			if(d != null) {
-				return d;
-			}
-		}
-		Dialog dialog = null;
+            return etd;
+         }
 
-		if(id == EDIT_INSTRUCTION_DIALOG) {
-			final Instruction instruction = adapter.getItem(bundle.getInt("position", -1));
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            final EnterTextDialog dialog = (EnterTextDialog) d;
+            final int position = bundle.getInt("position", -1);
+            final Instruction instruction = adapter.getItem(position);
+            final boolean deleteOnCancel = bundle.getBoolean("deleteOnCancel", false);
 
-			Log.d("Recipebox", "Edit dialog position: " + bundle.getInt("position", -1) + " instruction: " + instruction.getId());
+            dialog.setEditText(instruction.getText());
 
-			EnterTextDialog etd = new EnterTextDialog(this);
+            dialog.setOkListener(new OnClickListener() {
+               public void onClick(View v) {
+                  instruction.setText(dialog.getEditText());
 
-			etd.setEditText(instruction.getText());
+                  adapter.notifyDataSetChanged();
+                  if(adapter.getCount() >= 2) {
+                     Actions.RECIPE_INSTRUCTIONS_PRE_REORDER.showNotifications();
+                  }
+               }
+            });
 
-			etd.getEditView().setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-			etd.getEditView().setSingleLine(false);
+            dialog.setCancelListener(new OnClickListener() {
+               public void onClick(View v) {
+                  if(deleteOnCancel) {
+                     r.removeInstruction(instruction);
+                     adapter.remove(position);
+                  }
+               }
+            });
+         }
+      });
 
-			etd.setTitle("Edit Instruction");
+      this.dialogManager.registerHandler(DELETE_INSTRUCTION_DIALOG, new DialogHandler() {
 
-			etd.setOkButtonText("Done");
+         public Dialog createDialog(Bundle bundle) {
+            EnterTextDialog etd = new EnterTextDialog(InstructionsDisplay.this,
+                                                      R.layout.show_text_dialog);
 
-			dialog = etd;
+            etd.setTitle("Delete Instruction");
+            etd.setEditText("Are you sure you want to delete this instruction?");
 
-		} else if(id == DELETE_INSTRUCTION_DIALOG) {
-			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
+            etd.setOkButtonText("Delete");
 
-			etd.setTitle("Delete Instruction");
-			etd.setEditText("Are you sure you want to delete this instruction?");
+            return etd;
+         }
 
-			etd.setOkButtonText("Delete");
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            EnterTextDialog dialog = (EnterTextDialog) d;
 
-			dialog = etd;
-		}
+            final int position = bundle.getInt("position", -1);
+            final Instruction instruction = adapter.getItem(position);
 
-		return dialog;
-	}
+            dialog.setOkListener(new OnClickListener() {
+               public void onClick(View v) {
+                  r.removeInstruction(instruction);
 
-	public boolean onCreateOptionsMenu(Menu menu) {
-		EditSwitcher es = new EditSwitcher() {
-			public void setEditing(boolean editing) {
-				InstructionsDisplay.this.setEditing(editing);
-			}
+                  adapter.remove(position);
+               }
+            });
+         }
+      });
+   }
 
-			public boolean getEditing() {
-				return InstructionsDisplay.this.edit;
-			}
-		};
-		menus = new RecipeMenus(r, this, 2, es);
+   private void createDynamicLoadAdapter() {
 
-		menus.createMenu(menu);
-		return true;
-	}
+      DynamicLoadAdapter.Specifics<Instruction> sp =
+            new DynamicLoadAdapter.Specifics<Instruction>() {
+         public View getView(final int position, Instruction i, View convert, ViewGroup vg) {
+            if(convert == null) {
+               convert = InstructionsDisplay.this.inflate(R.layout.instructions_display_item);
+            }
 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		boolean menuHandled = menus.onItemSelect(item.getItemId());
+            InstructionsDisplay.this.useHeadingFont(convert, R.id.instruction_number);
+            TextView tv = (TextView) convert.findViewById(R.id.instruction_number);
+            tv.setText((position + 1) + ".");
 
-		if(!menuHandled) {
-			return super.onOptionsItemSelected(item);
-		} else {
-			return true;
-		}
-	}
+            InstructionsDisplay.this.useTextFont(convert, R.id.instruction_text);
+            tv = (TextView) convert.findViewById(R.id.instruction_text);
 
-	private void createDynamicLoadAdapter() {
+            Button be = (Button) convert.findViewById(R.id.edit_button);
+            Button bd = (Button) convert.findViewById(R.id.delete_button);
 
-		DynamicLoadAdapter.Specifics<Instruction> sp = new DynamicLoadAdapter.Specifics<Instruction>() {
-			public View getView(final int position, Instruction i, View convert, ViewGroup vg) {
-				if(convert == null) {
-					LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-					convert = vi.inflate(R.layout.instructions_display_item, null);
-				}
-
-				TextView tv = (TextView) convert.findViewById(R.id.instruction_number);
-				tv.setText((position + 1) + ".");
-				AppData.getSingleton().useHeadingFont(tv);
-
-				tv = (TextView) convert.findViewById(R.id.instruction_text);
-				AppData.getSingleton().useTextFont(tv);
-
-				Button be = (Button) convert.findViewById(R.id.edit_button);
-				Button bd = (Button) convert.findViewById(R.id.delete_button);
-
-				if(i == null) {
-					tv.setText("Loading...");
-					be.setVisibility(View.GONE);
-					bd.setVisibility(View.GONE);
-					return convert;
-				} else {
-					tv.setText(i.getText());
-				}
+            if(i == null) {
+               tv.setText("Loading...");
+               be.setVisibility(View.GONE);
+               bd.setVisibility(View.GONE);
+               return convert;
+            } else {
+               tv.setText(i.getText());
+            }
 
 
-				if(edit) {
-					be.setVisibility(View.VISIBLE);
-					bd.setVisibility(View.VISIBLE);
+            if(edit) {
+               be.setVisibility(View.VISIBLE);
+               bd.setVisibility(View.VISIBLE);
 
-					be.setOnClickListener(new OnClickListener() {
-						public void onClick(View v) {
-							Bundle bundle = new Bundle();
-							bundle.putInt("position", position);
+               be.setOnClickListener(new OnClickListener() {
+                  public void onClick(View v) {
+                     Bundle bundle = new Bundle();
+                     bundle.putInt("position", position);
 
-							showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
-						}
-					});
-					bd.setOnClickListener(new OnClickListener() {
-						public void onClick(View v) {
-							Bundle bundle = new Bundle();
-							bundle.putInt("position", position);
+                     showDialog(EDIT_INSTRUCTION_DIALOG, bundle);
+                  }
+               });
+               bd.setOnClickListener(new OnClickListener() {
+                  public void onClick(View v) {
+                     Bundle bundle = new Bundle();
+                     bundle.putInt("position", position);
 
-							showDialog(DELETE_INSTRUCTION_DIALOG, bundle);
-						}
-					});
-				} else {
-					be.setVisibility(View.GONE);
-					bd.setVisibility(View.GONE);
-				}
+                     showDialog(DELETE_INSTRUCTION_DIALOG, bundle);
+                  }
+               });
+            } else {
+               be.setVisibility(View.GONE);
+               bd.setVisibility(View.GONE);
+            }
 
-				reorderDecorator.decorateItem(convert, position);
+            reorderDecorator.decorateItem(convert, position);
 
-				return convert;
-			}
+            return convert;
+         }
 
-			public long getItemId(Instruction item) {
-				return item.getId();
-			}
+         public long getItemId(Instruction item) {
+            return item.getId();
+         }
 
-			public List<Instruction> filter(int offset, int max) {
-				List<Instruction> instructions = r.getInstructions();
-				return instructions;
-			}
+         public List<Instruction> filter(int offset, int max) {
+            List<Instruction> instructions = r.getInstructions();
+            return instructions;
+         }
 
-			public String convertResultToString(Instruction result) {
-				return "Instruction";
-			}
+         public String convertResultToString(Instruction result) {
+            return "Instruction";
+         }
 
-			public void onItemClick(AdapterView av, View v, int position, long id, Instruction item) {
+         public void onItemClick(AdapterView av, View v, int position,
+                                                         long id, Instruction item) {
 
-			}
+         }
+      };
 
-			private View inflate(int layoutId) {
-				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				return vi.inflate(layoutId, null);
-			}
-		};
-
-		adapter = new DynamicLoadAdapter<Instruction>(sp);
-	}
+      adapter = new DynamicLoadAdapter<Instruction>(sp);
+   }
 }

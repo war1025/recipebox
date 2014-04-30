@@ -1,7 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
 import org.wrowclif.recipebox.Actions;
-import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.RecipeIngredient;
@@ -16,20 +15,17 @@ import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
 import org.wrowclif.recipebox.ui.components.MenuManager.MenuHandler;
 import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.RecipePickDialog;
-import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
 
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
 import java.util.List;
-import java.util.ArrayList;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -100,9 +96,9 @@ public class CategoryList extends BaseActivity {
       //}
 
       // Setup the header
+      this.useHeadingFont(R.id.category_label);
       TextView label = (TextView) findViewById(R.id.category_label);
       label.setText(category.getName());
-      AppData.getSingleton().useHeadingFont(label);
 
       //{ Add recipe button
       TextView addButton = (TextView) findViewById(R.id.add_button);
@@ -178,11 +174,11 @@ public class CategoryList extends BaseActivity {
           **/
          public View getView(final int position, Recipe r, View v, ViewGroup vg) {
             if(v == null) {
-               v = inflate(R.layout.category_item);
+               v = CategoryList.this.inflate(R.layout.category_item);
             }
 
+            CategoryList.this.useTextFont(v, R.id.name_box);
             TextView tv = (TextView) v.findViewById(R.id.name_box);
-            AppData.getSingleton().useTextFont(tv);
 
             // If the recipe is null, then we are at the end of the list and need to load more items.
             if(r == null) {
@@ -270,16 +266,6 @@ public class CategoryList extends BaseActivity {
             Intent intent = new Intent(CategoryList.this, RecipeTabs.class);
             intent.putExtra("id", id);
             startActivity(intent);
-         }
-
-         /**
-          * Create a view for the given id
-          *
-          * @param layoutId The id of the view to create
-          **/
-         private View inflate(int layoutId) {
-            LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            return vi.inflate(layoutId, null);
          }
       };
 

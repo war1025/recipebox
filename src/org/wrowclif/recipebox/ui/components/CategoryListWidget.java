@@ -12,6 +12,8 @@ import org.wrowclif.recipebox.impl.UtilityImpl;
 
 import org.wrowclif.recipebox.ui.CategoryList;
 
+import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
+
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
 import android.app.Activity;
@@ -28,125 +30,128 @@ import android.widget.TextView;
 
 public class CategoryListWidget {
 
-	private static final int DELETE_CATEGORY_DIALOG = assignId();
-	private static final int ADD_CATEGORY_DIALOG = assignId();
+   private static final int DELETE_CATEGORY_DIALOG = assignId();
+   private static final int ADD_CATEGORY_DIALOG    = assignId();
 
-	private Recipe recipe;
-	private Utility util;
-	private Activity context;
-	private View listWidget;
-	private Button addButton;
-	private ViewGroup categories;
-	private CategoryDialog categoryDialog;
-	private boolean editing;
+   private Recipe recipe;
+   private Utility util;
+   private Activity context;
+   private View listWidget;
+   private Button addButton;
+   private ViewGroup categories;
+   private CategoryDialog categoryDialog;
+   private boolean editing;
 
-	public CategoryListWidget(Recipe recipe, Activity context) {
-		this.recipe = recipe;
-		this.context = context;
-		this.listWidget = getLayoutInflater().inflate(R.layout.list_widget, null);
-		this.categories = (ViewGroup) listWidget.findViewById(R.id.category_list);
-		this.editing = false;
-		this.util = UtilityImpl.singleton;
+   public CategoryListWidget(Recipe recipe, Activity context) {
+      this.recipe = recipe;
+      this.context = context;
+      this.listWidget = getLayoutInflater().inflate(R.layout.list_widget, null);
+      this.categories = (ViewGroup) listWidget.findViewById(R.id.category_list);
+      this.editing = false;
+      this.util = UtilityImpl.singleton;
 
-		AppData.getSingleton().useHeadingFont((TextView) listWidget.findViewById(R.id.category_label));
+      AppData app_data = AppData.getSingleton();
+      app_data.useHeadingFont((TextView) listWidget.findViewById(R.id.category_label));
 
-		this.addButton = (Button) listWidget.findViewById(R.id.category_button);
+      this.addButton = (Button) listWidget.findViewById(R.id.category_button);
 
-		addButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Actions.RECIPE_ADD_CATEGORY.showNotifications();
-				CategoryListWidget.this.context.showDialog(ADD_CATEGORY_DIALOG);
-			}
-		});
-	}
+      addButton.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Actions.RECIPE_ADD_CATEGORY.showNotifications();
+            CategoryListWidget.this.context.showDialog(ADD_CATEGORY_DIALOG);
+         }
+      });
+   }
 
-	public View getView() {
-		refresh();
-		return listWidget;
-	}
+   public View getView() {
+      refresh();
+      return listWidget;
+   }
 
-	public void refresh() {
-		categories.removeAllViews();
-		for(Category c : recipe.getCategories()) {
-			categories.addView(createCategoryEntry(c));
-		}
-		categories.invalidate();
-	}
+   public void refresh() {
+      categories.removeAllViews();
+      for(Category c : recipe.getCategories()) {
+         categories.addView(createCategoryEntry(c));
+      }
+      categories.invalidate();
+   }
 
-	protected View createCategoryEntry(final Category c) {
-		View v = getLayoutInflater().inflate(R.layout.list_widget_item, null);
-		TextView ctv = (TextView) v.findViewById(R.id.name_box);
-		AppData.getSingleton().useTextFont(ctv);
-		ctv.setText(c.getName());
+   protected View createCategoryEntry(final Category c) {
+      View v = getLayoutInflater().inflate(R.layout.list_widget_item, null);
+      TextView ctv = (TextView) v.findViewById(R.id.name_box);
+      AppData.getSingleton().useTextFont(ctv);
+      ctv.setText(c.getName());
 
-		TextView idBox = (TextView) v.findViewById(R.id.edit_button);
-		idBox.setText(c.getId() + "");
-		idBox.setVisibility(View.GONE);
+      TextView idBox = (TextView) v.findViewById(R.id.edit_button);
+      idBox.setText(c.getId() + "");
+      idBox.setVisibility(View.GONE);
 
-		v.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Intent i = new Intent(context, CategoryList.class);
-				i.putExtra("id", c.getId());
-				i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-				context.startActivity(i);
-			}
-		});
+      v.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Intent i = new Intent(context, CategoryList.class);
+            i.putExtra("id", c.getId());
+            i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            context.startActivity(i);
+         }
+      });
 
-		View deleteButton = v.findViewById(R.id.delete_button);
-		deleteButton.setVisibility(View.VISIBLE);
+      View deleteButton = v.findViewById(R.id.delete_button);
+      deleteButton.setVisibility(View.VISIBLE);
 
-		deleteButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Bundle bundle = new Bundle();
+      deleteButton.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Bundle bundle = new Bundle();
 
-				bundle.putLong("id", c.getId());
-				context.showDialog(DELETE_CATEGORY_DIALOG, bundle);
-			}
-		});
+            bundle.putLong("id", c.getId());
+            context.showDialog(DELETE_CATEGORY_DIALOG, bundle);
+         }
+      });
 
-		return v;
-	}
+      return v;
+   }
 
-	public void setEditing(boolean editing) {
-		this.editing = editing;
-		if(editing) {
-			listWidget.setVisibility(View.VISIBLE);
-		} else if(categories.getChildCount() == 0) {
-			listWidget.setVisibility(View.GONE);
-		}
-		for(int i = 0; i < categories.getChildCount(); i++) {
-			View child = categories.getChildAt(i);
-			View editGroup = child.findViewById(R.id.edit_group);
-			editGroup.setVisibility((editing) ? View.VISIBLE : View.GONE);
-		}
-		addButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
-	}
+   public void setEditing(boolean editing) {
+      this.editing = editing;
+      if(editing) {
+         listWidget.setVisibility(View.VISIBLE);
+      } else if(categories.getChildCount() == 0) {
+         listWidget.setVisibility(View.GONE);
+      }
+      for(int i = 0; i < categories.getChildCount(); i++) {
+         View child = categories.getChildAt(i);
+         View editGroup = child.findViewById(R.id.edit_group);
+         editGroup.setVisibility((editing) ? View.VISIBLE : View.GONE);
+      }
+      addButton.setVisibility((editing) ? View.VISIBLE : View.GONE);
+   }
 
-	public Dialog createDialog(int id) {
-		Dialog retDialog = null;
-		if((id == ADD_CATEGORY_DIALOG) || (id == DELETE_CATEGORY_DIALOG)) {
-			if(categoryDialog == null) {
-				categoryDialog = new CategoryDialog(context, recipe, this);
-			}
-			retDialog = categoryDialog;
-		}
-		return retDialog;
-	}
+   public void setupDialogHandlers(DialogManager dialogManager) {
 
-	public boolean prepareDialog(int id, Dialog dialog, Bundle bundle) {
-		boolean handled = false;
-		if(id == ADD_CATEGORY_DIALOG) {
-			((CategoryDialog) dialog).prepareNew();
-			handled = true;
-		} else if(id == DELETE_CATEGORY_DIALOG) {
-			long category = bundle.getLong("id", -1);
-			((CategoryDialog) dialog).prepareDelete(util.getCategoryById(category));
-			handled = true;
-		}
-		return handled;
-	}
+      dialogManager.registerHandler(ADD_CATEGORY_DIALOG, new DialogHandler() {
 
-	protected LayoutInflater getLayoutInflater() {
-		return (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	}
+         public Dialog createDialog(Bundle bundle) {
+            return new CategoryDialog(context, recipe, CategoryListWidget.this);
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            ((CategoryDialog) d).prepareNew();
+         }
+      });
+
+      dialogManager.registerHandler(DELETE_CATEGORY_DIALOG, new DialogHandler() {
+
+         public Dialog createDialog(Bundle bundle) {
+            return new CategoryDialog(context, recipe, CategoryListWidget.this);
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+            long category = bundle.getLong("id", -1);
+            ((CategoryDialog) d).prepareDelete(util.getCategoryById(category));
+         }
+      });
+   }
+
+   protected LayoutInflater getLayoutInflater() {
+      return (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+   }
 }
