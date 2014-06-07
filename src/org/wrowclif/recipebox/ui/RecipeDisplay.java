@@ -323,8 +323,6 @@ public class RecipeDisplay extends BaseActivity {
 
             dialog.setTitle("Edit Name");
 
-            dialog.setEditText(r.getName());
-
             dialog.getEditView().setInputType(InputType.TYPE_CLASS_TEXT
                                               | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
             dialog.getEditView().setSingleLine(true);
@@ -348,7 +346,15 @@ public class RecipeDisplay extends BaseActivity {
          }
 
          public void prepareDialog(Dialog d, Bundle bundle) {
-            // No preparation needed before showing.
+            EnterTextDialog dialog = (EnterTextDialog) d;
+            String name = r.getName();
+
+            // Clear out "New Recipe" so the user doesn't have to.
+            if ("New Recipe".equals(name)) {
+               dialog.setEditText("");
+            } else {
+               dialog.setEditText(r.getName());
+            }
          }
       });
       //}
@@ -360,8 +366,6 @@ public class RecipeDisplay extends BaseActivity {
             final EnterTextDialog dialog = new EnterTextDialog(RecipeDisplay.this);
 
             dialog.setTitle("Edit Description");
-
-            dialog.setEditText(r.getDescription());
 
             dialog.getEditView().setInputType(InputType.TYPE_CLASS_TEXT
                                               | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
@@ -383,7 +387,9 @@ public class RecipeDisplay extends BaseActivity {
          }
 
          public void prepareDialog(Dialog d, Bundle bundle) {
-            // No preparation needed before showing.
+            EnterTextDialog dialog = (EnterTextDialog) d;
+
+            dialog.setEditText(r.getDescription());
          }
       });
       //}
