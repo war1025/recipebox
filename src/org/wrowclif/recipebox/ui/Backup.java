@@ -34,7 +34,9 @@ import java.util.List;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-
+/**
+ * View for managing Recipe backups.
+ **/
 public class Backup extends BaseActivity {
 
    private static final String LOG_TAG = "Recipebox Backup";

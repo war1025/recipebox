@@ -7,6 +7,8 @@ import org.wrowclif.recipebox.Recipe;
 
 import org.wrowclif.recipebox.util.ImageUtil;
 
+import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
+
 import static org.wrowclif.recipebox.util.ConstantInitializer.assignId;
 
 import android.os.AsyncTask;
@@ -134,62 +136,77 @@ public class ImageWidget {
       setEditing(editing);
    }
 
-   public Dialog createDialog(int id) {
-      Dialog dialog = null;
-      if(id == DELETE_IMAGE_DIALOG) {
-         EnterTextDialog etd = new EnterTextDialog(context, R.layout.show_text_dialog);
+   public void setupDialogHandlers(DialogManager dialogManager) {
 
-         etd.setTitle("Delete Image");
-         etd.setEditText("Are you sure you want to delete this recipe's image?");
+      dialogManager.registerHandler(EDIT_IMAGE_DIALOG, new DialogHandler() {
 
-         etd.setOkButtonText("Delete");
+         public Dialog createDialog(Bundle bundle) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(ImageWidget.this.context);
+            builder.setTitle("Edit Image");
+            builder.setItems(new String[] {"Take Photo", "Choose Image", "Cancel"},
+               new DialogInterface.OnClickListener() {
+                  public void onClick(DialogInterface dialog, int which) {
+                     Uri outputUri = getImageOutputUri();
+                     ImageWidget.this.imageSaveUri = outputUri;
+                     Intent intent = null;
+                     switch(which) {
+                        case 0 :
+                           intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                           intent.putExtra(MediaStore.EXTRA_OUTPUT, outputUri);
+                           ImageWidget.this.context.startActivityForResult(intent,
+                                                                           TAKE_IMAGE_REQUEST);
+                           break;
+                        case 1 :
+                           intent = new Intent(Intent.ACTION_PICK);
+                           intent.setType("image/*");
+                           ImageWidget.this.context.startActivityForResult(intent,
+                                                                           PICK_IMAGE_REQUEST);
+                           break;
+                        default:
+                           ImageWidget.this.imageSaveUri = null;
+                           break;
 
-         etd.setOkListener(new OnClickListener() {
-            public void onClick(View v) {
-               File toDelete = ImageUtil.getImageFile(recipe);
-               if(toDelete != null && toDelete.exists()) {
-                  toDelete.delete();
-               }
-               recipe.setImageUri("");
-               refreshImage();
-            }
-         });
-
-         dialog = etd;
-      } else if(id == EDIT_IMAGE_DIALOG) {
-         AlertDialog.Builder builder = new AlertDialog.Builder(ImageWidget.this.context);
-         builder.setTitle("Edit Image");
-         builder.setItems(new String[] {"Take Photo", "Choose Image", "Cancel"},
-            new DialogInterface.OnClickListener() {
-               public void onClick(DialogInterface dialog, int which) {
-                  Uri outputUri = getImageOutputUri();
-                  ImageWidget.this.imageSaveUri = outputUri;
-                  Intent intent = null;
-                  switch(which) {
-                     case 0 :
-                        intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, outputUri);
-                        ImageWidget.this.context.startActivityForResult(intent,
-                                                                        TAKE_IMAGE_REQUEST);
-                        break;
-                     case 1 :
-                        intent = new Intent(Intent.ACTION_PICK);
-                        intent.setType("image/*");
-                        ImageWidget.this.context.startActivityForResult(intent,
-                                                                        PICK_IMAGE_REQUEST);
-                        break;
-                     default:
-                        ImageWidget.this.imageSaveUri = null;
-                        break;
-
+                     }
                   }
-               }
-         });
-         builder.setCancelable(true);
-         dialog = builder.create();
+            });
+            builder.setCancelable(true);
+            return builder.create();
+         }
 
-      }
-      return dialog;
+         public void prepareDialog(Dialog d, Bundle bundle) {
+
+         }
+      });
+
+      dialogManager.registerHandler(DELETE_IMAGE_DIALOG, new DialogHandler() {
+
+         public Dialog createDialog(Bundle bundle) {
+            EnterTextDialog etd = new EnterTextDialog(context, R.layout.show_text_dialog);
+
+            etd.setTitle("Delete Image");
+            etd.setEditText("Are you sure you want to delete this recipe's image?");
+
+            etd.setOkButtonText("Delete");
+
+            etd.setOkListener(new OnClickListener() {
+               public void onClick(View v) {
+                  File toDelete = ImageUtil.getImageFile(recipe);
+                  if(toDelete != null && toDelete.exists()) {
+                     toDelete.delete();
+                  }
+                  recipe.setImageUri("");
+                  refreshImage();
+               }
+            });
+
+            return etd;
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+
+         }
+      });
+
    }
 
    public boolean onActivityResult(int requestCode, int resultCode, Intent data) {

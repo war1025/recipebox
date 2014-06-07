@@ -1,7 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
 import org.wrowclif.recipebox.Actions;
-import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Category;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Utility;
@@ -38,7 +37,6 @@ import android.widget.TextView;
  * Shows the user all categories in the system
  *
  * @param util    Reference to the Utility singleton for querying recipes
- * @param appData Reference to the AppData singleton for retrieving application settings
  * @param adapter Adapter for loading the category list
  * @param edit    Flag indicating whether we are in edit mode
  *
@@ -49,7 +47,6 @@ import android.widget.TextView;
 public class BrowseCategories extends BaseActivity {
 
    private Utility util;
-   private AppData appData;
    private DynamicLoadAdapter<Category> adapter;
    private boolean edit;
 
@@ -73,9 +70,8 @@ public class BrowseCategories extends BaseActivity {
 
       // Singleton references
       util = UtilityImpl.singleton;
-      appData = AppData.getSingleton();
 
-      appData.useHeadingFont((TextView) findViewById(R.id.category_label));
+      this.useHeadingFont(R.id.category_label);
 
       //{ Setup the category list
       ListView lv = (ListView) findViewById(R.id.category_list);
@@ -186,8 +182,8 @@ public class BrowseCategories extends BaseActivity {
                v = inflate(R.layout.category_item);
             }
 
+            BrowseCategories.this.useTextFont(v, R.id.name_box);
             TextView tv = (TextView) v.findViewById(R.id.name_box);
-            appData.useTextFont((TextView) v.findViewById(R.id.name_box));
 
             // If the category is null then we are at the end of the list and need to load more items
             if(c == null) {

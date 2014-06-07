@@ -8,6 +8,8 @@ import org.wrowclif.recipebox.Instruction;
 import org.wrowclif.recipebox2.R;
 import org.wrowclif.recipebox.impl.UtilityImpl;
 
+import org.wrowclif.recipebox.ui.components.BaseActivity;
+import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
 import org.wrowclif.recipebox.ui.components.EnterTextDialog;
 import org.wrowclif.recipebox.ui.components.ListAutoCompleteAdapter;
 import org.wrowclif.recipebox.ui.components.DynamicLoadAdapter;
@@ -38,8 +40,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.text.TextWatcher;
-import android.text.Editable;
 
 import java.util.ArrayList;
 
@@ -47,344 +47,331 @@ import java.util.ArrayList;
  * The entry point for Recipebox
  *
  * @param util          Singleton reference to the utility class (Used for making queries, etc.)
- * @param recentAdapter Adapter to dynamically load recently viewed recipes as we scroll through the list
+ * @param recentAdapter Adapter to dynamically load recently viewed recipes as
+ *                      we scroll through the list
  *
  * @param CREATE_RECIPE_DIALOG Id used when we want to open a create recipe dialog
  **/
-public class Main extends Activity {
+public class Main extends BaseActivity {
 
-	private Utility util;
-	private DynamicLoadAdapter<Recipe> recentAdapter;
-	private static final int CREATE_RECIPE_DIALOG = assignId();
+   private Utility util;
+   private DynamicLoadAdapter<Recipe> recentAdapter;
+   private static final int CREATE_RECIPE_DIALOG = assignId();
 
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+   protected int getViewId() {
+      return R.layout.main;
+   }
 
-		// Initialize the app data. We need to pass in a Context for AppData to work properly.
-		AppData.initialSingleton(this);
+   /** Called when the activity is first created. */
+   @Override
+   public void onCreate(Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
 
-		util = UtilityImpl.singleton;
+      // Initialize the app data. We need to pass in a Context for AppData to work properly.
+      AppData.initialSingleton(this);
 
-		Intent intent = getIntent();
+      util = UtilityImpl.singleton;
 
-		// Check the intent to see if we need to load any recipes
-		if(intent.getData() != null) {
-			Log.d("Recipebox", "Intent data not null!");
-			if("text/rcpb".equals(intent.getType())) {
-				ShareUtil.loadRecipe(this, intent.getData());
-			} else if("application/zip".equals(intent.getType())) {
-				ShareUtil.loadZipRecipe(this, intent.getData());
-			}
-		}
+      Intent intent = getIntent();
 
-		//{ Setup fonts
-		AppData.getSingleton().useHeadingFont((TextView) findViewById(R.id.recipe_label));
+      // Check the intent to see if we need to load any recipes
+      if(intent.getData() != null) {
+         Log.d("Recipebox", "Intent data not null!");
+         if("text/rcpb".equals(intent.getType())) {
+            ShareUtil.loadRecipe(this, intent.getData());
+         } else if("application/zip".equals(intent.getType())) {
+            ShareUtil.loadZipRecipe(this, intent.getData());
+         }
+      }
 
-		AutoCompleteTextView tv = (AutoCompleteTextView) findViewById(R.id.recipesearch);
-		AppData.getSingleton().useTextFont(tv);
-		//}
+      //{ Setup fonts
+      this.useHeadingFont(R.id.recipe_label,
+                          R.id.categories,
+                          R.id.browse,
+                          R.id.addrecipe);
 
-		//{ Setup the autocomplete list for the search bar
-		ListAutoCompleteAdapter.Specifics<Recipe> sp = new ListAutoCompleteAdapter.Specifics<Recipe>() {
+      this.useTextFont(R.id.recipesearch);
+      //}
 
-			/**
-			 * Returns a row item for the given recipe.
-			 *
-			 * @param id The id of the recipe
-			 * @param r  The recipe to make the row for
-			 * @param v  The view to reuse or null
-			 * @param vg The group that the view is a part of
-			 **/
-			public View getView(int id, Recipe r, View v, ViewGroup vg) {
-				if(v == null) {
-					v = inflate(R.layout.autoitem);
-				}
+      this.setupDialogHandlers();
 
-				TextView tv = (TextView) v.findViewById(R.id.child_name);
-				AppData.getSingleton().useTextFont(tv);
+      //{ Setup the autocomplete list for the search bar
+      AutoCompleteTextView tv = (AutoCompleteTextView) findViewById(R.id.recipesearch);
+      ListAutoCompleteAdapter.Specifics<Recipe> sp =
+            new ListAutoCompleteAdapter.Specifics<Recipe>() {
 
-				tv.setText(r.getName());
+         /**
+          * Returns a row item for the given recipe.
+          *
+          * @param id The id of the recipe
+          * @param r  The recipe to make the row for
+          * @param v  The view to reuse or null
+          * @param vg The group that the view is a part of
+          **/
+         public View getView(int id, Recipe r, View v, ViewGroup vg) {
+            if(v == null) {
+               v = Main.this.inflate(R.layout.autoitem);
+            }
 
-				return v;
-			}
+            Main.this.useTextFont(v, R.id.child_name);
+            TextView tv = (TextView) v.findViewById(R.id.child_name);
 
-			/**
-			 * Returns the id of the given item
-			 *
-			 * @param item The item to get the id for
-			 **/
-			public long getItemId(Recipe item) {
-				return item.getId();
-			}
+            tv.setText(r.getName());
 
-			/**
-			 * Returns the top 5 matching recipes for the given text
-			 *
-			 * @param seq The text being searched for
-			 **/
-			public List<Recipe> filter(CharSequence seq) {
-				return UtilityImpl.singleton.searchRecipes(seq.toString(), 5);
-			}
+            return v;
+         }
 
-			/**
-			 * Returns the name of the given recipe
-			 *
-			 * @param result The recipe to get the name of
-			 **/
-			public String convertResultToString(Recipe result) {
-				return result.getName();
-			}
+         /**
+          * Returns the id of the given item
+          *
+          * @param item The item to get the id for
+          **/
+         public long getItemId(Recipe item) {
+            return item.getId();
+         }
 
-			/**
-			 * Called when an item in the search list is clicked.
-			 * Go to the selected recipe
-			 *
-			 * @param av       The adapter
-			 * @param v        The view that was clicked
-			 * @param position The position in the list of the clicked item
-			 * @param id       The id of the recipe
-			 * @param item     The recipe represented by the clicked item
-			 **/
-			public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
-				Intent intent = new Intent(Main.this, RecipeTabs.class);
-				intent.putExtra("id", id);
-				startActivity(intent);
-			}
+         /**
+          * Returns the top 5 matching recipes for the given text
+          *
+          * @param seq The text being searched for
+          **/
+         public List<Recipe> filter(CharSequence seq) {
+            return UtilityImpl.singleton.searchRecipes(seq.toString(), 5);
+         }
 
-			/**
-			 * Creates the view for the given id
-			 *
-			 * @param layoutId The id of a layout
-			 **/
-			private View inflate(int layoutId) {
-				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				return vi.inflate(layoutId, null);
-			}
-		};
+         /**
+          * Returns the name of the given recipe
+          *
+          * @param result The recipe to get the name of
+          **/
+         public String convertResultToString(Recipe result) {
+            return result.getName();
+         }
 
-		ListAutoCompleteAdapter<Recipe> adapter = new ListAutoCompleteAdapter<Recipe>(sp);
+         /**
+          * Called when an item in the search list is clicked.
+          * Go to the selected recipe
+          *
+          * @param av       The adapter
+          * @param v        The view that was clicked
+          * @param position The position in the list of the clicked item
+          * @param id       The id of the recipe
+          * @param item     The recipe represented by the clicked item
+          **/
+         public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
+            Intent intent = new Intent(Main.this, RecipeTabs.class);
+            intent.putExtra("id", id);
+            startActivity(intent);
+         }
+      };
 
-		adapter.setUpView(tv);
+      ListAutoCompleteAdapter<Recipe> adapter = new ListAutoCompleteAdapter<Recipe>(sp);
 
-		/**
-		 * When enter pressed on the keyboard, search for the current text and go to the first matching item.
-		 * If no items match, open a dialog offering to create that recipe.
-		 *
-		 * @param v      The view being edited
-		 * @param action The action that was taken
-		 * @param event  The key event that triggered the action
-		 **/
-		tv.setOnEditorActionListener(new OnEditorActionListener() {
-			public boolean onEditorAction(TextView v, int action, KeyEvent event) {
-				// This combination indicates that enter was pressed
-				if((action == EditorInfo.IME_NULL) && (event.getAction() == 0)) {
-					String text = v.getText().toString();
-					List<Recipe> recipes = util.searchRecipes(text, 1);
-					if(recipes.size() > 0) {
-						Intent intent = new Intent(Main.this, RecipeTabs.class);
-						intent.putExtra("id", recipes.get(0).getId());
-						startActivity(intent);
-					} else {
-						showDialog(CREATE_RECIPE_DIALOG);
-					}
-					return true;
-				}
-				return false;
-			}
-		});
-		//}
+      adapter.setUpView(tv);
 
-		//{ Add recipe button
-		TextView addRecipe = (TextView) findViewById(R.id.addrecipe);
-		AppData.getSingleton().useHeadingFont(addRecipe);
+      /**
+       * When enter pressed on the keyboard, search for the current text and go to the first matching item.
+       * If no items match, open a dialog offering to create that recipe.
+       *
+       * @param v      The view being edited
+       * @param action The action that was taken
+       * @param event  The key event that triggered the action
+       **/
+      tv.setOnEditorActionListener(new OnEditorActionListener() {
+         public boolean onEditorAction(TextView v, int action, KeyEvent event) {
+            // This combination indicates that enter was pressed
+            if((action == EditorInfo.IME_NULL) && (event.getAction() == 0)) {
+               String text = v.getText().toString();
+               List<Recipe> recipes = util.searchRecipes(text, 1);
+               if(recipes.size() > 0) {
+                  Intent intent = new Intent(Main.this, RecipeTabs.class);
+                  intent.putExtra("id", recipes.get(0).getId());
+                  startActivity(intent);
+               } else {
+                  showDialog(CREATE_RECIPE_DIALOG);
+               }
+               return true;
+            }
+            return false;
+         }
+      });
+      //}
 
-		addRecipe.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Recipe r = util.newRecipe("New Recipe");
-				Intent intent = new Intent(Main.this, RecipeTabs.class);
-				intent.putExtra("id", r.getId());
-				intent.putExtra("edit", true);
-				startActivity(intent);
-			}
-		});
-		//}
+      //{ Add recipe button
+      View addRecipe = findViewById(R.id.addrecipe);
 
-		//{ Browse recipes button
-		TextView browseRecipe = (TextView) findViewById(R.id.browse);
-		AppData.getSingleton().useHeadingFont(browseRecipe);
+      addRecipe.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Recipe r = util.newRecipe("New Recipe");
+            Intent intent = new Intent(Main.this, RecipeTabs.class);
+            intent.putExtra("id", r.getId());
+            intent.putExtra("edit", true);
+            startActivity(intent);
+         }
+      });
+      //}
 
-		browseRecipe.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Intent intent = new Intent(Main.this, Browse.class);
-				startActivity(intent);
-			}
-		});
-		//}
+      //{ Browse recipes button
+      View browseRecipe = findViewById(R.id.browse);
 
-		//{ Categories button
-		TextView browseCategories = (TextView) findViewById(R.id.categories);
-		AppData.getSingleton().useHeadingFont(browseCategories);
+      browseRecipe.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Intent intent = new Intent(Main.this, Browse.class);
+            startActivity(intent);
+         }
+      });
+      //}
 
-		browseCategories.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Intent intent = new Intent(Main.this, BrowseCategories.class);
-				startActivity(intent);
-			}
-		});
-		//}
+      //{ Categories button
+      View browseCategories = findViewById(R.id.categories);
 
-		//{ Set up recently viewed recipes list
-		ListView lv = (ListView) findViewById(R.id.recent_recipes);
+      browseCategories.setOnClickListener(new OnClickListener() {
+         public void onClick(View v) {
+            Intent intent = new Intent(Main.this, BrowseCategories.class);
+            startActivity(intent);
+         }
+      });
+      //}
 
-		DynamicLoadAdapter.Specifics<Recipe> sp2 = new DynamicLoadAdapter.Specifics<Recipe>() {
+      //{ Set up recently viewed recipes list
+      ListView lv = (ListView) findViewById(R.id.recent_recipes);
 
-			/**
-			 * Gets the view for the given recipe
-			 *
-			 * @param id The id of the recipe
-			 * @param r  The recipe
-			 * @param v  The view to reuse or null
-			 * @param vg The group the given view belongs to
-			 **/
-			public View getView(int id, Recipe r, View v, ViewGroup vg) {
-				if(v == null) {
-					v = inflate(R.layout.category_item);
-				}
+      DynamicLoadAdapter.Specifics<Recipe> sp2 = new DynamicLoadAdapter.Specifics<Recipe>() {
 
-				// Don't show edit buttons
-				v.findViewById(R.id.edit_group).setVisibility(View.GONE);
+         /**
+          * Gets the view for the given recipe
+          *
+          * @param id The id of the recipe
+          * @param r  The recipe
+          * @param v  The view to reuse or null
+          * @param vg The group the given view belongs to
+          **/
+         public View getView(int id, Recipe r, View v, ViewGroup vg) {
+            if(v == null) {
+               v = Main.this.inflate(R.layout.category_item);
+            }
 
-				TextView tv = (TextView) v.findViewById(R.id.name_box);
-				AppData.getSingleton().useTextFont(tv);
+            // Don't show edit buttons
+            v.findViewById(R.id.edit_group).setVisibility(View.GONE);
 
-				// If the recipe is null, then we are at the end of the current list and need to load more recipes.
-				if(r == null) {
-					tv.setText("Loading...");
-				// Otherwise we need to set the item to show the recipe's name
-				} else {
-					tv.setText(r.getName());
-				}
+            Main.this.useTextFont(v, R.id.name_box);
+            TextView tv = (TextView) v.findViewById(R.id.name_box);
 
-				return v;
-			}
+            // If the recipe is null, then we are at the end of the current list and need to load more recipes.
+            if(r == null) {
+               tv.setText("Loading...");
+            // Otherwise we need to set the item to show the recipe's name
+            } else {
+               tv.setText(r.getName());
+            }
 
-			/**
-			 * Gets the id for the given recipe
-			 *
-			 * @param item The item to get the id for
-			 **/
-			public long getItemId(Recipe item) {
-				return item.getId();
-			}
+            return v;
+         }
 
-			/**
-			 * Loads the next set of items to be shown in the list.
-			 * This is called when we reach the end of the list and need to load more items
-			 *
-			 * @param offset The offset to start getting items from
-			 * @param max    The maximum number of items to retrieve
-			 **/
-			public List<Recipe> filter(int offset, int max) {
-				List<Recipe> list = UtilityImpl.singleton.getRecentlyViewedRecipes(offset, max);
-				if(list.size() == max) {
-					list.add(null);
-				}
-				return list;
-			}
+         /**
+          * Gets the id for the given recipe
+          *
+          * @param item The item to get the id for
+          **/
+         public long getItemId(Recipe item) {
+            return item.getId();
+         }
 
-			/**
-			 * Returns the representation of the given recipe as a string (its name)
-			 *
-			 * @param result The recipe to get the name of
-			 **/
-			public String convertResultToString(Recipe result) {
-				return (result == null) ? "Null" : result.getName();
-			}
+         /**
+          * Loads the next set of items to be shown in the list.
+          * This is called when we reach the end of the list and need to load more items
+          *
+          * @param offset The offset to start getting items from
+          * @param max    The maximum number of items to retrieve
+          **/
+         public List<Recipe> filter(int offset, int max) {
+            List<Recipe> list = UtilityImpl.singleton.getRecentlyViewedRecipes(offset, max);
+            if(list.size() == max) {
+               list.add(null);
+            }
+            return list;
+         }
 
-			/**
-			 * Called when a recipe is clicked in the list.
-			 * Opens the selected recipe
-			 *
-			 * @param av       The parent view
-			 * @param v        The view that was clicked
-			 * @param position The position of the item in the list
-			 * @param id       The id of the recipe in the view
-			 * @param item     The recipe held by the view
-			 **/
-			public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
-				Intent intent = new Intent(Main.this, RecipeTabs.class);
-				intent.putExtra("id", id);
-				startActivity(intent);
-			}
+         /**
+          * Returns the representation of the given recipe as a string (its name)
+          *
+          * @param result The recipe to get the name of
+          **/
+         public String convertResultToString(Recipe result) {
+            return (result == null) ? "Null" : result.getName();
+         }
 
-			/**
-			 * Creates a view for the given Id
-			 *
-			 * @param layoutId The id of the view to create
-			 **/
-			private View inflate(int layoutId) {
-				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				return vi.inflate(layoutId, null);
-			}
-		};
+         /**
+          * Called when a recipe is clicked in the list.
+          * Opens the selected recipe
+          *
+          * @param av       The parent view
+          * @param v        The view that was clicked
+          * @param position The position of the item in the list
+          * @param id       The id of the recipe in the view
+          * @param item     The recipe held by the view
+          **/
+         public void onItemClick(AdapterView av, View v, int position, long id, Recipe item) {
+            Intent intent = new Intent(Main.this, RecipeTabs.class);
+            intent.putExtra("id", id);
+            startActivity(intent);
+         }
+      };
 
-		recentAdapter = new DynamicLoadAdapter<Recipe>(sp2);
+      recentAdapter = new DynamicLoadAdapter<Recipe>(sp2);
 
-		recentAdapter.setUpList(lv);
-		lv.requestFocus();
-		//}
+      recentAdapter.setUpList(lv);
+      lv.requestFocus();
+      //}
 
-    }
+   }
 
-	/**
-	 * Called when this activity is about to resume execution
-	 **/
-    public void onResume() {
-		super.onResume();
-		// Reload the recently viewed recipes
-		recentAdapter.clear();
-	}
+   /**
+    * Called when this activity is about to resume execution
+    **/
+   public void onResume() {
+      super.onResume();
+      // Reload the recently viewed recipes
+      recentAdapter.clear();
+   }
 
-	/**
-	 * Called when a dialog for a given id is being constructed.
-	 *
-	 * @param id The Id of the dialog to construct
-	 **/
-    protected Dialog onCreateDialog(int id) {
-		Dialog dialog = null;
+   private void setupDialogHandlers() {
 
-		// Shown when we type a name into the search bar that doesn't exist in the recipes database.
-		if(id == CREATE_RECIPE_DIALOG) {
-			EnterTextDialog etd = new EnterTextDialog(this, R.layout.show_text_dialog);
+      DialogHandler create_handler = new DialogHandler() {
 
-			etd.setTitle("Create New Recipe");
-			etd.setEditText("There are no recipes by that name.\n\n" +
-								"Would you like to create a new recipe?");
+         public Dialog createDialog(Bundle bundle) {
+            EnterTextDialog etd = new EnterTextDialog(Main.this, R.layout.show_text_dialog);
 
-			// If the user accepts, we take the text in the search bar and create a recipe with that name.
-			etd.setOkButtonText("Create");
-			etd.setOkListener(new OnClickListener() {
-				public void onClick(View v) {
-					TextView tv = (TextView) findViewById(R.id.recipesearch);
+            etd.setTitle("Create New Recipe");
+            etd.setEditText("There are no recipes by that name.\n\n" +
+                            "Would you like to create a new recipe?");
 
-					String name = tv.getText().toString();
-					Recipe r = util.newRecipe(name);
-					Intent intent = new Intent(Main.this, RecipeTabs.class);
+            // If the user accepts, we take the text in the search bar
+            // and create a recipe with that name.
+            etd.setOkButtonText("Create");
+            etd.setOkListener(new OnClickListener() {
+               public void onClick(View v) {
+                  TextView tv = (TextView) findViewById(R.id.recipesearch);
 
-					intent.putExtra("id", r.getId());
-					intent.putExtra("edit", true);
+                  String name = tv.getText().toString();
+                  Recipe r = util.newRecipe(name);
+                  Intent intent = new Intent(Main.this, RecipeTabs.class);
 
-					startActivity(intent);
-				}
-			});
+                  intent.putExtra("id", r.getId());
+                  intent.putExtra("edit", true);
 
-			dialog = etd;
-		}
+                  startActivity(intent);
+               }
+            });
 
-		return dialog;
-	}
+            return etd;
+         }
+
+         public void prepareDialog(Dialog d, Bundle bundle) {
+
+         }
+      };
+      this.dialogManager.registerHandler(CREATE_RECIPE_DIALOG, create_handler);
+   }
 
 }

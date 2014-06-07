@@ -1,14 +1,20 @@
 package org.wrowclif.recipebox.ui.components;
 
+import org.wrowclif.recipebox.AppData;
+
 import org.wrowclif.recipebox.ui.components.DialogManager.DialogHandler;
 import org.wrowclif.recipebox.ui.components.MenuManager.MenuHandler;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 public class BaseActivity extends Activity {
 
@@ -21,6 +27,42 @@ public class BaseActivity extends Activity {
 
    protected int getMenuId() {
       return 0;
+   }
+
+   protected void useHeadingFont(View baseView, int... viewIds) {
+      AppData app_data = AppData.getSingleton();
+
+      for(int view_id : viewIds) {
+         TextView view = (TextView) baseView.findViewById(view_id);
+         app_data.useHeadingFont(view);
+      }
+   }
+
+   protected void useHeadingFont(int... viewIds) {
+      AppData app_data = AppData.getSingleton();
+
+      for(int view_id : viewIds) {
+         TextView view = (TextView) findViewById(view_id);
+         app_data.useHeadingFont(view);
+      }
+   }
+
+   protected void useTextFont(View baseView, int... viewIds) {
+      AppData app_data = AppData.getSingleton();
+
+      for(int view_id : viewIds) {
+         TextView view = (TextView) baseView.findViewById(view_id);
+         app_data.useTextFont(view);
+      }
+   }
+
+   protected void useTextFont(int... viewIds) {
+      AppData app_data = AppData.getSingleton();
+
+      for(int view_id : viewIds) {
+         TextView view = (TextView) findViewById(view_id);
+         app_data.useTextFont(view);
+      }
    }
 
    public void onCreate(Bundle savedInstanceState) {
@@ -73,4 +115,8 @@ public class BaseActivity extends Activity {
       return false;
    }
 
+   public View inflate(int layoutId) {
+      LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      return inflater.inflate(layoutId, null);
+   }
 }

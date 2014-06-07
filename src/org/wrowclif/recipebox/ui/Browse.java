@@ -1,7 +1,6 @@
 package org.wrowclif.recipebox.ui;
 
 import org.wrowclif.recipebox.Actions;
-import org.wrowclif.recipebox.AppData;
 import org.wrowclif.recipebox.Recipe;
 import org.wrowclif.recipebox.Utility;
 import org.wrowclif.recipebox2.R;
@@ -58,7 +57,7 @@ public class Browse extends BaseActivity {
 
       ListView lv = (ListView) findViewById(R.id.browse_recipes);
 
-      AppData.getSingleton().useHeadingFont((TextView) findViewById(R.id.browse_label));
+      this.useHeadingFont(R.id.browse_label);
 
       createDynamicLoadAdapter();
 
@@ -93,13 +92,13 @@ public class Browse extends BaseActivity {
           **/
          public View getView(int id, Recipe r, View v, ViewGroup vg) {
             if(v == null) {
-               v = inflate(R.layout.category_item);
+               v = Browse.this.inflate(R.layout.category_item);
             }
 
             v.findViewById(R.id.edit_group).setVisibility(View.GONE);
 
+            Browse.this.useTextFont(v, R.id.name_box);
             TextView tv = (TextView) v.findViewById(R.id.name_box);
-            tv.setTypeface(AppData.getSingleton().getTextFont());
 
             // If the recipe is null, then we are at the end of the list and need to load more recipes
             if(r == null) {
@@ -166,38 +165,26 @@ public class Browse extends BaseActivity {
             intent.putExtra("id", id);
             startActivity(intent);
          }
-
-         /**
-          * Create a view for the given id
-          *
-          * @param layoutId The id for the layout to create
-          **/
-         private View inflate(int layoutId) {
-            LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            return vi.inflate(layoutId, null);
-         }
       };
 
       recipeListAdapter = new DynamicLoadAdapter<Recipe>(sp);
    }
 
    private void setupMenuHandlers() {
-      MenuHandler export_handler = new MenuHandler() {
+      this.menuManager.registerHandler(R.id.export, new MenuHandler() {
          public void itemSelected(MenuItem item) {
             // Create the Export intent
             Intent intent = new Intent(Browse.this, Export.class);
             startActivity(intent);
          }
-      };
-      this.menuManager.registerHandler(R.id.export, export_handler);
+      });
 
-      MenuHandler backup_handler = new MenuHandler() {
+      this.menuManager.registerHandler(R.id.backup, new MenuHandler() {
          public void itemSelected(MenuItem item) {
             // Create the Export intent
             Intent intent = new Intent(Browse.this, Backup.class);
             startActivity(intent);
          }
-      };
-      this.menuManager.registerHandler(R.id.backup, backup_handler);
+      });
    }
 }
