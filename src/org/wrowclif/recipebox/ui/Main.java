@@ -343,8 +343,6 @@ public class Main extends BaseActivity {
             EnterTextDialog etd = new EnterTextDialog(Main.this, R.layout.show_text_dialog);
 
             etd.setTitle("Create New Recipe");
-            etd.setEditText("There are no recipes by that name.\n\n" +
-                            "Would you like to create a new recipe?");
 
             // If the user accepts, we take the text in the search bar
             // and create a recipe with that name.
@@ -368,6 +366,13 @@ public class Main extends BaseActivity {
          }
 
          public void prepareDialog(Dialog d, Bundle bundle) {
+            EnterTextDialog etd = (EnterTextDialog) d;
+            TextView tv = (TextView) findViewById(R.id.recipesearch);
+
+            // Customize the text shown in the dialog based on the search text.
+            String name = tv.getText().toString();
+            etd.setEditHtml("There is no recipe for <b>" + name + "</b>.<br><br>" +
+                            "Would you like to create a new recipe?");
 
          }
       };
